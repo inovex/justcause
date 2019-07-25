@@ -20,11 +20,11 @@ class SingleOutcomeRegression(CausalMethod):
 
     @staticmethod
     def union(x, t):
-        return np.concatenate(x, t, axis=1)
+        return np.c_[x, t]
 
     def predict_ite(self, x):
         if self.is_trained:
-            return self.regressor.predict(self.union(x, t))
+            return self.regressor.predict(self.union(x, np.ones(x.shape[0]))) - self.regressor.predict(self.union(x, np.zeros(x.shape[0])))
         else:
             raise AssertionError('Must fit method before prediction')
 
