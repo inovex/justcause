@@ -6,12 +6,13 @@ os.environ['R_HOME'] = '/Library/Frameworks/R.framework/Resources'
 from causaleval.methods.basics.outcome_regression import SingleOutcomeRegression
 from causaleval.methods.causal_forest import CausalForest
 from causaleval.data.sets.ihdp import IHDPDataProvider
+from causaleval.data.sets.twins import TwinsDataProvider
 from sklearn.ensemble.forest import RandomForestRegressor
 
 # Testwise implementation
 
 
-provider = IHDPDataProvider()
+provider = TwinsDataProvider()
 
 cf = CausalForest(0)
 cf.fit(*provider.get_training_data())
@@ -19,6 +20,6 @@ method = SingleOutcomeRegression(0, RandomForestRegressor())
 
 method.fit(*provider.get_training_data())
 x, _, _ = provider.get_training_data()
-print(method.predict_ite(x))
-print(cf.predict_ite(x))
+print(method.predict_ate(x))
+print(cf.predict_ate(x))
 

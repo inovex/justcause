@@ -13,4 +13,8 @@ class DataProvider():
     def get_epoch_iterator(self, num_epochs):
         pass
 
+    def get_true_ite(self, data=None):
+        pass
 
+    def get_true_ate(self, subset=None):
+        pass
