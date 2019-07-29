@@ -10,7 +10,7 @@ from .causal_method import CausalMethod
 
 class CausalForest(CausalMethod):
 
-    def __init__(self, seed):
+    def __init__(self, seed=0):
         super().__init__(seed)
         self.grf = self.install_grf()
         self.forest = None
@@ -46,6 +46,9 @@ class CausalForest(CausalMethod):
         pred = robjects.r.predict(self.forest, estimate_variance=False)
         return np.array(list(map(lambda element: element[0], pred)))
 
-    def fit(self, x, t, y):
+    def fit(self, x, t, y, refit=False):
+        if self.is_fitted and not refit:
+            return
         self.forest = self.grf.causal_forest(x, FloatVector(y), IntVector(t), seed=self.seed)
+        self.is_fitted = True
 

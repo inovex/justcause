@@ -4,7 +4,7 @@ class DataProvider():
     def __init__(self):
         pass
 
-    def get_training_data(self):
+    def get_training_data(self, size=None):
         pass
 
     def get_test_data(self):

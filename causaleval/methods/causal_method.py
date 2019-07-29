@@ -4,19 +4,21 @@ class DataInputError(Exception):
 
 class CausalMethod():
 
-    def __init__(self, seed):
+    def __init__(self, seed=0):
         """
 
         :param seed: The random seed for any function using randomness
         """
         self.seed = seed
+        self.is_fitted = False
         pass
 
-    def fit(self, x, t, y) -> None:
+    def fit(self, x, t, y, refit=False) -> None:
         """ Fit / Train the method on given data
 
         Must be called be before `predict_ite` or `predict_ate`
 
+        :param refit: Whether to force a refitting on new data
         :param x: the covariate matrix with `k` columns and `n` rows
         :param t: the treatment vector with `n` elements
         :param y: the observed outcome vector `n` elements

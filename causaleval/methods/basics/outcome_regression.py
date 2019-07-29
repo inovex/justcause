@@ -1,3 +1,4 @@
+import copy
 import numpy as np
 from causaleval.methods.causal_method import CausalMethod
 
@@ -9,7 +10,7 @@ class SingleOutcomeRegression(CausalMethod):
     [S-Learner](﻿https://arxiv.org/pdf/1706.03461.pdf)
     """
 
-    def __init__(self, seed, regressor):
+    def __init__(self, regressor, seed=0):
         """
 
         :param regressor: a sklearn regressor with methods `fit` and `predict`
@@ -31,7 +32,7 @@ class SingleOutcomeRegression(CausalMethod):
     def predict_ate(self, x):
         return np.mean(self.predict_ite(x))
 
-    def fit(self, x, t, y) -> None:
+    def fit(self, x, t, y, refit) -> None:
         train = self.union(x, t)
         self.regressor.fit(train, y)
         self.is_trained = True
@@ -45,7 +46,7 @@ class DoubleOutcomeRegression(CausalMethod):
     [T-Learner](﻿https://arxiv.org/pdf/1706.03461.pdf)
     """
 
-    def __init__(self, seed, regressor, regressor_two=None):
+    def __init__(self, regressor, regressor_two=None, seed=0):
         """
 
         :param seed: Random seed
@@ -57,14 +58,15 @@ class DoubleOutcomeRegression(CausalMethod):
         self.is_trained = False
 
         if regressor_two is None:
-            self.regressor_two = regressor
+            # Create a full, independent copy of the first regressor
+            self.regressor_two = copy.deepcopy(regressor)
         else:
             self.regressor_two = regressor_two
 
     def predict_ate(self, x):
         return np.mean(self.predict_ite(x))
 
-    def fit(self, x, t, y) -> None:
+    def fit(self, x, t, y, refit=False) -> None:
         x_treatment = x[t == 1]
         x_control = x[t == 0]
         self.regressor_one.fit(x_treatment, y[t == 1])
