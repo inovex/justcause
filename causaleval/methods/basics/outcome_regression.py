@@ -32,7 +32,7 @@ class SingleOutcomeRegression(CausalMethod):
     def predict_ate(self, x):
         return np.mean(self.predict_ite(x))
 
-    def fit(self, x, t, y, refit) -> None:
+    def fit(self, x, t, y, refit=False) -> None:
         train = self.union(x, t)
         self.regressor.fit(train, y)
         self.is_trained = True
