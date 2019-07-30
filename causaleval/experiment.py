@@ -16,10 +16,12 @@ import matplotlib.pyplot as plt
 from sacred import Experiment
 from sacred.observers import MongoObserver
 
-from sklearn.ensemble.forest import RandomForestRegressor
+from sklearn.ensemble.forest import RandomForestRegressor, DecisionTreeRegressor
+from sklearn.ensemble.gradient_boosting import GradientBoostingRegressor
+from sklearn.neural_network import MLPRegressor
 
 from causaleval.data.data_provider import DataProvider
-from causaleval.metrics import EvaluationMetric
+from causaleval.metrics import EvaluationMetric, EPEHE, AbsoluteATEError
 from causaleval.methods.causal_method import CausalMethod
 from causaleval.methods.basics.outcome_regression import SingleOutcomeRegression, DoubleOutcomeRegression
 from causaleval.methods.causal_forest import CausalForest
@@ -27,27 +29,21 @@ from causaleval.data.sets.ihdp import IHDPDataProvider
 from causaleval.data.sets.twins import TwinsDataProvider
 from causaleval import config
 
-# Testwise implementation
-
 ex = Experiment('normal')
 ex.observers.append(MongoObserver.create(url=config.DB_URL, db_name=config.DB_NAME))
 
 @ex.main
 def run_experiment():
-    methods = [CausalForest(), SingleOutcomeRegression(RandomForestRegressor())]
+    methods = [DoubleOutcomeRegression(DecisionTreeRegressor()), SingleOutcomeRegression(GradientBoostingRegressor()), SingleOutcomeRegression(MLPRegressor()),]
     datasets = [IHDPDataProvider()]
-    metrics = [EvaluationMetric(ex)]
+    metrics = [EPEHE(ex), AbsoluteATEError(ex)]
 
-    for metric in metrics:
-        for dataset in datasets:
-            for method in methods:
+    # Enfore right order of iteration
+    for dataset in datasets:
+        for method in methods:
+            for metric in metrics:
                 metric.evaluate(dataset, method)
 
 
-ex.run()
-
-
-
-
-
-
+if __name__ == '__main__':
+    ex.run()
