@@ -21,7 +21,7 @@ from sklearn.ensemble.gradient_boosting import GradientBoostingRegressor
 from sklearn.neural_network import MLPRegressor
 
 from causaleval.data.data_provider import DataProvider
-from causaleval.metrics import EvaluationMetric, EPEHE, AbsoluteATEError
+from causaleval.metrics import EvaluationMetric, StandardErrors
 from causaleval.methods.causal_method import CausalMethod
 from causaleval.methods.basics.outcome_regression import SingleOutcomeRegression, DoubleOutcomeRegression
 from causaleval.methods.causal_forest import CausalForest
@@ -36,7 +36,7 @@ ex.observers.append(MongoObserver.create(url=config.DB_URL, db_name=config.DB_NA
 def run_experiment():
     methods = [DoubleOutcomeRegression(DecisionTreeRegressor()), SingleOutcomeRegression(GradientBoostingRegressor()), SingleOutcomeRegression(MLPRegressor()),]
     datasets = [IHDPDataProvider()]
-    metrics = [EPEHE(ex), AbsoluteATEError(ex)]
+    metrics = [StandardErrors(ex)]
 
     # Enfore right order of iteration
     for dataset in datasets:
