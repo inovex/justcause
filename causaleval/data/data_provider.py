@@ -4,6 +4,9 @@ class DataProvider():
     def __init__(self):
         pass
 
+    def __str__(self):
+        return "Abstract Data Provider"
+
     def get_training_data(self, size=None):
         pass
 

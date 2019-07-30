@@ -21,6 +21,9 @@ class TwinsDataProvider(DataProvider):
         self.y = None
         self.y_cf = None
 
+    def __str__(self):
+        return "Twins"
+
     def load_training_data(self):
         path = config.TWINS_PATH
         x_df = pd.read_csv(path + '/twinX.csv')

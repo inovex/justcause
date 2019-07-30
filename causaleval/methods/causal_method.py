@@ -43,3 +43,10 @@ class CausalMethod():
         """
         pass
 
+    def __str__(self):
+        """
+        Overwrite the string representation to get a method identifier for the logs
+        :return:
+        """
+        return "Abstract Causal Method"
+

@@ -15,6 +15,9 @@ class CausalForest(CausalMethod):
         self.grf = self.install_grf()
         self.forest = None
 
+    def __str__(self):
+        return "Causal Forest"
+
     @staticmethod
     def install_grf():
         """Install the `grf` R package and active necessary conversion

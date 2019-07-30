@@ -14,6 +14,9 @@ class IHDPDataProvider(DataProvider):
         self.y = None
         self.y_cf = None
 
+    def __str__(self):
+        return "IHDP"
+
     def load_training_data(self):
         path = config.IHDP_PATH
         dirname = os.path.dirname(__file__)
