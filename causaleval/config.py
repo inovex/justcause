@@ -7,6 +7,11 @@ IHDP_PATH = os.path.join(ROOT_DIR, RELATIVE_IHDP_PATH)
 RELATIVE_TWINS_PATH = 'datasets/twins'
 TWINS_PATH = os.path.join(ROOT_DIR, RELATIVE_TWINS_PATH)
 
+RELATIVE_IBM_PATH = 'datasets/ibm/scaling'
+IBM_PATH = os.path.join(ROOT_DIR, RELATIVE_IBM_PATH)
+RELATIVE_IBM_PATH_ROOT = 'datasets/ibm'
+IBM_PATH_ROOT = os.path.join(ROOT_DIR, RELATIVE_IBM_PATH_ROOT)
+
 DB_NAME = 'sacred'
 DB_URL = 'localhost:27017'
 

@@ -28,8 +28,10 @@ from causaleval.metrics import EvaluationMetric, StandardEvaluation
 from causaleval.methods.causal_method import CausalMethod
 from causaleval.methods.basics.outcome_regression import SingleOutcomeRegression, DoubleOutcomeRegression
 from causaleval.methods.causal_forest import CausalForest
+from causaleval.methods.ganite_wrapper import GANITEWrapper
 from causaleval.data.sets.ihdp import IHDPDataProvider
 from causaleval.data.sets.twins import TwinsDataProvider
+from causaleval.data.sets.ibm import SimpleIBMDataProvider
 from causaleval import config
 
 ex = Experiment('normal')
@@ -43,7 +45,7 @@ def run_experiment(_run):
     output = pd.DataFrame(columns=['metric', 'method', 'dataset', 'score'])
 
     methods = [DoubleOutcomeRegression(DecisionTreeRegressor()), SingleOutcomeRegression(GradientBoostingRegressor())]
-    datasets = [IHDPDataProvider(), TwinsDataProvider()]
+    datasets = [IHDPDataProvider(), TwinsDataProvider(), SimpleIBMDataProvider()]
     metrics = [StandardEvaluation(ex)]
 
     # Enfore right order of iteration

@@ -5,6 +5,8 @@ import numpy as np
 from causaleval.data.data_provider import DataProvider
 from causaleval import config
 
+from itertools import cycle
+
 class IHDPDataProvider(DataProvider):
 
     def __init__(self):
@@ -54,6 +56,29 @@ class IHDPDataProvider(DataProvider):
 
     def get_true_ate(self, subset=None):
         return np.mean(self.get_true_ite())
+
+
+    def get_train_generator_single(self, random=False, replacement=False):
+        """
+        Return a cycle generator of single objects
+        :param random:
+        :param replacement:
+        :return:
+        """
+        id_generator = cycle(range(self.x.shape[0]))
+        while True:
+            ID = next(id_generator)
+            yield self.x[ID], self.t[ID], self.y[ID]
+
+
+    def get_train_generator_batch(self, batch_size):
+        num_batches = self.x.shape[0] / batch_size
+        batch_id_generator = cycle(range(num_batches))
+
+        while True:
+            start = next(batch_id_generator) * batch_size
+            end = next(batch_id_generator) * (batch_size + 1)
+            yield self.x[start:end], self.t[start:end], self.y[start:end]
 
 
 
