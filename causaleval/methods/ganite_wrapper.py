@@ -7,4 +7,6 @@ class GANITEWrapper(CausalMethod):
         super().__init__(seed)
         self.model = GANITEModel(25, 0, num_treatments=2, nonlinearity="relu")
 
+    
+
 

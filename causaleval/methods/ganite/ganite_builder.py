@@ -113,7 +113,7 @@ class GANITEBuilder(object):
 
             last_layer = build_mlp(current_last_layer_h, num_layers, num_units, dropout, nonlinearity)
 
-            output = tf.layers.dense(last_layer, units=num_treatments, use_bias=True,
+            output = tf.layers.dense(last_layer[0], units=num_treatments, use_bias=True,
                                      bias_initializer=initializer)
 
             all_indices.append(indices)
@@ -151,8 +151,7 @@ class GANITEBuilder(object):
 
             mlp_input = tf.concat([x, y_f, t, z_g], axis=-1)
             x = build_mlp(mlp_input, num_layers, num_units, dropout, nonlinearity)
-            y = tf.layers.dense()
-            y = tf.layers.dense(x, units=num_treatments, use_bias=True,
+            y = tf.layers.dense(x[0], units=num_treatments, use_bias=True,
                                 bias_initializer=initializer)
             return y, z_g
 
@@ -168,7 +167,7 @@ class GANITEBuilder(object):
                                initializer=initializer):
             mlp_input = tf.concat([x, y_pred], axis=-1)
             x = build_mlp(mlp_input, num_layers, num_units, dropout, nonlinearity)
-            propensity_scores = tf.layers.dense(x, units=num_treatments, use_bias=True,
+            propensity_scores = tf.layers.dense(x[0], units=num_treatments, use_bias=True,
                                                 bias_initializer=initializer)
             return propensity_scores
 
@@ -206,7 +205,7 @@ class GANITEBuilder(object):
             z_i = tf.placeholder("float", shape=[None, num_treatments], name='z_i')
             mlp_input = tf.concat([x, z_i], axis=-1)
             x = build_mlp(mlp_input, num_layers, num_units, dropout, nonlinearity)
-            y_pred = tf.layers.dense(x, units=num_treatments, use_bias=True,
+            y_pred = tf.layers.dense(x[0], units=num_treatments, use_bias=True,
                                      bias_initializer=initializer)
             return y_pred, z_i
 
@@ -222,6 +221,6 @@ class GANITEBuilder(object):
                                initializer=initializer):
             mlp_input = tf.concat([x, y_pred], axis=-1)
             x = build_mlp(mlp_input, num_layers, num_units, dropout, nonlinearity)
-            y = tf.layers.dense(x, units=1, use_bias=True,
+            y = tf.layers.dense(x[0], units=1, use_bias=True,
                                 bias_initializer=initializer, activation=tf.nn.sigmoid)
             return y

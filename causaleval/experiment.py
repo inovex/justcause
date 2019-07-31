@@ -42,6 +42,8 @@ ex.observers.append(MongoObserver.create(url=config.DB_URL, db_name=config.DB_NA
 @ex.main
 def run_experiment(_run):
 
+    ganite = GANITEWrapper()
+
     output = pd.DataFrame(columns=['metric', 'method', 'dataset', 'score'])
 
     methods = [DoubleOutcomeRegression(DecisionTreeRegressor()), SingleOutcomeRegression(GradientBoostingRegressor())]
