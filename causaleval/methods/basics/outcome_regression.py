@@ -1,6 +1,8 @@
 import copy
 import numpy as np
+
 from causaleval.methods.causal_method import CausalMethod
+from causaleval.utils import get_regressor_name
 
 class SingleOutcomeRegression(CausalMethod):
     """
@@ -20,7 +22,7 @@ class SingleOutcomeRegression(CausalMethod):
         self.is_trained = False
 
     def __str__(self):
-        return "SingleOutcomeRegression using " + str(self.regressor)
+        return "SingleOutcomeRegression - " + get_regressor_name(self.regressor)
 
     @staticmethod
     def union(x, t):
@@ -68,7 +70,9 @@ class DoubleOutcomeRegression(CausalMethod):
             self.regressor_two = regressor_two
 
     def __str__(self):
-        return "DoubleOutcomeRegression using " + str(self.regressor_one) + " and " + str(self.regressor_two)
+        return "DoubleOutcomeRegression - " \
+               + get_regressor_name(self.regressor_one) \
+               + " & " + get_regressor_name(self.regressor_two)
 
     def predict_ate(self, x):
         return np.mean(self.predict_ite(x))
