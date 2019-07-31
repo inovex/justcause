@@ -40,7 +40,7 @@ class EvaluationMetric():
         return method.predict_ite(x)
 
 
-class StandardErrors(EvaluationMetric):
+class StandardEvaluation(EvaluationMetric):
     """
     All the scores that work with full prediction result of the ITE on test data
     """
