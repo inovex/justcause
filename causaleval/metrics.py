@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 
 from sacred import Experiment
 
@@ -12,8 +13,11 @@ class EvaluationMetric():
 
         :param experiment: the sacred experiment in which this metric is called
         :type experiment: Experiment
+        :param output: the sacred experiment in which this metric is called
+        :type output: pd.DataFrame
         """
         self.ex = experiment
+        self.output = None
 
     def evaluate(self, data_provider, method):
         """
@@ -41,8 +45,7 @@ class EvaluationMetric():
 
 
 class StandardEvaluation(EvaluationMetric):
-    """
-    All the scores that work with full prediction result of the ITE on test data
+    """All the scores that work with full prediction result of the ITE on test data
     """
 
     @staticmethod
@@ -57,6 +60,14 @@ class StandardEvaluation(EvaluationMetric):
     def enormse(true, predicted):
         return np.sqrt(np.sum(np.power((1 - predicted/true), 2))/true.shape[0])
 
+    def log_method(self, score_name, method, data_provider, score):
+        self.ex.log_scalar(score_name + ',' + str(method) + ',' + str(data_provider), score)
+        print(score_name + ',' + str(method) + ',' + str(data_provider)+ ',' + str(score))
+        self.output = self.output.append(
+            other={'metric': score_name, 'method': str(method), 'dataset': str(data_provider), 'score': score},
+            ignore_index=True)
+
+
     def bias(true, predicted):
         pass
 
@@ -70,13 +81,18 @@ class StandardEvaluation(EvaluationMetric):
         :return:
         """
 
+        # Setupt new DataFrame for every run of the metric
+        self.output = pd.DataFrame(columns=['metric', 'method', 'dataset', 'score'])
         pred_ite = self.prep_ite(data_provider, method)
         true_ite = data_provider.get_true_ite()
-        self.ex.log_scalar('PEHE, {method}, {dataset}'.format(method=str(method), dataset=str(data_provider)), self.pehe_score(true_ite, pred_ite))
-        print('PEHE, {method}, {dataset}'.format(method=str(method), dataset=str(data_provider)), self.pehe_score(true_ite, pred_ite))
-        self.ex.log_scalar('ATE, {method}, {dataset}'.format(method=str(method), dataset=str(data_provider)), self.ate_error(true_ite, pred_ite))
-        print('ATE, {method}, {dataset}'.format(method=str(method), dataset=str(data_provider)), self.ate_error(true_ite, pred_ite))
-        self.ex.log_scalar('ATE, {method}, {dataset}'.format(method=str(method), dataset=data_provider), self.enormse(true_ite, pred_ite))
-        print('enormse score', self.enormse(true_ite, pred_ite))
+        self.log_method('PEHE', method, data_provider, self.pehe_score(true_ite, pred_ite))
+        self.log_method('ATE', method, data_provider, self.ate_error(true_ite, pred_ite))
+        self.log_method('ENORMSE', method, data_provider, self.enormse(true_ite, pred_ite))
+
+class PlotEvaluation(EvaluationMetric):
+    """Plot evaluation results of various metrics for further inspection
+    Add the plots as artifacts to the Experiment.
+    """
+    pass
 
 

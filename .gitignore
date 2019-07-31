@@ -4,6 +4,8 @@
 # Ignore Datasets in the repo
 /datasets
 
+# Ignore Result outputs
+
 # Created by https://www.gitignore.io/api/venv,python,pycharm
 # Edit at https://www.gitignore.io/?templates=venv,python,pycharm
 

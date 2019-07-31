@@ -1,6 +1,9 @@
 # Dynamically set the environment variable for R_HOME as
 # found by running python -m rpy2.situation from the terminal
 import os
+
+import pandas as pd
+
 os.environ['R_HOME'] = '/Library/Frameworks/R.framework/Resources'
 
 # To make it work on MacOS
@@ -32,10 +35,15 @@ from causaleval import config
 ex = Experiment('normal')
 ex.observers.append(MongoObserver.create(url=config.DB_URL, db_name=config.DB_NAME))
 
+
+
 @ex.main
-def run_experiment():
-    methods = [DoubleOutcomeRegression(DecisionTreeRegressor()), SingleOutcomeRegression(GradientBoostingRegressor()), SingleOutcomeRegression(MLPRegressor()),]
-    datasets = [IHDPDataProvider()]
+def run_experiment(_run):
+
+    output = pd.DataFrame(columns=['metric', 'method', 'dataset', 'score'])
+
+    methods = [DoubleOutcomeRegression(DecisionTreeRegressor()), SingleOutcomeRegression(GradientBoostingRegressor())]
+    datasets = [IHDPDataProvider(), TwinsDataProvider()]
     metrics = [StandardEvaluation(ex)]
 
     # Enfore right order of iteration
@@ -43,6 +51,11 @@ def run_experiment():
         for method in methods:
             for metric in metrics:
                 metric.evaluate(dataset, method)
+                output = output.append(metric.output, ignore_index=True)
+
+    file_name = config.OUTPUT_PATH + str(_run._id) + '_output.csv'
+    output.to_csv(file_name)
+    _run.add_artifact(filename=file_name)
 
 
 if __name__ == '__main__':

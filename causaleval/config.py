@@ -9,3 +9,5 @@ TWINS_PATH = os.path.join(ROOT_DIR, RELATIVE_TWINS_PATH)
 
 DB_NAME = 'sacred'
 DB_URL = 'localhost:27017'
+
+OUTPUT_PATH = os.path.join(ROOT_DIR, 'results') + '/'
