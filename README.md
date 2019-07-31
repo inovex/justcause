@@ -11,3 +11,6 @@ Results are stored row wise in a csv with fields: `Metric, Method, Dataset, Scor
 
 Since it is possible to evaluate a dataset on different sizes of training etc. we will later
 add identifiers to the dataset name like `IHDP-1k` for methods trained on 1000 instances of IHDP.
+
+# Notes no DataProviders
+ - Files are in np.array format when they are retrieved from the DataProvider
