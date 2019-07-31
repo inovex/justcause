@@ -60,16 +60,16 @@ class StandardEvaluation(EvaluationMetric):
     def enormse(true, predicted):
         return np.sqrt(np.sum(np.power((1 - predicted/true), 2))/true.shape[0])
 
+    @staticmethod
+    def bias(true, predicted):
+        return np.sum(predicted - true)/true.shape[0]
+
     def log_method(self, score_name, method, data_provider, score):
         self.ex.log_scalar(score_name + ',' + str(method) + ',' + str(data_provider), score)
         print(score_name + ',' + str(method) + ',' + str(data_provider)+ ',' + str(score))
         self.output = self.output.append(
             other={'metric': score_name, 'method': str(method), 'dataset': str(data_provider), 'score': score},
             ignore_index=True)
-
-
-    def bias(true, predicted):
-        pass
 
     def evaluate(self, data_provider, method):
         """
@@ -88,11 +88,17 @@ class StandardEvaluation(EvaluationMetric):
         self.log_method('PEHE', method, data_provider, self.pehe_score(true_ite, pred_ite))
         self.log_method('ATE', method, data_provider, self.ate_error(true_ite, pred_ite))
         self.log_method('ENORMSE', method, data_provider, self.enormse(true_ite, pred_ite))
+        self.log_method('BIAS', method, data_provider, self.bias(true_ite, pred_ite))
 
 class PlotEvaluation(EvaluationMetric):
     """Plot evaluation results of various metrics for further inspection
     Add the plots as artifacts to the Experiment.
     """
-    pass
+
+    def plot_bias_distribution(self):
+        pass
+
+    def plot_error_distribution(self):
+        pass
 
 
