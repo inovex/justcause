@@ -1,6 +1,9 @@
 # Ignore Sacred database
 /sacred
 
+# Ignore Datasets in the repo
+/datasets
+
 # Created by https://www.gitignore.io/api/venv,python,pycharm
 # Edit at https://www.gitignore.io/?templates=venv,python,pycharm
 
