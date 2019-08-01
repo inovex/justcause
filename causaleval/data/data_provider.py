@@ -21,3 +21,15 @@ class DataProvider():
 
     def get_true_ate(self, subset=None):
         pass
+
+    def get_train_generator_batch(self, batch_size=32):
+        raise NotImplementedError('Batch generator not implemented for ', str(self))
+
+    def get_train_generator_single(self, random=False, replacement=False):
+        raise NotImplementedError('Instance generator not implemented for ', str(self))
+
+    def get_num_covariates(self):
+        raise NotImplementedError('Not implemented for ', str(self))
+
+    def get_info(self):
+        pass
