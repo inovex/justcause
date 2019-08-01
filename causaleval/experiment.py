@@ -42,12 +42,18 @@ ex.observers.append(MongoObserver.create(url=config.DB_URL, db_name=config.DB_NA
 @ex.main
 def run_experiment(_run):
 
-    ganite = GANITEWrapper()
+    # ganite = GANITEWrapper()
+    # ihdp = IHDPDataProvider()
+    # ihdp.load_training_data()
+    # ganite.fit(ihdp)
+    # x, t, y = ihdp.get_training_data()
+    # y_pred = ganite.predict_ite(x)
+    # print(StandardEvaluation.enormse(ihdp.get_true_ite(), y_pred))
 
     output = pd.DataFrame(columns=['metric', 'method', 'dataset', 'score'])
 
-    methods = [DoubleOutcomeRegression(DecisionTreeRegressor()), SingleOutcomeRegression(GradientBoostingRegressor())]
-    datasets = [IHDPDataProvider(), TwinsDataProvider(), SimpleIBMDataProvider()]
+    methods = [DoubleOutcomeRegression(DecisionTreeRegressor()), GANITEWrapper()]
+    datasets = [IHDPDataProvider()]
     metrics = [StandardEvaluation(ex)]
 
     # Enfore right order of iteration

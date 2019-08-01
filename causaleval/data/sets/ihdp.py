@@ -65,20 +65,28 @@ class IHDPDataProvider(DataProvider):
         :param replacement:
         :return:
         """
-        id_generator = cycle(range(self.x.shape[0]))
+        if random:
+            id_generator = cycle(np.random.choice(self.x.shape[0], size=self.x.shape[0], replacement=replacement))
+        else:
+            id_generator = cycle(range(self.x.shape[0]))
         while True:
             ID = next(id_generator)
             yield self.x[ID], self.t[ID], self.y[ID]
 
 
-    def get_train_generator_batch(self, batch_size):
-        num_batches = self.x.shape[0] / batch_size
+    def get_train_generator_batch(self, batch_size=32):
+        num_batches = int(self.x.shape[0] / batch_size)
         batch_id_generator = cycle(range(num_batches))
 
         while True:
-            start = next(batch_id_generator) * batch_size
-            end = next(batch_id_generator) * (batch_size + 1)
-            yield self.x[start:end], self.t[start:end], self.y[start:end]
+            id = next(batch_id_generator)
+            start = id * batch_size
+            end = (id + 1) * batch_size
+            yield (self.x[start:end], self.t[start:end]), self.y[start:end]
+
+    def get_num_covariates(self):
+        return 25
+
 
 
 
