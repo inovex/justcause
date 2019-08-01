@@ -50,3 +50,8 @@ class CausalMethod():
         """
         return "Abstract Causal Method"
 
+    def requires_provider(self):
+        return False
+
+    def fit_provider(self, data_provider):
+        raise NotImplementedError('No provider based training implemented')

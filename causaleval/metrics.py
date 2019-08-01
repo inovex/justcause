@@ -40,7 +40,10 @@ class EvaluationMetric():
         :return:
         """
         x, t, y = data_provider.get_training_data()
-        method.fit(x, t, y)
+        if method.requires_provider():
+            method.fit_provider(data_provider)
+        else:
+            method.fit(x, t, y)
         return method.predict_ite(x)
 
 
@@ -85,6 +88,8 @@ class StandardEvaluation(EvaluationMetric):
         self.output = pd.DataFrame(columns=['metric', 'method', 'dataset', 'score'])
         pred_ite = self.prep_ite(data_provider, method)
         true_ite = data_provider.get_true_ite()
+
+        # TODO: Make a list of metric functions within this evaluation class and iterate over them
         self.log_method('PEHE', method, data_provider, self.pehe_score(true_ite, pred_ite))
         self.log_method('ATE', method, data_provider, self.ate_error(true_ite, pred_ite))
         self.log_method('ENORMSE', method, data_provider, self.enormse(true_ite, pred_ite))
