@@ -169,9 +169,9 @@ class GANITEModel(object):
         losses = []
         for iter_idx in range(steps):
             (x_batch, t_batch), y_batch = next(generator)
+            t_original = t_batch.astype(int)
             t_batch = np.expand_dims(t_batch, axis=-1)
             y_batch = np.expand_dims(y_batch, axis=-1)
-
             batch_size = len(x_batch)
             feed_dict = {
                 self.x: x_batch,
@@ -182,7 +182,7 @@ class GANITEModel(object):
             }
             if include_y_full:
                 y_pred = self._predict_g_cf([x_batch, t_batch], y_batch)
-                y_pred[np.arange(len(y_pred)), t_batch] = y_batch
+                y_pred[:, t_original] = y_batch
                 feed_dict[self.y_full] = y_pred
 
             if train_step is not None:
@@ -203,10 +203,9 @@ class GANITEModel(object):
         return y_pred
 
     def predict(self, x):
-        batch_size = len(x[0])
+        batch_size = len(x)
         y_pred = self.sess.run(self.y_pred_ite, feed_dict={
-            self.x: x[0],
+            self.x: x,
             self.z_i: np.random.uniform(size=(batch_size, self.num_treatments))
         })
-        y_pred = np.array(map(lambda inner, idx: inner[idx], y_pred, x[1]))
         return y_pred
