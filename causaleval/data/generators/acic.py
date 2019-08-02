@@ -5,8 +5,24 @@ from causaleval.data.data_provider import DataProvider
 from causaleval import config
 
 import scipy
-from scipy import stats
 from sklearn.preprocessing import StandardScaler
+
+# Playground imports
+import seaborn as sns
+import matplotlib
+from sklearn.ensemble import RandomForestRegressor
+from causaleval.data.sets.ibm import SimpleIBMDataProvider
+
+
+# To make it work on MacOS
+import matplotlib
+matplotlib.use("MacOSX")
+
+import seaborn as sns
+sns.set(style="darkgrid")
+
+import matplotlib.pyplot as plt
+
 
 class ACICGenerator(DataProvider):
 
@@ -42,28 +58,59 @@ class ACICGenerator(DataProvider):
 
     def generate_data(self):
         np.random.seed(0)
-        covariates = pd.read_csv(config.IBM_PATH_ROOT + '/' + 'covariates.csv')
-        covariates = covariates.drop(columns=['sample_id']).values
+        covariates_df = pd.read_csv(config.IBM_PATH_ROOT + '/' + 'covariates.csv')
+        sub_df = covariates_df.loc[:,[x.startswith('f_') for x in covariates_df.columns]]
+        covariates = covariates_df.drop(columns=['sample_id']).values
 
+        # rf = RandomForestRegressor(n_jobs=-1)
+        # x, t, y = SimpleIBMDataProvider().get_training_data()
+        # rf.fit(X=x, y=y)
+        # print('outcome importance')
+        # print(np.flip(np.argsort(rf.feature_importances_)))
+        #
+        # rf.fit(X=x, y=t)
+        # print('treatment importance')
+        # print(np.flip(np.argsort(rf.feature_importances_)))
+
+        def normal_polynomial(vars):
+            """
+            Calculate the value of linear function with normal sampled coefficients for the input vars
+            :param vars:
+            :return:
+            """
+            coeffs = np.random.randn(len(vars))
+            mult = coeffs*vars
+            return np.sum(mult)/len(vars)
 
         def random_assignment(covariates):
             return np.random.random_integers(0,1, size=covariates.shape[0])
 
-        def treatment_assignment(covariates):
-            confounder_ids = np.random.choice(covariates.shape[1], size=10)
-            confounders = covariates[:, confounder_ids]
-            confounders = StandardScaler().fit_transform(confounders)
+        def treatment_assignment(covariates, num_parents=10, equal_split=True, relation='weak', use_parents=None):
+            if relation == 'random':
+                return random_assignment(covariates)
+            if relation == 'weak':
+                if use_parents is not None:
+                    confounders = use_parents
+                else:
+                    ids = np.random.choice(covariates.shape[1], size=num_parents)
+                    confounders = StandardScaler().fit_transform(covariates[:, ids])
 
-            expectations = scipy.special.expit(np.sum(confounders , axis=1)/len(confounder_ids))
-            s = np.random.normal(expectations, scale=0.01)
-            s = np.maximum(np.zeros(len(s)), s)
-            s = np.minimum(np.ones(len(s)), s)
-            return np.random.binomial(1, p=s)
+                exp_poly = scipy.special.expit(np.array(list(map(normal_polynomial, confounders))))
+                return np.random.binomial(1, p=exp_poly)
+            if relation == 'strong':
+                # Idea: Create a deterministic split based on a few covariates that results in a 50/50
+                # partition of the data
+                pass
 
-        def treatment_effect(covariates):
-            return np.full(len(covariates), 0.5)
+        def treatment_effect(covariates, homogeneous=True):
+            if homogeneous:
+                return np.full(len(covariates), 0.5)
+            else:
+                return 0 # TODO
 
-        def outcome_assignment(covariates):
+                
+
+        def outcome_assignment(covariates, num_parents=10, equal_split=True, relation='weak', use_parents=None):
             standardized = StandardScaler().fit_transform(covariates)
             y_0 = (standardized[:, 0]**2 + standardized[:, 1]**(1/2))*3
             y_1 = y_0 + treatment_effect(covariates)
