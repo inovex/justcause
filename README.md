@@ -14,3 +14,17 @@ add identifiers to the dataset name like `IHDP-1k` for methods trained on 1000 i
 
 # Notes no DataProviders
  - Files are in np.array format when they are retrieved from the DataProvider
+
+## Data Generation Parameters
+ The following parameters should be provided in a dict to the DGP in `causaleval.data.generators.acic`:
+
+ - treatment
+   - relation ('strong', 'weak', 'random')
+   - num_parents (int)
+ - outcome
+   - relation ('strong', 'weak', 'random')
+   - num_parents (int)
+   - constant_base (bool)
+   - homogeneous (bool)
+
+ - confounding (bool)
