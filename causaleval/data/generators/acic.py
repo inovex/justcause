@@ -5,12 +5,13 @@ from causaleval.data.data_provider import DataProvider
 from causaleval import config
 
 import scipy
-from sklearn.preprocessing import StandardScaler, minmax_scale
+from sklearn.preprocessing import StandardScaler, minmax_scale, RobustScaler
 
 # Playground imports
 import seaborn as sns
 import matplotlib
 from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import LinearRegression
 from causaleval.data.sets.ibm import SimpleIBMDataProvider
 
 
@@ -58,6 +59,8 @@ class ACICGenerator(DataProvider):
 
     def generate_data(self, param_dict):
 
+        exp_coeffs = np.random.normal(loc=0, scale=0.5, size=10)
+
         def normal_polynomial(vars):
             """
             Calculate the averaged value of linear function with normal sampled coefficients for the input vars
@@ -65,13 +68,12 @@ class ACICGenerator(DataProvider):
             :param vars:
             :return:
             """
-            coeffs = np.random.randn(len(vars))
-            mult = coeffs*vars
+            mult = exp_coeffs*vars
             return np.sum(mult)/len(vars)
 
         def exponential(vars):
-            coeffs = np.random.normal(loc=0, scale=0.5, size=len(vars))
-            mult = coeffs*vars
+
+            mult = exp_coeffs*vars
             return np.sum(np.exp(mult))
 
         def random_poly(vars):
@@ -117,15 +119,16 @@ class ACICGenerator(DataProvider):
                     confounders = minmax_scale(covariates[:, ids], feature_range=(0,10))
 
                 if relation == 'weak':
-                    func = np.array(list(map(normal_polynomial, confounders)))
-                    exp_poly = scipy.special.expit(minmax_scale(func.reshape(-1,1)).reshape(1, -1)[0])
+                    confounders = RobustScaler().fit_transform(confounders)
+                    func = np.array(list(map(exponential, confounders)))
+                    exp_poly = scipy.special.expit(RobustScaler().fit_transform(func.reshape(-1,1)).reshape(1, -1)[0])
                     return np.random.binomial(1, p=exp_poly)
                 if relation == 'strong':
-                    # Create a deterministic split based on a few covariates that results in a 50/50
-                    # partition of the data
-                    func = np.array(list(map(f4, confounders)))
-                    exp_poly = scipy.special.expit(minmax_scale(func.reshape(-1,1)).reshape(1, -1)[0])
-                    return (exp_poly > 0.5).astype(int)
+                    # TODO: Create a deterministic split based on a few covariates that results in a 50/50
+                    # partition of the data --> Feature selection
+                    sex = covariates[:, self.idx_dict['sex']]
+                    return sex > 0 # Treatment only to one gender --> creates equal split with no overlap
+
 
 
         def treatment_effect(covariates, relation='weak', homogeneous=True, num_parents=10, use_parents=None, *args):
@@ -143,7 +146,7 @@ class ACICGenerator(DataProvider):
             :return: treatment effect vector
             """
             if homogeneous:
-                return np.full(len(covariates), 0.5)
+                return np.full(len(covariates), 1.5)
             else:
                 if use_parents is not None:
                     # Use unnormalized features to get more significant treatment effects
@@ -153,12 +156,12 @@ class ACICGenerator(DataProvider):
                     confounders = covariates[:, ids]
 
                 if relation == 'weak':
-                    confounders = minmax_scale(confounders, feature_range=(1,2))
-                    effect = np.array(list(map(exponential, confounders)))
-                    return minmax_scale(effect.reshape(-1, 1), feature_range=(2,4)).reshape(1, -1)[0]
-                else:
+                    confounders = RobustScaler().fit_transform(confounders)
+                    effect = np.array(list(map(normal_polynomial, confounders)))
+                    return minmax_scale(effect.reshape(-1, 1), feature_range=(1,2)).reshape(1, -1)[0]
+                elif relation == 'strong':
                     # Relation is deterministic and treatment effect is binary (either 1 or 0)
-                    confounders = StandardScaler().fit_transform(confounders)
+                    confounders = minmax_scale(confounders, feature_range=(-1.5,1.5))
                     exp_poly = scipy.special.expit(np.array(list(map(normal_polynomial, confounders))))
                     return (exp_poly > 0.5).astype(int)
 
@@ -187,10 +190,11 @@ class ACICGenerator(DataProvider):
                 confounders = covariates[:, ids]
 
             if constant_base:
+                # Pathetic special case
                 y_0 = np.zeros(covariates.shape[0])
             else:
-                confounders = minmax_scale(confounders)
-                y_0 = np.array(list(map(exponential, confounders)))
+                confounders_outcome = minmax_scale(confounders, feature_range=(1,2))
+                y_0 = np.array(list(map(exponential, confounders_outcome)))
                 y_0 = minmax_scale(y_0.reshape(-1,1), feature_range=(1,2)).reshape(1, -1)[0]
 
             # Use same confounders for treatment effect and outcome generation
@@ -198,22 +202,112 @@ class ACICGenerator(DataProvider):
                                          homogeneous=homogeneous,
                                          use_parents=confounders,
                                          relation=relation)
+
             y_1 = y_0 + ite
-            return np.c_[y_1, y_0]
+            return np.c_[y_1, y_0] # TODO: Change the order here and everywhere used
 
         covariates_df = pd.read_csv(config.IBM_PATH_ROOT + '/' + 'covariates.csv')
         covariates_df = covariates_df.loc[:, covariates_df.var() > 0.3]
-        covariates = covariates_df.drop(columns=['sample_id']).values
+        covariates_df = covariates_df.drop(columns=['sample_id'])
+        covariates = covariates_df.values
 
-        np.random.seed(param_dict['seed'])
-        t = treatment_assignment(covariates, relation='strong')
-        ys = outcome_assignment(covariates, homogeneous=False)
+        interesting_columns = ['sex', 'md_route', 'dbwt', 'estgest']
+        self.idx_dict = { name : covariates_df.columns.get_loc(name) for name in interesting_columns}
 
-        y = np.array([row[int(ix)] for row, ix in zip(ys, t)])
-        y_cf = np.array([row[int(1 - ix)] for row, ix in zip(ys, t)])
-        sns.distplot(y, color='red')
-        sns.distplot(y_cf, color='green')
-        plt.show()
+        self.param_dict = param_dict
+
+        ids = np.random.choice(covariates.shape[1], size=10)
+        confounders = covariates[:, ids]
+
+        def test_confounding(x, y, y_cf, t):
+            treated = y[t==1]
+            control = y[t==0]
+            simple_mean = np.mean(treated) - np.mean(control)
+            print('simple: ' + str(simple_mean))
+
+
+        def test_generation(random, homogeneous, conf=False, strength='weak'):
+            np.random.seed(param_dict['seed'])
+            relation = 'random' if random else 'weak'
+            outcome_relation = strength
+
+            if strength is 'strong':
+                relation = 'strong'
+
+            if conf:
+                # Use strong pre-selected values
+                ids = np.random.choice(covariates.shape[1], size=6)
+                ids = np.concatenate((ids, list(self.idx_dict.values())), axis=0)
+                parents = covariates[:, ids]
+            else:
+                parents = None
+
+            # Sample data
+            t = treatment_assignment(covariates, relation=relation, use_parents=parents)
+            ys = outcome_assignment(covariates, constant_base=False, homogeneous=homogeneous, relation=outcome_relation, use_parents=parents)
+            y_cf = np.array([row[int(ix)] for row, ix in zip(ys, t)])
+            y = np.array([row[int(1 - ix)] for row, ix in zip(ys, t)])
+
+            test_confounding(covariates, y, y_cf, t)
+            print('true ', np.mean(ys[:, 0] - ys[:, 1]))
+
+            # Plot distributions
+            sns.distplot(y, color='red')
+            sns.distplot(y_cf, color='green')
+            sns.distplot(ys[:,0] - ys[:,1], color='blue')
+            plt.show()
+
+
+
+
+        def make_file_name(random, homogeneous, strength=None, conf=None):
+            file = config.GENERATE_PATH
+            file += 'random' if random else 'observ'
+            file += '_homo_full' if homogeneous else '_hetero_full'
+            if strength is 'strong':
+                file += '_strong'
+            if conf:
+                file += '_conf'
+            return file
+
+
+        def generate_file(random, homogeneous, conf=False, strength='weak'):
+            np.random.seed(param_dict['seed'])
+            relation = 'random' if random else 'weak'
+
+            if strength is 'strong':
+                relation = 'strong'
+
+            if conf:
+                ids = np.random.choice(covariates.shape[1], size=10)
+                parents = covariates[:, ids]
+            else:
+                parents = None
+
+            # Sample data
+            t = treatment_assignment(covariates, relation=relation, use_parents=parents)
+            ys = outcome_assignment(covariates, constant_base=False, homogeneous=homogeneous, relation=relation, use_parents=parents)
+            y = np.array([row[int(ix)] for row, ix in zip(ys, t)])
+            y_cf = np.array([row[int(1 - ix)] for row, ix in zip(ys, t)])
+
+            # Create Dataframes
+            factual = pd.DataFrame(data=np.array([t, y]).T, columns=['t', 'y'])
+            counterfactual = pd.DataFrame(data=np.array([t, y, y_cf, ys[:, 1], ys[:, 0]]).T, columns=['t', 'y', 'y_cf', 'y_0', 'y_1'])
+
+            # Write file
+            file_stub = make_file_name(random, homogeneous, strength, conf)
+            factual_file = file_stub + '.csv'
+            counterfactual_file = file_stub + '_CF.csv'
+            factual.to_csv(factual_file)
+            counterfactual.to_csv(counterfactual_file)
+
+        test_generation(random=True, homogeneous=False)
+        # generate_file(random=True, homogeneous=True)
+        # generate_file(random=True, homogeneous=False)
+        # generate_file(random=False, homogeneous=False)
+        # generate_file(random=False, homogeneous=True)
+        # generate_file(random=False, homogeneous=False, conf=True)
+        # generate_file(random=False, homogeneous=False, strength='strong')
 
 
     def generate_data_powers(self, param_dict):
@@ -263,7 +357,7 @@ class ACICGenerator(DataProvider):
 if __name__ == '__main__':
 
     a = ACICGenerator()
-    a.generate_data({'seed':0})
+    a.generate_data({'seed': 10})
 
 
 

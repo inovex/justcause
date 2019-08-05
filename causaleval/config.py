@@ -16,3 +16,5 @@ DB_NAME = 'sacred'
 DB_URL = 'localhost:27017'
 
 OUTPUT_PATH = os.path.join(ROOT_DIR, 'results') + '/'
+
+GENERATE_PATH = os.path.join(ROOT_DIR, 'datasets/generated/')
