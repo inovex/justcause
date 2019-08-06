@@ -1,3 +1,4 @@
+import numpy as np
 
 class DataProvider():
 
@@ -17,10 +18,10 @@ class DataProvider():
         pass
 
     def get_true_ite(self, data=None):
-        pass
+        raise NotImplementedError('not yet implemented here')
 
     def get_true_ate(self, subset=None):
-        pass
+        np.mean(self.get_true_ite(subset))
 
     def get_train_generator_batch(self, batch_size=32):
         raise NotImplementedError('Batch generator not implemented for ', str(self))

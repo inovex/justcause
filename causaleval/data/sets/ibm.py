@@ -45,7 +45,7 @@ class SimpleIBMDataProvider(DataProvider):
         factual = pd.read_csv(config.IBM_PATH + '/' + 'factuals'+ '/' + id + '.csv')
         counterfactual = pd.read_csv(config.IBM_PATH + '/' + 'counterfactuals'+ '/' + id + '_cf.csv')
         covariates = pd.read_csv(config.IBM_PATH_ROOT + '/' + 'covariates.csv')
-        self.x = covariates[covariates['sample_id'].isin(list(factual['sample_id']))].values
+        self.x = covariates[covariates['sample_id'].isin(list(factual['sample_id']))].drop(columns=['sample_id']).values
         self.y = factual['y'].values
         self.t = factual['z'].values
         union = counterfactual[['y0','y1']].values
