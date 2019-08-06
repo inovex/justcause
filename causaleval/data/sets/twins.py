@@ -16,10 +16,6 @@ class TwinsDataProvider(DataProvider):
 
     def __init__(self):
         super().__init__()
-        self.x = None
-        self.t = None
-        self.y = None
-        self.y_cf = None
 
     def __str__(self):
         return "Twins"
@@ -70,9 +66,4 @@ class TwinsDataProvider(DataProvider):
         if self.ite is None:
             self.load_training_data()
         return self.ite
-
-    def get_true_ate(self, subset=None):
-        num = self.data.shape[0]
-        return (self.data['mort_1'].sum()/num) - self.data['mort_0'].sum()/num
-
 

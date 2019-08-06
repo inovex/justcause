@@ -15,10 +15,6 @@ class SimpleIBMDataProvider(DataProvider):
 
     def __init__(self):
         super().__init__()
-        self.x = None
-        self.t = None
-        self.y = None
-        self.y_cf = None
 
     def get_test_data(self):
         super().get_test_data()
@@ -34,9 +30,6 @@ class SimpleIBMDataProvider(DataProvider):
 
     def get_true_ite(self, data=None):
         return self.treated_outcome - self.control_outcome
-
-    def get_true_ate(self, subset=None):
-        return np.mean(self.get_true_ite())
 
     def load_training_data(self):
         params = pd.read_csv(config.IBM_PATH + '/' + 'params.csv')
