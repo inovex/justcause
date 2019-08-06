@@ -29,6 +29,8 @@ class GANITEModel(object):
                  num_treatments=2, with_bn=False, nonlinearity="elu", initializer=tf.variance_scaling_initializer(),
                  alpha=1.0, beta=1.0):
 
+        tf.reset_default_graph()
+
         config = tf.ConfigProto()
         config.gpu_options.allow_growth = True
         self.sess = tf.Session(config=config)

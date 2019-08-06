@@ -12,7 +12,7 @@ class GANITEWrapper(CausalMethod):
         self.model = self.build_model(num_covariates)
 
     def fit(self, x, t, y, refit=False) -> None:
-        raise NotImplementedError('GANITE requires a batch generator for fitting')
+        raise NotImplementedError( str(self) + ' requires a batch generator for fitting')
 
     def fit_provider(self, data_provider):
         """
@@ -21,7 +21,7 @@ class GANITEWrapper(CausalMethod):
         """
         # See if the model suits the data
         if not self.does_fit_provider(data_provider):
-            self.rebuild_model(data_provider.get_num_covariates())
+            self.model = self.build_model(data_provider.get_num_covariates())
 
         batch_gen = data_provider.get_train_generator_batch(batch_size=64)
         self.model.train(batch_gen, 5, batch_gen, 5, 50, 0.001)
@@ -45,7 +45,7 @@ class GANITEWrapper(CausalMethod):
         return self.num_covariates is data_provider.get_num_covariates()
 
 
-    def build_model(self, num_covariates, ):
+    def build_model(self, num_covariates):
         """
         Rebuild model with new input dimension
         :param num_covariates: number of covariates that are used as input to the model
