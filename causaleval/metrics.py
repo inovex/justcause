@@ -31,7 +31,7 @@ class EvaluationMetric():
         pass
 
     def prep_ite(self, data_provider, method, size=None):
-        """
+        """ Return the Predicted ITE on train and test data
 
         :param data_provider:
         :type data_provider: DataProvider
@@ -45,7 +45,10 @@ class EvaluationMetric():
             method.fit_provider(data_provider)
         else:
             method.fit(x, t, y)
-        return method.predict_ite(x)
+
+        x_test, _, _ = data_provider.get_test_data()
+
+        return method.predict_ite(x), method.predict_ite(x_test)
 
 
 class StandardEvaluation(EvaluationMetric):
@@ -68,11 +71,20 @@ class StandardEvaluation(EvaluationMetric):
     def bias(true, predicted):
         return np.sum(predicted - true)/true.shape[0]
 
-    def log_method(self, score_name, method, data_provider, size, score):
-        self.ex.log_scalar(score_name + ',' + str(method) + ',' + str(data_provider), score)
-        print(score_name + ',' + str(method) + ',' + str(data_provider)+ ',' + str(score))
+    def log_method(self, score_name, method, data_provider, size, sample, score):
+        """Log output to console, csv and sacred logging
+
+        :param score_name:
+        :param method:
+        :param data_provider:
+        :param size:
+        :param sample:
+        :param score:
+        """
+        self.ex.log_scalar(score_name + ',' + str(method) + ',' + str(data_provider) + ',' + str(sample), score)
+        print(score_name + ',' + str(method) + ',' + str(data_provider)+ ',' + str(size) + ',' + str(sample) + ',' + str(score))
         self.output = self.output.append(
-            other={'metric': score_name, 'method': str(method), 'dataset': str(data_provider),'size' : size, 'score': score},
+            other={'metric': score_name, 'method': str(method), 'dataset': str(data_provider), 'size': size, 'sample': sample, 'score': score},
             ignore_index=True)
 
     def evaluate(self, data_provider, method, sizes=None):
@@ -94,14 +106,25 @@ class StandardEvaluation(EvaluationMetric):
 
         }
 
-        # Setupt new DataFrame for every run of the metric
-        self.output = pd.DataFrame(columns=['metric', 'method', 'dataset', 'size', 'score'])
-        pred_ite = self.prep_ite(data_provider, method)
-        true_ite = data_provider.get_true_ite()
+        self.output = pd.DataFrame(columns=['metric', 'method', 'dataset', 'size', 'sample', 'score'])
 
-        # TODO: Make a list of metric functions within this evaluation class and iterate over them
-        for key in function_map:
-            self.log_method(key, method, data_provider, 0, function_map[key](true_ite, pred_ite))
+        # Setupt new DataFrame for every run of the metric
+        if sizes:
+            for size in sizes:
+                pred_train, pred_test = self.prep_ite(data_provider, method, size=size)
+                true_train = data_provider.get_train_ite(subset=True)
+                true_test = data_provider.get_test_ite()
+
+                for key in function_map:
+                    self.log_method(key, method, data_provider, size, 'train', function_map[key](pred_train, true_train))
+                    self.log_method(key, method, data_provider, size, 'test', function_map[key](pred_test, true_test))
+        else:
+            pred_train, pred_test = self.prep_ite(data_provider, method, size=None)
+            true_train = data_provider.get_train_ite(subset=True)
+
+            for key in function_map:
+                self.log_method(key, method, data_provider, 'full', 'test', function_map[key](pred_train, true_train))
+                self.log_method(key, method, data_provider, 'full', 'train', function_map[key](pred_train, true_train))
 
 class PlotEvaluation(EvaluationMetric):
     """Plot evaluation results of various metrics for further inspection

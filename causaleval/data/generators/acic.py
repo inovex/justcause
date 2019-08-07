@@ -79,22 +79,14 @@ class ACICGenerator(DataGenerator):
 
         :param params: dict containing 'random', 'homogeneous', 'deterministic', 'confounded'
         """
-        super().__init__(params)
-
         covariates_df = pd.read_csv(config.IBM_PATH_ROOT + '/' + 'covariates.csv')
         covariates_df = covariates_df.loc[:, covariates_df.var() > 0.3]
         self.covariates_df = covariates_df.drop(columns=['sample_id'])
         self.covariates = covariates_df.values
-
-        interesting_columns = ['sex', 'md_route', 'dbwt', 'estgest']
-        self.idx_dict = { name : self.covariates_df.columns.get_loc(name) for name in interesting_columns}
-
+        self.idx_dict = { name : self.covariates_df.columns.get_loc(name) for name in config.ACIC_SELECTED_VALUES}
         self.x = self.covariates
-        self.t = None
-        self.y = None
-        self.y_cf = None
-        self.y_0 = None
-        self.y_1 = None
+        super().__init__(params)
+
 
     def __str__(self):
         return self.make_data_name()
@@ -110,17 +102,13 @@ class ACICGenerator(DataGenerator):
             self.generate_file(self.random, self.homogeneous, self.confounded, self.deterministic)
 
         dataframe = pd.read_csv(fname)
+        self.x = self.covariates
         self.t = dataframe['t']
         self.y = dataframe['y']
         self.y_cf = dataframe['y_cf']
         self.y_0 = dataframe['y_0']
         self.y_1 = dataframe['y_1']
 
-    def get_training_data(self, size=None):
-        if self.y is None:
-            self.load_training_data()
-
-        return self.x, self.t, self.y
 
     def get_num_covariates(self):
         return self.x.shape[1]
@@ -132,6 +120,8 @@ class ACICGenerator(DataGenerator):
 
         if self.homogeneous:
             name += 'homo-'
+        else:
+            name += 'hetero-'
 
         if self.deterministic:
             name += 'det-'
@@ -288,7 +278,7 @@ class ACICGenerator(DataGenerator):
 
         if confounded:
             # Use strong pre-selected values
-            ids = np.random.choice(self.covariates.shape[1], size=6)
+            ids = np.random.choice(self.covariates.shape[1], size= 10 - len(self.idx_dict))
             ids = np.concatenate((ids, list(self.idx_dict.values())), axis=0)
             parents = self.covariates[:, ids]
         else:
@@ -343,7 +333,7 @@ if __name__ == '__main__':
         'random' : True,
         'deterministic': False,
         'homogeneous' : False,
-        'confounding' : False
+        'confounded' : False
     }
 
     a = ACICGenerator(dict)

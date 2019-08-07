@@ -43,11 +43,21 @@ from causaleval import config
 ex = Experiment('normal')
 ex.observers.append(MongoObserver.create(url=config.DB_URL, db_name=config.DB_NAME))
 
+dict = {
+    'random' : True,
+    'deterministic': False,
+    'homogeneous' : False,
+    'confounded' : False,
+    'seed' : 0
+}
+
+data_gen = ACICGenerator(dict)
+
 # Define Experiment
 methods = [DoubleOutcomeRegression(DecisionTreeRegressor()), GANITEWrapper()]
-datasets = [IHDPDataProvider()]
+datasets = [IHDPDataProvider(), data_gen]
 metrics = [StandardEvaluation(ex)]
-sizes = [1000, 2000, 5000, 10000]
+sizes = [1000, 2000, 5000]
 
 
 @ex.main

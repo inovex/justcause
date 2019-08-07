@@ -35,20 +35,8 @@ class IHDPDataProvider(DataProvider):
         self.y = np.array(Y)
         self.y_cf = np.array(Y_cf)
         union = np.c_[self.y, self.y_cf]
-        self.treated_outcome = np.array([row[int(ix)] for row, ix in zip(union, self.t)])
-        self.control_outcome = np.array([row[int(ix)] for row, ix in zip(union, (1 - self.t))])
-
-    def get_training_data(self, size=None):
-        if self.x is None:
-            self.load_training_data()
-        if size is None:
-            return self.x, self.t, self.y
-        else:
-            sample = np.random.choice(self.x.shape[0], size)
-            return self.x[sample], self.t[sample], self.y[sample]
-
-    def get_true_ite(self, data=None):
-        return self.treated_outcome - self.control_outcome
+        self.y_1 = np.array([row[int(ix)] for row, ix in zip(union, self.t)])
+        self.y_0 = np.array([row[int(ix)] for row, ix in zip(union, (1 - self.t))])
 
     def get_num_covariates(self):
         return 25

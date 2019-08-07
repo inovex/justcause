@@ -16,20 +16,8 @@ class SimpleIBMDataProvider(DataProvider):
     def __init__(self):
         super().__init__()
 
-    def get_test_data(self):
-        super().get_test_data()
-
-    def get_training_data(self, size=None):
-        if self.x is None:
-            self.load_training_data()
-        if size is None:
-            return self.x, self.t, self.y
-
     def __str__(self):
         return "IBM"
-
-    def get_true_ite(self, data=None):
-        return self.treated_outcome - self.control_outcome
 
     def load_training_data(self):
         params = pd.read_csv(config.IBM_PATH + '/' + 'params.csv')
@@ -52,8 +40,8 @@ class SimpleIBMDataProvider(DataProvider):
 
         self.params = params[params['ufid'] == id]
         self.y_cf = np.array(cf)
-        self.treated_outcome = counterfactual['y1']
-        self.control_outcome = counterfactual['y0']
+        self.y_1 = counterfactual['y1']
+        self.y_0 = counterfactual['y0']
 
 
     def get_params(self):
