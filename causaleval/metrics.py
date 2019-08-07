@@ -30,16 +30,17 @@ class EvaluationMetric():
         """
         pass
 
-    def prep_ite(self, data_provider, method):
+    def prep_ite(self, data_provider, method, size=None):
         """
 
         :param data_provider:
         :type data_provider: DataProvider
         :param method:
         :type method: CausalMethod
+        :param size: for which to evaluate
         :return:
         """
-        x, t, y = data_provider.get_training_data()
+        x, t, y = data_provider.get_training_data(size=size)
         if method.requires_provider():
             method.fit_provider(data_provider)
         else:
@@ -67,33 +68,40 @@ class StandardEvaluation(EvaluationMetric):
     def bias(true, predicted):
         return np.sum(predicted - true)/true.shape[0]
 
-    def log_method(self, score_name, method, data_provider, score):
+    def log_method(self, score_name, method, data_provider, size, score):
         self.ex.log_scalar(score_name + ',' + str(method) + ',' + str(data_provider), score)
         print(score_name + ',' + str(method) + ',' + str(data_provider)+ ',' + str(score))
         self.output = self.output.append(
-            other={'metric': score_name, 'method': str(method), 'dataset': str(data_provider), 'score': score},
+            other={'metric': score_name, 'method': str(method), 'dataset': str(data_provider),'size' : size, 'score': score},
             ignore_index=True)
 
-    def evaluate(self, data_provider, method):
+    def evaluate(self, data_provider, method, sizes=None):
         """
 
         :param data_provider:
         :type data_provider: DataProvider
         :param method:
         :type method: CausalMethod
+        :param sizes: The dataset sizes for which to evaluate
         :return:
         """
 
+        function_map = {
+            'PEHE' : self.pehe_score,
+            'ATE' : self.ate_error,
+            'ENORMSE' : self.enormse,
+            'BIAS' : self.bias,
+
+        }
+
         # Setupt new DataFrame for every run of the metric
-        self.output = pd.DataFrame(columns=['metric', 'method', 'dataset', 'score'])
+        self.output = pd.DataFrame(columns=['metric', 'method', 'dataset', 'size', 'score'])
         pred_ite = self.prep_ite(data_provider, method)
         true_ite = data_provider.get_true_ite()
 
         # TODO: Make a list of metric functions within this evaluation class and iterate over them
-        self.log_method('PEHE', method, data_provider, self.pehe_score(true_ite, pred_ite))
-        self.log_method('ATE', method, data_provider, self.ate_error(true_ite, pred_ite))
-        self.log_method('ENORMSE', method, data_provider, self.enormse(true_ite, pred_ite))
-        self.log_method('BIAS', method, data_provider, self.bias(true_ite, pred_ite))
+        for key in function_map:
+            self.log_method(key, method, data_provider, 0, function_map[key](true_ite, pred_ite))
 
 class PlotEvaluation(EvaluationMetric):
     """Plot evaluation results of various metrics for further inspection

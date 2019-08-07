@@ -19,16 +19,22 @@ import matplotlib.pyplot as plt
 from sacred import Experiment
 from sacred.observers import MongoObserver
 
+# Base Methods
 from sklearn.ensemble.forest import RandomForestRegressor, DecisionTreeRegressor
 from sklearn.ensemble.gradient_boosting import GradientBoostingRegressor
 from sklearn.neural_network import MLPRegressor
 
-from causaleval.data.data_provider import DataProvider
+
 from causaleval.metrics import EvaluationMetric, StandardEvaluation
+
+# Methods
 from causaleval.methods.causal_method import CausalMethod
 from causaleval.methods.basics.outcome_regression import SingleOutcomeRegression, DoubleOutcomeRegression
 from causaleval.methods.causal_forest import CausalForest
 from causaleval.methods.ganite_wrapper import GANITEWrapper
+
+# Data
+from causaleval.data.generators.acic import ACICGenerator
 from causaleval.data.sets.ihdp import IHDPDataProvider
 from causaleval.data.sets.twins import TwinsDataProvider
 from causaleval.data.sets.ibm import SimpleIBMDataProvider
@@ -37,30 +43,22 @@ from causaleval import config
 ex = Experiment('normal')
 ex.observers.append(MongoObserver.create(url=config.DB_URL, db_name=config.DB_NAME))
 
+# Define Experiment
+methods = [DoubleOutcomeRegression(DecisionTreeRegressor()), GANITEWrapper()]
+datasets = [IHDPDataProvider()]
+metrics = [StandardEvaluation(ex)]
+sizes = [1000, 2000, 5000, 10000]
 
 
 @ex.main
-def run_experiment(_run):
-
-    # ganite = GANITEWrapper()
-    # ihdp = IHDPDataProvider()
-    # ihdp.load_training_data()
-    # ganite.fit(ihdp)
-    # x, t, y = ihdp.get_training_data()
-    # y_pred = ganite.predict_ite(x)
-    # print(StandardEvaluation.enormse(ihdp.get_true_ite(), y_pred))
-
+def run(_run):
     output = pd.DataFrame(columns=['metric', 'method', 'dataset', 'score'])
 
-    methods = [DoubleOutcomeRegression(DecisionTreeRegressor()), GANITEWrapper()]
-    datasets = [IHDPDataProvider()]
-    metrics = [StandardEvaluation(ex)]
-
-    # Enfore right order of iteration
+    # Enforce right order of iteration
     for dataset in datasets:
         for method in methods:
             for metric in metrics:
-                metric.evaluate(dataset, method)
+                metric.evaluate(dataset, method, sizes)
                 output = output.append(metric.output, ignore_index=True)
 
     file_name = config.OUTPUT_PATH + str(_run._id) + '_output.csv'
