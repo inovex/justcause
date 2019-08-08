@@ -103,11 +103,11 @@ class ACICGenerator(DataGenerator):
 
         dataframe = pd.read_csv(fname)
         self.x = self.covariates
-        self.t = dataframe['t']
-        self.y = dataframe['y']
-        self.y_cf = dataframe['y_cf']
-        self.y_0 = dataframe['y_0']
-        self.y_1 = dataframe['y_1']
+        self.t = dataframe['t'].values
+        self.y = dataframe['y'].values
+        self.y_cf = dataframe['y_cf'].values
+        self.y_0 = dataframe['y_0'].values
+        self.y_1 = dataframe['y_1'].values
 
 
     def get_num_covariates(self):
