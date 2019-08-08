@@ -62,7 +62,7 @@ sizes = [1000, 2000, 5000]
 
 @ex.main
 def run(_run):
-    output = pd.DataFrame(columns=['metric', 'method', 'dataset', 'score'])
+    output = pd.DataFrame(columns=['metric', 'method', 'dataset', 'size', 'sample', 'score'])
 
     # Enforce right order of iteration
     for dataset in datasets:
