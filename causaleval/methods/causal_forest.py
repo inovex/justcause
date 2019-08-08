@@ -38,15 +38,15 @@ class CausalForest(CausalMethod):
 
         return importr("grf")
 
-    def predict_ate(self, x) -> type(float):
+    def predict_ate(self, x, t=None, y=None):
         predictions = self.predict_ite(x)
         return np.mean(predictions)
 
-    def predict_ite(self, x) -> type(np.array):
+    def predict_ite(self, x, t=None, y=None):
         if self.forest is None:
             raise AssertionError('Must fit the forest before prediction')
 
-        pred = robjects.r.predict(self.forest, estimate_variance=False)
+        pred = robjects.r.predict(self.forest, x, estimate_variance=False)
         return np.array(list(map(lambda element: element[0], pred)))
 
     def fit(self, x, t, y, refit=False):

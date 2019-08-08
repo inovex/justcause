@@ -26,7 +26,7 @@ class GANITEWrapper(CausalMethod):
         batch_gen = data_provider.get_train_generator_batch(batch_size=64)
         self.model.train(batch_gen, 5, batch_gen, 5, 50, 0.001)
 
-    def predict_ite(self, x):
+    def predict_ite(self, x, t=None, y=None):
         ys = self.model.predict(x)
         return ys[:, 1] - ys[:, 0]
 

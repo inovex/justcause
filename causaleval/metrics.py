@@ -46,9 +46,9 @@ class EvaluationMetric():
         else:
             method.fit(x, t, y)
 
-        x_test, _, _ = data_provider.get_test_data()
+        x_test, t_test, y_test = data_provider.get_test_data()
 
-        return method.predict_ite(x), method.predict_ite(x_test)
+        return method.predict_ite(x, t, y), method.predict_ite(x_test, t_test, y_test)
 
 
 class StandardEvaluation(EvaluationMetric):
