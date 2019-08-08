@@ -25,20 +25,22 @@ class CausalMethod():
         """
         pass
 
-    def predict_ite(self, x):
-        """ Predict individual treatment effect for given instances with
+    def predict_ite(self, x, t=None, y=None):
+        """Predict individual treatment effect for given instances with
         covariates and treatment indicator
         :param x: covariates of instances
         :param t: treatment indicator of instances
+        :param y: outcome of instances
         :return: an array of the individual treatment effects
         """
         pass
 
-    def predict_ate(self, x):
-        """ Predict average treatment effect for given population
+    def predict_ate(self, x, t=None, y=None):
+        """Predict average treatment effect for given population
 
         :param x: covariates of instances
         :param t: treatment indicator of instances
+        :param y: outcome of instances
         :return: a float value of the ATE
         """
         pass
