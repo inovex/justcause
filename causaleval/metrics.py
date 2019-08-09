@@ -1,3 +1,4 @@
+import time
 import numpy as np
 import pandas as pd
 
@@ -71,7 +72,7 @@ class StandardEvaluation(EvaluationMetric):
     def bias(true, predicted):
         return np.sum(predicted - true)/true.shape[0]
 
-    def log_method(self, score_name, method, data_provider, size, sample, score):
+    def log_method(self, score_name, method, data_provider, size, sample, time, score):
         """Log output to console, csv and sacred logging
 
         :param score_name:
@@ -82,9 +83,9 @@ class StandardEvaluation(EvaluationMetric):
         :param score:
         """
         self.ex.log_scalar(score_name + ',' + str(method) + ',' + str(data_provider) + ',' + str(sample), score)
-        print(score_name + ',' + str(method) + ',' + str(data_provider)+ ',' + str(size) + ',' + str(sample) + ',' + str(score))
+        print(score_name + ',' + str(method) + ',' + str(data_provider)+ ',' + str(size) + ',' + str(sample) + ',' + str(time) + ',' + str(score))
         self.output = self.output.append(
-            other={'metric': score_name, 'method': str(method), 'dataset': str(data_provider), 'size': size, 'sample': sample, 'score': score},
+            other={'metric': score_name, 'method': str(method), 'dataset': str(data_provider), 'size': size, 'sample': sample, 'time': time, 'score': score},
             ignore_index=True)
 
     def evaluate(self, data_provider, method, sizes=None):
@@ -106,25 +107,31 @@ class StandardEvaluation(EvaluationMetric):
 
         }
 
-        self.output = pd.DataFrame(columns=['metric', 'method', 'dataset', 'size', 'sample', 'score'])
+        self.output = pd.DataFrame(columns=['metric', 'method', 'dataset', 'size', 'sample', 'time', 'score'])
 
         # Setupt new DataFrame for every run of the metric
+
         if sizes:
             for size in sizes:
+                start = time.time()
                 pred_train, pred_test = self.prep_ite(data_provider, method, size=size)
                 true_train = data_provider.get_train_ite(subset=True)
                 true_test = data_provider.get_test_ite()
+                time_elapsed = round(time.time() - start, 3)
 
                 for key in function_map:
-                    self.log_method(key, method, data_provider, size, 'train', function_map[key](pred_train, true_train))
-                    self.log_method(key, method, data_provider, size, 'test', function_map[key](pred_test, true_test))
+                    self.log_method(key, method, data_provider, size, 'train', time_elapsed, function_map[key](pred_train, true_train))
+                    self.log_method(key, method, data_provider, size, 'test', time_elapsed, function_map[key](pred_test, true_test))
         else:
+            start = time.time()
             pred_train, pred_test = self.prep_ite(data_provider, method, size=None)
-            true_train = data_provider.get_train_ite(subset=True)
+            true_train = data_provider.get_train_ite(subset=False)
+            true_test = data_provider.get_test_ite()
+            time_elapsed = round(time.time() - start, 3)
 
             for key in function_map:
-                self.log_method(key, method, data_provider, 'full', 'test', function_map[key](pred_train, true_train))
-                self.log_method(key, method, data_provider, 'full', 'train', function_map[key](pred_train, true_train))
+                self.log_method(key, method, data_provider, 'full', 'test', time_elapsed, function_map[key](pred_test, true_test))
+                self.log_method(key, method, data_provider, 'full', 'train', time_elapsed, function_map[key](pred_train, true_train))
 
 class PlotEvaluation(EvaluationMetric):
     """Plot evaluation results of various metrics for further inspection
