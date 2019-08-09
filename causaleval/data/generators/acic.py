@@ -27,6 +27,7 @@ sns.set(style="darkgrid")
 import matplotlib.pyplot as plt
 
 
+np.random.seed(0) # make sure to fix the seed for replication
 exp_coeffs = np.random.normal(loc=0, scale=0.5, size=10)
 
 def normal_polynomial(vars):
@@ -156,6 +157,7 @@ class ACICGenerator(DataGenerator):
             parents should be the subset of the covariate matrix
         :return: binary treatment vector
         """
+        np.random.seed(self.params['seed']) # make sure to fix the seed for replication
         if relation == 'random':
             # Completely random treatment assignment
             return np.random.random_integers(0,1, size=covariates.shape[0])
@@ -190,6 +192,7 @@ class ACICGenerator(DataGenerator):
             parents should be the subset of the covariate matrix
         :return: treatment effect vector
         """
+        np.random.seed(self.params['seed']) # make sure to fix the seed for replication
         if homogeneous:
             return np.full(len(covariates), 1.5)
         else:
@@ -231,6 +234,7 @@ class ACICGenerator(DataGenerator):
         :param homogeneous: Whether or not treatment effect should be homogeneous / equal for all instances
         :return: binary treatment vector
         """
+        np.random.seed(self.params['seed']) # make sure to fix the seed for replication
         if use_parents is not None:
             confounders = use_parents
         else:
@@ -287,11 +291,10 @@ class ACICGenerator(DataGenerator):
         # Sample data
         t = self.treatment_assignment(self.covariates, relation=relation, use_parents=parents)
         ys = self.outcome_assignment(self.covariates, constant_base=False, homogeneous=homogeneous, relation=outcome_relation, use_parents=parents)
-        y = np.array([row[int(ix)] for row, ix in zip(ys, t)])
-        y_cf = np.array([row[int(1 - ix)] for row, ix in zip(ys, t)])
+        y = np.array([row[int(1 - ix)] for row, ix in zip(ys, t)])
+        y_cf = np.array([row[int(ix)] for row, ix in zip(ys, t)])
 
         return t, ys, y, y_cf
-
     def generate_file(self, random, homogeneous, confounded=False, deterministic=False):
         t, ys, y, y_cf = self.generate_data(random, homogeneous, confounded, deterministic)
 
@@ -332,12 +335,13 @@ if __name__ == '__main__':
     dict = {
         'random' : True,
         'deterministic': False,
-        'homogeneous' : False,
-        'confounded' : False
+        'homogeneous' : True,
+        'confounded' : False,
+        'seed' : 0
     }
 
     a = ACICGenerator(dict)
-    a.test_generation(random=False, homogeneous=False, counfounded=True)
+    a.test_generation(random=False, homogeneous=False, counfounded=True, deterministic=True)
 
 
 
