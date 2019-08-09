@@ -29,10 +29,7 @@ class SingleOutcomeRegression(CausalMethod):
         return np.c_[x, t]
 
     def predict_ite(self, x, t=None, y=None):
-        if self.is_trained:
-            return self.regressor.predict(self.union(x, np.ones(x.shape[0]))) - self.regressor.predict(self.union(x, np.zeros(x.shape[0])))
-        else:
-            raise AssertionError('Must fit method before prediction')
+        return self.regressor.predict(self.union(x, np.ones(x.shape[0]))) - self.regressor.predict(self.union(x, np.zeros(x.shape[0])))
 
     def predict_ate(self, x, t=None, y=None):
         return np.mean(self.predict_ite(x))
