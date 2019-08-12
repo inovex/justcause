@@ -36,7 +36,7 @@ class PropensityScoreWeighting(CausalMethod):
 
 
     def __str__(self):
-        return "PropensityScoreWeighting"
+        return "PropensityScoreWeighting - " + get_regressor_name(self.propensity_regressor)
 
     def predict_ite(self, x, t=None, y=None):
         # Broadcast ATE to all instances

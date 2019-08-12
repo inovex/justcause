@@ -40,7 +40,7 @@ class DoubleRobust(CausalMethod):
 
 
     def __str__(self):
-        return "DoubleRobustEstimator"
+        return "DoubleRobustEstimator - P: " +  get_regressor_name(self.propensity_regressor) + " O: " + get_regressor_name(self.outcome_regressor)
 
     def predict_ite(self, x, t=None, y=None):
         # Broadcast ATE to all instances
