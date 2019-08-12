@@ -126,6 +126,7 @@ class GANITEModel(object):
                               do_save)
 
             if num_epochs_without_improvement >= early_stopping_patience:
+                print('EARLY STOPPING due to NO IMPROVEMENT')
                 break
 
         best_val_loss, num_epochs_without_improvement = np.finfo(float).max, 0
@@ -155,6 +156,7 @@ class GANITEModel(object):
                               do_save)
 
             if num_epochs_without_improvement >= early_stopping_patience:
+                print('EARLY STOPPING due to NO IMPROVEMENT')
                 break
 
     def print_losses(self, epoch_idx, num_epochs, train_losses, val_losses, did_save=False):
