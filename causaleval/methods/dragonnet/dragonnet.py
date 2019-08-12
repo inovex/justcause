@@ -30,7 +30,7 @@ def _split_output(yt_hat, t, y, y_scaler, x, index):
     return {'q_t0': q_t0, 'q_t1': q_t1, 'g': g, 't': t, 'y': y, 'x': x, 'index': index, 'eps': eps}
 
 def train_dragon(t, y_unscaled, x, targeted_regularization=True,
-                 knob_loss=dragonnet_loss_binarycross, ratio=1., val_split=0.2,
+                 knob_loss=dragonnet_loss_binarycross, ratio=1., val_split=0.1,
                  batch_size=512, num_epochs=100, verbose=1):
     """Build and Train the DragonNet Model on given data
 
@@ -109,7 +109,7 @@ def train_dragon(t, y_unscaled, x, targeted_regularization=True,
 
 
 def train_and_predict_dragons(t, y_unscaled, x, targeted_regularization=True, output_dir='',
-                              knob_loss=dragonnet_loss_binarycross, ratio=1., dragon=1, val_split=0.2,batch_size=512):
+                              knob_loss=dragonnet_loss_binarycross, ratio=1., dragon=1, val_split=0.1,batch_size=512):
 
     verbose=1
     y_scaler = StandardScaler().fit(y_unscaled)
@@ -193,7 +193,7 @@ def train_and_predict_dragons(t, y_unscaled, x, targeted_regularization=True, ou
 
 
 def train_and_predict_ned(t, y_unscaled, x, targeted_regularization=True, output_dir='',
-                          knob_loss=dragonnet_loss_binarycross, ratio=1., dragon=1,val_split=0.2, batch_size=512):
+                          knob_loss=dragonnet_loss_binarycross, ratio=1., dragon=1,val_split=0.1, batch_size=512):
 
     verbose=0
     y_scaler = StandardScaler().fit(y_unscaled)

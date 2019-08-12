@@ -4,14 +4,14 @@ from causaleval.methods.dragonnet import dragonnet
 
 class DragonNetWrapper(CausalMethod):
 
-    def __init__(self, seed=0, learning_rate=0.001, num_epochs=5, num_covariates=25):
+    def __init__(self, seed=0, learning_rate=0.001, num_epochs=50, num_covariates=25):
         super().__init__(seed)
         self.learning_rate = learning_rate
         self.num_epochs = num_epochs
         self.num_covariates = num_covariates
 
     def fit(self, x, t, y, refit=False) -> None:
-        self.model = dragonnet.train_dragon(t, y, x)
+        self.model = dragonnet.train_dragon(t, y, x, num_epochs=self.num_epochs)
 
     def predict_ite(self, x, t=None, y=None):
         # returns a 4-tupel for each instance : [y_0, y_1, t_pred, epislon]
