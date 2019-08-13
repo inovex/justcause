@@ -10,8 +10,6 @@ from keras.optimizers import rmsprop, SGD, Adam
 from keras.callbacks import EarlyStopping, ModelCheckpoint, TensorBoard, ReduceLROnPlateau, TerminateOnNaN, Callback
 
 
-
-
 def _split_output(yt_hat, t, y, y_scaler, x, index):
     q_t0 = y_scaler.inverse_transform(yt_hat[:, 0].copy())
     q_t1 = y_scaler.inverse_transform(yt_hat[:, 1].copy())
@@ -90,7 +88,6 @@ def train_dragon(t, y_unscaled, x, targeted_regularization=True,
         EarlyStopping(monitor='regression_loss', patience=10, min_delta=0.),
         ReduceLROnPlateau(monitor='loss', factor=0.5, patience=5, verbose=verbose, mode='auto',
                           min_delta=1e-8, cooldown=0, min_lr=0),
-        EarlyStoppingByLossVal(value=400, verbose=verbose),
         SacredLogLoss()
 
     ]
