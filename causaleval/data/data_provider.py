@@ -5,7 +5,7 @@ from itertools import cycle
 
 class DataProvider():
 
-    def __init__(self, seed=0):
+    def __init__(self, seed=0, train_size=0.8):
         # Standard null initialization
         self.x = None
         self.y = None
@@ -18,7 +18,7 @@ class DataProvider():
 
         np.random.seed(seed)
         self.load_training_data()
-        self.set_train_test_split(train_size=0.8) # Use 80/20 as default
+        self.set_train_test_split(train_size=train_size) # Use 80/20 as default
 
     def __str__(self):
         return "Abstract Data Provider"
