@@ -9,8 +9,8 @@ from itertools import cycle
 
 class IHDPDataProvider(DataProvider):
 
-    def __init__(self):
-        super().__init__()
+    def __init__(self,seed=0, train_size=0.8):
+        super().__init__(seed, train_size)
 
     def __str__(self):
         return "IHDP"
@@ -28,6 +28,8 @@ class IHDPDataProvider(DataProvider):
             data = np.loadtxt(filepath, delimiter=',')
             T, Y, Y_cf = np.append(T, data[:, 0]), np.append(Y,data[:, 1][:, np.newaxis]), np.append(Y_cf, data[:, 2][:, np.newaxis])
             X = np.append(X, data[:, 5:], axis=0)
+            break # only use one of the different data set versions
+
 
         X = X[1:]
         self.x = np.array(X)
@@ -35,8 +37,8 @@ class IHDPDataProvider(DataProvider):
         self.y = np.array(Y)
         self.y_cf = np.array(Y_cf)
         union = np.c_[self.y, self.y_cf]
-        self.y_1 = np.array([row[int(ix)] for row, ix in zip(union, self.t)])
-        self.y_0 = np.array([row[int(ix)] for row, ix in zip(union, (1 - self.t))])
+        self.y_1 = np.array([row[int(1 - ix)] for row, ix in zip(union, self.t)])
+        self.y_0 = np.array([row[int(ix)] for row, ix in zip(union, self.t)])
 
     def get_num_covariates(self):
         return 25
