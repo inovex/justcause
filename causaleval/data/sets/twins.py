@@ -50,20 +50,14 @@ class TwinsDataProvider(DataProvider):
         df['observed'] = observed
         self.data = df
 
+        self.y_1 = potential_outcomes[:, 1]
+        self.y_0 = potential_outcomes[:, 0]
         self.x = df.drop(['mort_0', 'mort_1', 'dbirwt_0', 'dbirwt_1'], axis=1).values
         self.t = treatment
         self.y = np.array(observed)
         self.y_cf = np.array(counterfactual)
         self.ite = df['mort_1'].values - df['mort_0'].values
 
+        print('shape: ', self.x.shape)
 
-    def get_training_data(self):
-        if self.x is None:
-            self.load_training_data()
-        return self.x, self.t, self.y
-
-    def get_true_ite(self, data=None):
-        if self.ite is None:
-            self.load_training_data()
-        return self.ite
 
