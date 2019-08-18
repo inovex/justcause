@@ -5,20 +5,16 @@ import numpy as np
 
 from causaleval.data.generators.generator import DataGenerator
 from causaleval import config
+from utils import surface_plot, simple_comparison_mean
 
 import scipy
 from sklearn.preprocessing import StandardScaler, minmax_scale, RobustScaler
-
-# Playground imports
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.linear_model import LinearRegression
-from causaleval.data.sets.ibm import SimpleIBMDataProvider
-from sklearn.manifold import TSNE
 
 
 # To make it work on MacOS
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib
+
 matplotlib.use("MacOSX")
 import seaborn as sns
 sns.set(style="darkgrid")
@@ -62,13 +58,6 @@ def f4(vars):
     # high interactions
     return 2*vars[0]*vars[3]*vars[5] + vars[0]*vars[3]*(1-vars[5]) + 3*vars[7]*vars[8] \
            + 4*vars[6]*(1- vars[9])*(1-vars[0])
-
-def test_confounding(x, y, y_cf, t):
-    treated = y[t==1]
-    control = y[t==0]
-    simple_mean = np.mean(treated) - np.mean(control)
-    print('simple: ' + str(simple_mean))
-
 
 
 class ACICGenerator(DataGenerator):
@@ -306,38 +295,15 @@ class ACICGenerator(DataGenerator):
         factual.to_csv(factual_file)
         counterfactual.to_csv(counterfactual_file)
 
-    def test_generation(self, random, homogeneous, counfounded=False, deterministic=False):
-        t, ys, y, y_cf = self.generate_data(random, homogeneous, counfounded, deterministic)
+    def test_generation(self, random, homogeneous, confounded=False, deterministic=False):
+        t, ys, y, y_cf = self.generate_data(random, homogeneous, confounded, deterministic)
 
-        test_confounding(self.covariates, y, y_cf, t)
+        simple_comparison_mean(y, t)
         print('true ', np.mean(ys[:, 0] - ys[:, 1]))
 
-        self.surface_plot(ys, y, y_cf)
+        choice = np.random.choice(len(self.x), size=1000)
+        surface_plot(self.y_1[choice], self.y_0[choice], self.y[choice], self.y_cf[choice], self.x[choice])
 
-        # Plot distributions for analysis
-        # sns.distplot(y, color='red')
-        # sns.distplot(y_cf, color='green')
-        # sns.distplot(ys[:,0] - ys[:,1], color='blue')
-        # plt.show()
-
-    def surface_plot(self, ys, y, y_cf):
-        y1 = ys[0:1000, 0]
-        y0 = ys[0:1000, 1]
-
-        print('transform')
-        covariates_2d = TSNE().fit_transform(self.covariates[0:1000])
-        print('finish')
-
-        fig = plt.figure()
-        ax = fig.add_subplot(1, 2, 1, projection='3d')
-        ax.scatter(covariates_2d[:, 0], covariates_2d[:, 1], y1, color='green', alpha=0.7, s=5)
-        ax.scatter(covariates_2d[:, 0], covariates_2d[:, 1], y0, color='gray', alpha=0.7, s=5)
-        ax.view_init(30, 45)
-        ax2 = fig.add_subplot(1, 2, 2, projection='3d')
-        ax2.scatter(covariates_2d[:, 0], covariates_2d[:, 1], y[0:1000], color='blue', alpha=0.7, s=5)
-        ax2.scatter(covariates_2d[:, 0], covariates_2d[:, 1], y_cf[0:1000], color='gray', alpha=0.5, s=5)
-        ax2.view_init(30, 45)
-        plt.show()
 
     def generate_all_files(self):
 
@@ -359,7 +325,7 @@ if __name__ == '__main__':
     }
 
     a = ACICGenerator(dict)
-    a.test_generation(random=True, homogeneous=False)
+    a.test_generation(random=False, homogeneous=True)
 
 
 
