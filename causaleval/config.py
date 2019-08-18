@@ -4,6 +4,12 @@ ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__))) # this is
 RELATIVE_IHDP_PATH = 'datasets/ihdp/csv'
 IHDP_PATH = os.path.join(ROOT_DIR, RELATIVE_IHDP_PATH)
 
+RELATIVE_IHDP_REPLICA_PATH = 'datasets/ihdp_from_r/A'
+IHDP_REPLICA_PATH = os.path.join(ROOT_DIR, RELATIVE_IHDP_REPLICA_PATH)
+
+RELATIVE_IHDP_REPLICA_PATH_SETTING_B = 'datasets/ihdp_from_r/B'
+IHDP_REPLICA_PATH_SETTING_B = os.path.join(ROOT_DIR, RELATIVE_IHDP_REPLICA_PATH_SETTING_B)
+
 RELATIVE_TWINS_PATH = 'datasets/twins'
 TWINS_PATH = os.path.join(ROOT_DIR, RELATIVE_TWINS_PATH)
 
@@ -19,4 +25,6 @@ OUTPUT_PATH = os.path.join(ROOT_DIR, 'results') + '/'
 
 GENERATE_PATH = os.path.join(ROOT_DIR, 'datasets/generated/')
 
-ACIC_SELECTED_VALUES = ['sex', 'md_route', 'dbwt', 'estgest']
+ACIC_USE_COVARIATES = ['sex', 'md_route', 'dbwt', 'estgest', 'mbrace', 'meduc', 'precare']
+
+ACIC_SELECTED_VALUES = ['sex', 'md_route', 'dbwt', 'estgest', 'mager41']
