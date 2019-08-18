@@ -1,7 +1,5 @@
 import numpy as np
 import pandas as pd
-from scipy import stats
-
 
 from causaleval import config
 from causaleval.data.data_provider import DataProvider
@@ -58,6 +56,7 @@ class TwinsDataProvider(DataProvider):
         self.y_cf = np.array(counterfactual)
         self.ite = df['mort_1'].values - df['mort_0'].values
 
-        print('shape: ', self.x.shape)
 
-
+if __name__ == '__main__':
+    # for local tests
+    pass
