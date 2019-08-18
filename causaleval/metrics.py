@@ -7,6 +7,13 @@ from sacred import Experiment
 from causaleval.methods.causal_method import CausalMethod
 from causaleval.data.data_provider import DataProvider
 
+import matplotlib
+matplotlib.use("MacOSX")
+import seaborn as sns
+sns.set(style="darkgrid")
+import matplotlib.pyplot as plt
+
+
 class EvaluationMetric():
 
     def __init__(self, experiment):
@@ -66,7 +73,7 @@ class StandardEvaluation(EvaluationMetric):
 
     @staticmethod
     def enormse(true, predicted):
-        return np.sqrt(np.sum(np.power((1 - predicted/true), 2))/true.shape[0])
+        return np.sqrt(np.sum(np.power((1 - (predicted + 0.0001) /(true + 0.0001)), 2))/true.shape[0])
 
     @staticmethod
     def bias(true, predicted):
@@ -88,7 +95,14 @@ class StandardEvaluation(EvaluationMetric):
             other={'metric': score_name, 'method': str(method), 'dataset': str(data_provider), 'size': size, 'sample': sample, 'time': time, 'score': score},
             ignore_index=True)
 
-    def evaluate(self, data_provider, method, sizes=None):
+    def plot_residuals(self, pred_ite, true_ite):
+        sns.distplot(true_ite, color='green')
+        sns.distplot(pred_ite, color='gray')
+        print(np.mean(true_ite))
+        print(np.mean(pred_ite))
+        plt.show()
+
+    def evaluate(self, data_provider, method, sizes=None, plot=False):
         """
 
         :param data_provider:
