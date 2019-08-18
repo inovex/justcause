@@ -9,6 +9,7 @@ class PropensityScoreWeighting(CausalMethod):
     def __init__(self, propensity_regressor):
         super().__init__()
         self.propensity_regressor = propensity_regressor
+        self.delta = 0.0001
 
     def requires_provider(self):
         return False
@@ -17,14 +18,14 @@ class PropensityScoreWeighting(CausalMethod):
         # Predict ATE always for training set, thus test set evaluation is pretty bad
         if t is not None and y is not None:
             # Fit for requested set
-            self.fit(x, t, y)
+            # self.fit(x, t, y)
             self.x = x
             self.t = t
             self.y = y
 
         prop = self.propensity_regressor.predict(self.x)
-        m1 = np.sum((self.t*self.y/prop) / self.x.shape[0])
-        m0 = np.sum(((1-self.t)*self.y/(1-prop)) / self.x.shape[0])
+        m1 = np.sum(((self.t*self.y + self.delta)/(prop + self.delta)) / self.x.shape[0])
+        m0 = np.sum((((1-self.t)*self.y + self.delta)/(1-prop + self.delta)) / self.x.shape[0])
         return m1 - m0
 
     def fit(self, x, t, y, refit=False) -> None:

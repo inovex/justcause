@@ -11,6 +11,7 @@ class DoubleRobust(CausalMethod):
         self.propensity_regressor = propensity_regressor
         self.outcome_regressor = outcome_regressor
         self.outcome_regressor_ctrl = copy.deepcopy(outcome_regressor)
+        self.delta = 0.0001
 
     def requires_provider(self):
         return False
@@ -25,8 +26,8 @@ class DoubleRobust(CausalMethod):
             self.y = y
 
         prop = self.propensity_regressor.predict(x)
-        dr1 = np.sum((self.t*self.y/prop) - ((self.t - prop)/prop)*self.outcome_regressor.predict(x)) / x.shape[0]
-        dr0 = np.sum(((1 - self.t)*self.y/(1- prop)) - ((self.t - prop)/(1-prop))*self.outcome_regressor_ctrl.predict(x))/ x.shape[0]
+        dr1 = np.sum(((self.t*self.y)/ (prop + self.delta)) - ((self.t - prop + self.delta)/(prop +self.delta))*self.outcome_regressor.predict(x)) / x.shape[0]
+        dr0 = np.sum(((1 - self.t)*self.y/(1- prop + self.delta)) - ((self.t - prop + self.delta)/(1-prop + self.delta))*self.outcome_regressor_ctrl.predict(x))/ x.shape[0]
         return dr1 - dr0
 
     def fit(self, x, t, y, refit=False) -> None:
