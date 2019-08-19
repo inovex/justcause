@@ -126,9 +126,9 @@ class IHDPCfrProvider(DataProvider):
         return self.test['mu1'][:, self.counter] - self.test['mu0'][:, self.counter]
 
     def load_all(self):
-        fname = os.path.join(config.ROOT_DIR, "datasets/ihdp_from_r/train.npz")
+        fname = os.path.join(config.ROOT_DIR, "datasets/ihdp-cfr/train.npz")
         train = np.load(fname)
-        fname = os.path.join(config.ROOT_DIR, "datasets/ihdp_from_r/test.npz")
+        fname = os.path.join(config.ROOT_DIR, "datasets/ihdp-cfr/test.npz")
         self.test = np.load(fname)
         self.train = train
 
@@ -144,7 +144,7 @@ class IHDPCfrProvider(DataProvider):
     def load_training_data(self):
         """Just updates the specific replications used for the next run"""
 
-        if self.counter > 99: # This NPZ provides 100 replications
+        if self.counter > 999: # This NPZ provides 1000 replications
             self.counter = 0 # reset counter
 
         self.x = self.x_all[:,:,self.counter]
