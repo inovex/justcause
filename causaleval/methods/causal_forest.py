@@ -50,8 +50,6 @@ class CausalForest(CausalMethod):
         return np.array(list(map(lambda element: element[0], pred)))
 
     def fit(self, x, t, y, refit=False):
-        if self.is_fitted and not refit:
-            return
+        print('fit forest anew')
         self.forest = self.grf.causal_forest(x, FloatVector(y), IntVector(t), seed=self.seed)
-        self.is_fitted = True
 
