@@ -28,3 +28,11 @@ GENERATE_PATH = os.path.join(ROOT_DIR, 'datasets/generated/')
 ACIC_USE_COVARIATES = ['sex', 'md_route', 'dbwt', 'estgest', 'mbrace', 'meduc', 'precare']
 
 ACIC_SELECTED_VALUES = ['sex', 'md_route', 'dbwt', 'estgest', 'mager41']
+
+### COLORS
+
+CYAN = "#4ECDC4"
+BLUE = "#59D2FE"
+RED = "#FF6B6B"
+YELLOW = "#FAA916"
+GREY = "#4A6670"
