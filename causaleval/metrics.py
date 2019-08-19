@@ -81,6 +81,12 @@ class StandardEvaluation(EvaluationMetric):
     def bias(true, predicted):
         return np.sum(predicted - true)/true.shape[0]
 
+    @staticmethod
+    def multi_run_function(true_ites, predicted_ites, function):
+        """Evaluates a metric function with arguments true, predicted on the results of mutliple runs"""
+        values = list(map(function, true_ites, predicted_ites))
+        return np.mean(values)
+
 
     def log_all(self, method, data_provider, size, time_elapsed, pred_test, pred_train, true_test, true_train):
 
@@ -113,30 +119,36 @@ class StandardEvaluation(EvaluationMetric):
             ignore_index=True)
 
     def multi_run(self, method, data_provider, size, num_runs):
-        #TODO: Reimplement more generically, by first collecting an array of arrays of the ITE predictions and true ITEs
-        # for all runs, and then write a mean-function that applies the respective function to all runs and returns the mean
-        pehe = 0
-        ate = 0
-        pehe_test = 0
-        ate_test = 0
+        train_true_ites = []
+        test_true_ites = []
+        train_predictions = []
+        test_predictions = []
+
+
+        function_map = {
+            'PEHE-mean'+str(num_runs) : self.pehe_score,
+            'ATE-mean'+str(num_runs): self.ate_error,
+            'ENORMSE-mean'+str(num_runs) : self.enormse,
+            'BIAS-mean'+str(num_runs) : self.bias,
+
+        }
 
         for run in range(num_runs):
             pred_train, pred_test = self.prep_ite(data_provider, method, size=None)
-            true_train = data_provider.get_train_ite(subset=False)
-            true_test = data_provider.get_test_ite()
-            pehe += self.pehe_score(true_train, pred_train)
-            ate += self.ate_error(true_train, pred_train)
-            pehe_test += self.pehe_score(true_test, pred_test)
-            ate_test += self.ate_error(true_test, pred_test)
+            train_predictions.append(pred_train)
+            test_predictions.append(pred_test)
+            train_true_ites.append(data_provider.get_train_ite(subset=False))
+            test_true_ites.append(data_provider.get_test_ite())
 
-        pehe /= num_runs
-        ate /= num_runs
-        pehe_test /= num_runs
-        ate_test /= num_runs
-        self.log_method('PEHE-mean-'+str(num_runs), method, data_provider, 'full', 'train', 0, pehe)
-        self.log_method('ATE-mean-'+str(num_runs), method, data_provider, 'full', 'train', 0, ate)
-        self.log_method('PEHE-mean-'+str(num_runs), method, data_provider, 'full', 'test', 0, pehe_test)
-        self.log_method('ATE_mean-'+str(num_runs), method, data_provider, 'full', 'train', 0, ate_test)
+        # Work here with the accumulated ITE predictions for multi-run behaviour
+        # e.g. log variance as a measure of robustness
+
+        for key in function_map:
+            self.log_method(key, method, data_provider, size, 'train', 0,
+                            self.multi_run_function(train_true_ites, train_predictions, function_map[key]))
+
+            self.log_method(key, method, data_provider, size, 'test', 0,
+                            self.multi_run_function(test_true_ites, test_predictions, function_map[key]))
 
         # Reset dataprovider
         data_provider.reset_cycle()
@@ -196,7 +208,7 @@ class StandardEvaluation(EvaluationMetric):
 
         else:
             if num_runs > 1:
-                self.multi_run(method, data_provider, size=None, num_runs=num_runs)
+                self.multi_run(method, data_provider, size='full', num_runs=num_runs)
             else:
                 start = time.time()
                 pred_train, pred_test = self.prep_ite(data_provider, method, size=None)
