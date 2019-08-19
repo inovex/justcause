@@ -49,7 +49,6 @@ class IHDPReplicaProvider(DataProvider):
 
     def __init__(self,seed=0, train_size=0.8, setting="A"):
         self.setting = setting
-        self.counter = 0
         super().__init__(seed, train_size)
 
     def __str__(self):
@@ -70,7 +69,7 @@ class IHDPReplicaProvider(DataProvider):
         filedir = os.path.join(dirname, path)
         all_files = os.listdir(filedir)
 
-        if self.counter > 999:
+        if self.counter > 999: # IHDP has 1000 replications at max
             self.counter = 0 # reset counter
 
         fname = os.path.join(filedir, all_files[self.counter])

@@ -16,7 +16,7 @@ import matplotlib.pyplot as plt
 
 class EvaluationMetric():
 
-    def __init__(self, experiment):
+    def __init__(self, experiment, sizes=None, num_runs=1):
         """
 
         :param experiment: the sacred experiment in which this metric is called
@@ -26,6 +26,8 @@ class EvaluationMetric():
         """
         self.ex = experiment
         self.output = None
+        self.sizes = sizes
+        self.num_runs = num_runs
 
     def evaluate(self, data_provider, method):
         """
@@ -79,6 +81,21 @@ class StandardEvaluation(EvaluationMetric):
     def bias(true, predicted):
         return np.sum(predicted - true)/true.shape[0]
 
+
+    def log_all(self, method, data_provider, size, time_elapsed, pred_test, pred_train, true_test, true_train):
+
+        function_map = {
+            'PEHE' : self.pehe_score,
+            'ATE' : self.ate_error,
+            'ENORMSE' : self.enormse,
+            'BIAS' : self.bias,
+
+        }
+
+        for key in function_map:
+            self.log_method(key, method, data_provider, size, 'train', time_elapsed, function_map[key](pred_train, true_train))
+            self.log_method(key, method, data_provider, size, 'test', time_elapsed, function_map[key](pred_test, true_test))
+
     def log_method(self, score_name, method, data_provider, size, sample, time, score):
         """Log output to console, csv and sacred logging
 
@@ -95,14 +112,44 @@ class StandardEvaluation(EvaluationMetric):
             other={'metric': score_name, 'method': str(method), 'dataset': str(data_provider), 'size': size, 'sample': sample, 'time': time, 'score': score},
             ignore_index=True)
 
+    def multi_run(self, method, data_provider, size, num_runs):
+        #TODO: Reimplement more generically, by first collecting an array of arrays of the ITE predictions and true ITEs
+        # for all runs, and then write a mean-function that applies the respective function to all runs and returns the mean
+        pehe = 0
+        ate = 0
+        pehe_test = 0
+        ate_test = 0
+
+        for run in range(num_runs):
+            pred_train, pred_test = self.prep_ite(data_provider, method, size=None)
+            true_train = data_provider.get_train_ite(subset=False)
+            true_test = data_provider.get_test_ite()
+            pehe += self.pehe_score(true_train, pred_train)
+            ate += self.ate_error(true_train, pred_train)
+            pehe_test += self.pehe_score(true_test, pred_test)
+            ate_test += self.ate_error(true_test, pred_test)
+
+        pehe /= num_runs
+        ate /= num_runs
+        pehe_test /= num_runs
+        ate_test /= num_runs
+        self.log_method('PEHE-mean-'+str(num_runs), method, data_provider, 'full', 'train', 0, pehe)
+        self.log_method('ATE-mean-'+str(num_runs), method, data_provider, 'full', 'train', 0, ate)
+        self.log_method('PEHE-mean-'+str(num_runs), method, data_provider, 'full', 'test', 0, pehe_test)
+        self.log_method('ATE_mean-'+str(num_runs), method, data_provider, 'full', 'train', 0, ate_test)
+
+        # Reset dataprovider
+        data_provider.reset_cycle()
+
     def plot_residuals(self, pred_ite, true_ite):
-        sns.distplot(true_ite, color='green')
+        sns.distplot(true_ite, color='black')
         sns.distplot(pred_ite, color='gray')
+        sns.distplot(true_ite - pred_ite, color='red')
         print(np.mean(true_ite))
         print(np.mean(pred_ite))
         plt.show()
 
-    def evaluate(self, data_provider, method, sizes=None, plot=False):
+    def evaluate(self, data_provider, method, plot=False):
         """
 
         :param data_provider:
@@ -125,27 +172,48 @@ class StandardEvaluation(EvaluationMetric):
 
         # Setupt new DataFrame for every run of the metric
 
-        if sizes:
-            for size in sizes:
+        num_runs = self.num_runs
+
+        if self.sizes:
+            for size in self.sizes:
+                if num_runs > 1:
+                    self.multi_run(method, data_provider, size, num_runs)
+                else:
+                    start = time.time()
+                    pred_train, pred_test = self.prep_ite(data_provider, method, size=size)
+                    true_train = data_provider.get_train_ite(subset=True)
+                    true_test = data_provider.get_test_ite()
+                    time_elapsed = round(time.time() - start, 3)
+
+                    self.log_all(method,
+                                    data_provider,
+                                    size,
+                                    time_elapsed,
+                                    pred_test,
+                                    pred_train,
+                                    true_test,
+                                    true_train)
+
+        else:
+            if num_runs > 1:
+                self.multi_run(method, data_provider, size=None, num_runs=num_runs)
+            else:
                 start = time.time()
-                pred_train, pred_test = self.prep_ite(data_provider, method, size=size)
+                pred_train, pred_test = self.prep_ite(data_provider, method, size=None)
                 true_train = data_provider.get_train_ite(subset=True)
                 true_test = data_provider.get_test_ite()
                 time_elapsed = round(time.time() - start, 3)
 
-                for key in function_map:
-                    self.log_method(key, method, data_provider, size, 'train', time_elapsed, function_map[key](pred_train, true_train))
-                    self.log_method(key, method, data_provider, size, 'test', time_elapsed, function_map[key](pred_test, true_test))
-        else:
-            start = time.time()
-            pred_train, pred_test = self.prep_ite(data_provider, method, size=None)
-            true_train = data_provider.get_train_ite(subset=False)
-            true_test = data_provider.get_test_ite()
-            time_elapsed = round(time.time() - start, 3)
+                self.log_all(method,
+                                data_provider,
+                                'full',
+                                time_elapsed,
+                                pred_test,
+                                pred_train,
+                                true_test,
+                                true_train)
 
-            for key in function_map:
-                self.log_method(key, method, data_provider, 'full', 'test', time_elapsed, function_map[key](pred_test, true_test))
-                self.log_method(key, method, data_provider, 'full', 'train', time_elapsed, function_map[key](pred_train, true_train))
+
 
 class PlotEvaluation(EvaluationMetric):
     """Plot evaluation results of various metrics for further inspection

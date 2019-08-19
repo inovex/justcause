@@ -15,6 +15,7 @@ class DataProvider():
         self.y_1 = None
         self.train_selection = None
         self.test_selection = None
+        self.counter = 0
 
         np.random.seed(seed)
         self.load_training_data()
@@ -118,3 +119,13 @@ class DataProvider():
 
     def get_info(self):
         pass
+
+    def reset_cycle(self):
+        """Resets the replica counter if it exists
+
+        Providers that have access to multiple replicas of the dataset will return a different
+        replica for each run.
+
+        :return:
+        """
+        self.counter = 0

@@ -25,6 +25,7 @@ from causaleval.metrics import EvaluationMetric, StandardEvaluation
 from causaleval.methods.causal_method import CausalMethod
 from causaleval.methods.basics.outcome_regression import SingleOutcomeRegression, DoubleOutcomeRegression
 from causaleval.methods.basics.double_robust import DoubleRobust
+from causaleval.methods.basics.bart import Bart
 from causaleval.methods.basics.propensity_weighting import PropensityScoreWeighting
 from causaleval.methods.causal_forest import CausalForest
 from causaleval.methods.ganite_wrapper import GANITEWrapper
@@ -32,7 +33,8 @@ from causaleval.methods.dragonnet_wrapper import DragonNetWrapper
 
 # Data
 from causaleval.data.generators.acic import ACICGenerator
-from causaleval.data.sets.ihdp import IHDPDataProvider
+from causaleval.data.generators.ihdp import IHDPGenerator
+from causaleval.data.sets.ihdp import IHDPDataProvider, IHDPReplicaProvider
 from causaleval.data.sets.twins import TwinsDataProvider
 from causaleval.data.sets.ibm import SimpleIBMDataProvider
 from causaleval import config
@@ -41,61 +43,77 @@ ex = Experiment('normal')
 ex.observers.append(MongoObserver.create(url=config.DB_URL, db_name=config.DB_NAME))
 
 def create_data_gens():
-    tf_list = [True, False]
-    data_gen_list = []
+    # tf_list = [True, False]
+    # data_gen_list = []
+    #
+    # for one in tf_list:
+    #     for two in tf_list:
+    #         dict = {
+    #             'random' : one,
+    #             'homogeneous' : two,
+    #             'deterministic': False,
+    #             'confounded' : False,
+    #             'seed' : 0
+    #         }
+    #         data_gen_list.append(ACICGenerator(dict))
+    pass
 
-    for one in tf_list:
-        for two in tf_list:
-            dict = {
-                'random' : one,
-                'homogeneous' : two,
-                'deterministic': False,
-                'confounded' : False,
-                'seed' : 0
-            }
-            data_gen_list.append(ACICGenerator(dict))
+homo_dict =  {
+            'random' : False,
+            'homogeneous' : True,
+            'deterministic': False,
+            'confounded' : False,
+            'seed' : 0
+        }
 
-    conf_dict = {
-                'random' : False,
-                'homogeneous' : False,
-                'deterministic': False,
-                'confounded' : True,
-                'seed' : 0
-            }
-    data_gen_list.append(ACICGenerator(conf_dict))
+conf_dict = {
+            'random' : False,
+            'homogeneous' : False,
+            'deterministic': False,
+            'confounded' : True,
+            'seed' : 0
+        }
+# data_gen_list.append(ACICGenerator(conf_dict))
 
-    det_dict = {
-                'random' : False,
-                'homogeneous' : False,
-                'deterministic': True,
-                'confounded' : False,
-                'seed' : 0
-            }
-    data_gen_list.append(ACICGenerator(det_dict))
-    return data_gen_list
+det_dict = {
+            'random' : False,
+            'homogeneous' : False,
+            'deterministic': True,
+            'confounded' : False,
+            'seed' : 0
+        }
 
+datasets = [IHDPReplicaProvider(setting="A")]
 # Define Experiment
-methods = [DoubleRobust(LinearRegression(), LinearRegression()),
-           SingleOutcomeRegression(RandomForestRegressor()),
-           PropensityScoreWeighting(LinearRegression()),
-            DoubleOutcomeRegression(RandomForestRegressor())]
+methods = [
+            PropensityScoreWeighting(LinearRegression()),
+            SingleOutcomeRegression(LinearRegression()),
+            SingleOutcomeRegression(RandomForestRegressor()),
+            DoubleOutcomeRegression(RandomForestRegressor())
+           ]
 
-datasets = [IHDPDataProvider()]
-metrics = [StandardEvaluation(ex)]
 sizes = None
+metrics = [StandardEvaluation(ex, sizes=sizes, num_runs=100)]
 
 
-@ex.main
+
+@ex.automain
 def run(_run):
+
+    print('start')
     output = pd.DataFrame(columns=['metric', 'method', 'dataset', 'size', 'sample', 'time', 'score'])
 
     start = time.time()
+    if datasets and methods and sizes:
+        num_experiments = len(datasets)*len(methods)*len(sizes)
+        print('running {} training runs'.format(num_experiments))
+
 
     # Enforce right order of iteration
     for dataset in datasets:
         for method in methods:
             for metric in metrics:
-                metric.evaluate(dataset, method, sizes)
+                metric.evaluate(dataset, method, plot=False)
                 output = output.append(metric.output, ignore_index=True)
 
     elapsed = time.time() - start
@@ -107,4 +125,5 @@ def run(_run):
 
 
 if __name__ == '__main__':
-    ex.run()
+    # ex.run()
+    pass
