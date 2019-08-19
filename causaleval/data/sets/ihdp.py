@@ -46,6 +46,7 @@ class IHDPDataProvider(DataProvider):
 
 
 class IHDPReplicaProvider(DataProvider):
+    """Using script-generated files"""
 
     def __init__(self,seed=0, train_size=0.8, setting="A"):
         self.setting = setting
@@ -69,16 +70,19 @@ class IHDPReplicaProvider(DataProvider):
         filedir = os.path.join(dirname, path)
         all_files = os.listdir(filedir)
 
+        fname = os.path.join(config.ROOT_DIR, "datasets/ihdp_from_r/train.npz")
+        train = np.load(fname)
+
         if self.counter > 999: # IHDP has 1000 replications at max
             self.counter = 0 # reset counter
 
         fname = os.path.join(filedir, all_files[self.counter])
         data = pd.read_csv(fname)
-        Y_0 = data['y.0'].values
-        Y_1 = data['y.1'].values
+        Y_0 = data['mu.0'].values
+        Y_1 = data['mu.1'].values
         Y = data['y'].values
         T = data['z.r'].values
-        X = data.drop(columns=['y.0', 'y.1', 'y', 'z.r']).values
+        X = data.drop(columns=['mu.0', 'mu.1', 'y', 'z.r']).values
 
         self.x = np.array(X)
         self.t = np.array(T)
@@ -88,14 +92,75 @@ class IHDPReplicaProvider(DataProvider):
         union = np.c_[self.y_0, self.y_1]
         self.y_cf = np.array([row[int(1 - ix)] for row, ix in zip(union, self.t)])
 
+class IHDPCfrProvider(DataProvider):
+    """Using .npz file provided in [cfr-general] implementation here:
+
+    https://github.com/clinicalml/cfrnet
+    """
+    def __init__(self,seed=0, train_size=1.0):
+        """
+
+        :param seed: random seed
+        :param train_size: equal to 1, as test-data is provided manually
+        """
+        self.load_all() # Load set once
+        super().__init__(seed, train_size)
+
+    def __str__(self):
+        return "IHDP-CFR"
+
+    def get_training_data(self, size=None):
+        self.load_training_data()
+        self.counter += 1
+        return super(IHDPCfrProvider, self).get_training_data()
+
+    def get_test_data(self):
+        """
+        Manually provide test data from separate file"""
+        return self.test['x'][:,:, self.counter], \
+               self.test['t'][:, self.counter], \
+               self.test['y'][:, self.counter]
+
+    def get_test_ite(self):
+        """Manually provide true test results"""
+        return self.test['mu1'][:, self.counter] - self.test['mu0'][:, self.counter]
+
+    def load_all(self):
+        fname = os.path.join(config.ROOT_DIR, "datasets/ihdp_from_r/train.npz")
+        train = np.load(fname)
+        fname = os.path.join(config.ROOT_DIR, "datasets/ihdp_from_r/test.npz")
+        self.test = np.load(fname)
+        self.train = train
+
+        self.y1_all = train['mu1']
+        self.y0_all = train['mu0']
+        self.y_all = train['yf']
+        self.ycf_all = train['ycf']
+        self.t_all = train['t']
+        self.x_all = train['x'] # has shape (672, 25, 100)
+
+
+
+    def load_training_data(self):
+        """Just updates the specific replications used for the next run"""
+
+        if self.counter > 99: # This NPZ provides 100 replications
+            self.counter = 0 # reset counter
+
+        self.x = self.x_all[:,:,self.counter]
+        self.t = self.t_all[:, self.counter]
+        self.y = self.y_all[:, self.counter]
+        self.y_0 = self.y0_all[:, self.counter]
+        self.y_1 = self.y1_all[:, self.counter]
+        self.y_cf = self.ycf_all[:, self.counter]
+
 
 if __name__ == '__main__':
 
-    ihdp = IHDPDataProvider()
+    ihdp = IHDPCfrProvider()
     surface_plot(ihdp.y_1, ihdp.y_0, ihdp.y, ihdp.y_cf, ihdp.x)
     ite_plot(ihdp.y_1, ihdp.y_0)
     plot_y_dist(ihdp.y, ihdp.y_cf)
     simple_comparison_mean(ihdp.y, ihdp.t)
     print('true: ', ihdp.get_true_ate())
-
 

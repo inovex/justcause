@@ -86,7 +86,7 @@ class DataProvider():
         return np.mean(self.get_train_ite(subset))
 
     def get_test_ate(self, subset=False):
-        return np.mean(self.get_train_ite(subset))
+        return np.mean(self.get_test_ite(subset))
 
     def get_train_generator_single(self, random=False, replacement=False):
         """
