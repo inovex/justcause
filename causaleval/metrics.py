@@ -65,6 +65,11 @@ class StandardEvaluation(EvaluationMetric):
     """All the scores that work with full prediction result of the ITE on test data
     """
 
+    def __init__(self, experiment, sizes=None, num_runs=1, scores=['pehe', 'ate', 'bias', 'enormse']):
+        super().__init__(experiment, sizes, num_runs)
+        self.scores = scores
+
+
     @staticmethod
     def pehe_score(true, predicted):
         return np.sqrt(np.mean(np.square(predicted - true)))
@@ -136,10 +141,11 @@ class StandardEvaluation(EvaluationMetric):
         start = time.time()
 
         for run in range(num_runs):
-            pred_train, pred_test = self.prep_ite(data_provider, method, size=None)
+            # Perform evaluation for a number of runs
+            pred_train, pred_test = self.prep_ite(data_provider, method, size=size)
             train_predictions.append(pred_train)
             test_predictions.append(pred_test)
-            train_true_ites.append(data_provider.get_train_ite(subset=False))
+            train_true_ites.append(data_provider.get_train_ite(subset=(size is not None)))
             test_true_ites.append(data_provider.get_test_ite())
 
         time_elapsed = time.time() - start
@@ -147,12 +153,17 @@ class StandardEvaluation(EvaluationMetric):
         # Work here with the accumulated ITE predictions for multi-run behaviour
         # e.g. log variance as a measure of robustness
 
-        for key in function_map:
-            self.log_method(key, method, data_provider, size, 'train', time_elapsed,
-                            self.multi_run_function(train_true_ites, train_predictions, function_map[key]))
+        if size is None:
+            size = 'full'
 
-            self.log_method(key, method, data_provider, size, 'test', time_elapsed,
-                            self.multi_run_function(test_true_ites, test_predictions, function_map[key]))
+        for key in function_map:
+            if str(key).casefold().split("-")[0] in self.scores:
+                # Only evaluate requested scores
+                self.log_method(key, method, data_provider, size, 'train', time_elapsed,
+                                self.multi_run_function(train_true_ites, train_predictions, function_map[key]))
+
+                self.log_method(key, method, data_provider, size, 'test', time_elapsed,
+                                self.multi_run_function(test_true_ites, test_predictions, function_map[key]))
 
         # Reset dataprovider
         data_provider.reset_cycle()
@@ -176,59 +187,20 @@ class StandardEvaluation(EvaluationMetric):
         :return:
         """
 
-        function_map = {
-            'PEHE' : self.pehe_score,
-            'ATE' : self.ate_error,
-            'ENORMSE' : self.enormse,
-            'BIAS' : self.bias,
-
-        }
-
+        # Setup new DataFrame for every run of the metric, then append later
         self.output = pd.DataFrame(columns=['metric', 'method', 'dataset', 'size', 'sample', 'time', 'score'])
 
-        # Setupt new DataFrame for every run of the metric
 
         num_runs = self.num_runs
 
         if self.sizes:
             for size in self.sizes:
+                # iterate over different sizes
                 if num_runs > 1:
                     self.multi_run(method, data_provider, size, num_runs)
-                else:
-                    start = time.time()
-                    pred_train, pred_test = self.prep_ite(data_provider, method, size=size)
-                    true_train = data_provider.get_train_ite(subset=True)
-                    true_test = data_provider.get_test_ite()
-                    time_elapsed = round(time.time() - start, 3)
-
-                    self.log_all(method,
-                                    data_provider,
-                                    size,
-                                    time_elapsed,
-                                    pred_test,
-                                    pred_train,
-                                    true_test,
-                                    true_train)
 
         else:
-            if num_runs > 1:
-                self.multi_run(method, data_provider, size='full', num_runs=num_runs)
-            else:
-                start = time.time()
-                pred_train, pred_test = self.prep_ite(data_provider, method, size=None)
-                true_train = data_provider.get_train_ite(subset=True)
-                true_test = data_provider.get_test_ite()
-                time_elapsed = round(time.time() - start, 3)
-
-                self.log_all(method,
-                                data_provider,
-                                'full',
-                                time_elapsed,
-                                pred_test,
-                                pred_train,
-                                true_test,
-                                true_train)
-
+                self.multi_run(method, data_provider, size=None, num_runs=num_runs)
 
 
 class PlotEvaluation(EvaluationMetric):
