@@ -5,7 +5,8 @@ import time
 
 import pandas as pd
 
-os.environ['R_HOME'] = '/Library/Frameworks/R.framework/Resources'
+os.environ['L_ALL'] = 'en_US.UTF-8'
+os.environ['R_HOME'] = '/usr/local/Cellar/r/3.6.1/lib/R'
 
 # Sacred
 from sacred import Experiment
@@ -23,6 +24,8 @@ from causaleval.metrics import EvaluationMetric, StandardEvaluation
 
 # Methods
 from causaleval.methods.causal_method import CausalMethod
+from causaleval.methods.causal_learning import CausalBoosting, PolinatedTransformedOutcomeForest, CausalMars
+from causaleval.methods.r_learner import RLearner, XLearner
 from causaleval.methods.basics.outcome_regression import SingleOutcomeRegression, DoubleOutcomeRegression
 from causaleval.methods.basics.double_robust import DoubleRobust
 from causaleval.methods.basics.bart import Bart
@@ -34,7 +37,7 @@ from causaleval.methods.dragonnet_wrapper import DragonNetWrapper
 # Data
 from causaleval.data.generators.acic import ACICGenerator
 from causaleval.data.generators.ihdp import IHDPGenerator
-from causaleval.data.sets.ihdp import IHDPDataProvider, IHDPReplicaProvider
+from causaleval.data.sets.ihdp import IHDPDataProvider, IHDPReplicaProvider, IHDPCfrProvider
 from causaleval.data.sets.twins import TwinsDataProvider
 from causaleval.data.sets.ibm import SimpleIBMDataProvider
 from causaleval import config
