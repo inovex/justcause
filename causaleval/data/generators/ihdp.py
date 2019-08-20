@@ -34,7 +34,7 @@ class IHDPGenerator(DataProvider):
 
         fname = os.path.join(filedir, all_files[0])
         data = pd.read_csv(fname)
-        covariates_df = data.drop(columns=['y.0', 'y.1', 'y', 'z.r'])
+        covariates_df = data.drop(columns=['mu.0', 'mu.1', 'y', 'z.r'])
         X = covariates_df.values
 
         Y_0 = np.random.gamma(0.2, 1, size=len(X))
@@ -56,7 +56,7 @@ if __name__ == '__main__':
     ihdp = IHDPGenerator()
     ihdp.load_training_data()
     surface_plot(ihdp.y_1, ihdp.y_0, ihdp.y, ihdp.y_cf, ihdp.x)
-    # ite_plot(ihdp.y_1, ihdp.y_0)
-    # plot_y_dist(ihdp.y, ihdp.y_cf)
+    ite_plot(ihdp.y_1, ihdp.y_0)
+    plot_y_dist(ihdp.y, ihdp.y_cf)
     simple_comparison_mean(ihdp.y, ihdp.t)
     print('true: ', np.mean(ihdp.get_true_ite()))

@@ -119,7 +119,7 @@ class IHDPCfrProvider(DataProvider):
         Manually provide test data from separate file"""
         return self.test['x'][:,:, self.counter], \
                self.test['t'][:, self.counter], \
-               self.test['y'][:, self.counter]
+               self.test['yf'][:, self.counter]
 
     def get_test_ite(self):
         """Manually provide true test results"""
