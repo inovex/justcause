@@ -133,6 +133,8 @@ class StandardEvaluation(EvaluationMetric):
 
         }
 
+        start = time.time()
+
         for run in range(num_runs):
             pred_train, pred_test = self.prep_ite(data_provider, method, size=None)
             train_predictions.append(pred_train)
@@ -140,14 +142,16 @@ class StandardEvaluation(EvaluationMetric):
             train_true_ites.append(data_provider.get_train_ite(subset=False))
             test_true_ites.append(data_provider.get_test_ite())
 
+        time_elapsed = time.time() - start
+
         # Work here with the accumulated ITE predictions for multi-run behaviour
         # e.g. log variance as a measure of robustness
 
         for key in function_map:
-            self.log_method(key, method, data_provider, size, 'train', 0,
+            self.log_method(key, method, data_provider, size, 'train', time_elapsed,
                             self.multi_run_function(train_true_ites, train_predictions, function_map[key]))
 
-            self.log_method(key, method, data_provider, size, 'test', 0,
+            self.log_method(key, method, data_provider, size, 'test', time_elapsed,
                             self.multi_run_function(test_true_ites, test_predictions, function_map[key]))
 
         # Reset dataprovider
