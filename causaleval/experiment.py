@@ -2,11 +2,11 @@
 # found by running python -m rpy2.situation from the terminal
 import os
 import time
-
 import pandas as pd
+from causaleval import config
 
 os.environ['L_ALL'] = 'en_US.UTF-8'
-os.environ['R_HOME'] = '/usr/local/Cellar/r/3.6.1/lib/R'
+os.environ['R_HOME'] = config.R_HOME
 
 # Sacred
 from sacred import Experiment
@@ -40,7 +40,6 @@ from causaleval.data.generators.ihdp import IHDPGenerator
 from causaleval.data.sets.ihdp import IHDPDataProvider, IHDPReplicaProvider, IHDPCfrProvider
 from causaleval.data.sets.twins import TwinsDataProvider
 from causaleval.data.sets.ibm import SimpleIBMDataProvider
-from causaleval import config
 
 ex = Experiment('normal')
 ex.observers.append(MongoObserver.create(url=config.DB_URL, db_name=config.DB_NAME))

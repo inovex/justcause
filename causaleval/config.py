@@ -29,6 +29,10 @@ ACIC_USE_COVARIATES = ['sex', 'md_route', 'dbwt', 'estgest', 'mbrace', 'meduc', 
 
 ACIC_SELECTED_VALUES = ['sex', 'md_route', 'dbwt', 'estgest', 'mager41']
 
+### R Settings
+
+R_HOME = '/usr/local/Cellar/r/3.6.1/lib/R'
+
 ### COLORS
 
 CYAN = "#4ECDC4"
