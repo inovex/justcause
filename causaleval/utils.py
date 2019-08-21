@@ -6,7 +6,7 @@ import config
 # To make it work on MacOS
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib
-matplotlib.use("MacOSX")
+matplotlib.use(config.PLOT_BACKEND)
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -65,3 +65,24 @@ def simple_comparison_mean(y, t):
     control = y[t==0]
     simple_mean = np.mean(treated) - np.mean(control)
     print('simple: ' + str(simple_mean))
+
+
+def robustness_plot(true_ites, predicted_ites):
+    true_ates = np.mean(true_ites, axis=1)
+    predicted_ates = np.mean(predicted_ites, axis=1)
+    sns.set_style('whitegrid')
+    sns.lineplot(x=np.arange(len(true_ates)), y=true_ates, color=config.BLUE, label='True')
+    sns.lineplot(x=np.arange(len(true_ates)), y=predicted_ates, color=config.RED, label='Estimated')
+    plt.xlabel('#runs')
+    plt.ylabel('average treatment effect')
+    plt.legend()
+    plt.show()
+
+def treatment_scatter(true_ites, predicted_ites):
+    sns.set_style('whitegrid')
+    sns.scatterplot(true_ites[0], predicted_ites[0], color=config.GREY)
+    plt.xlabel('true effect')
+    plt.ylabel('predicted effect')
+    plt.show()
+
+

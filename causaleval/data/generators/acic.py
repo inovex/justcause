@@ -6,6 +6,7 @@ import numpy as np
 from causaleval.data.generators.generator import DataGenerator
 from causaleval import config
 from utils import surface_plot, simple_comparison_mean
+import config
 
 import scipy
 from sklearn.preprocessing import StandardScaler, minmax_scale, RobustScaler
@@ -15,7 +16,7 @@ from sklearn.preprocessing import StandardScaler, minmax_scale, RobustScaler
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib
 
-matplotlib.use("MacOSX")
+matplotlib.use(config.PLOT_BACKEND)
 import seaborn as sns
 sns.set(style="darkgrid")
 import matplotlib.pyplot as plt

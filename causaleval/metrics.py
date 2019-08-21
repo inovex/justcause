@@ -7,12 +7,14 @@ from sacred import Experiment
 from causaleval.methods.causal_method import CausalMethod
 from causaleval.data.data_provider import DataProvider
 
+import config
 import matplotlib
-matplotlib.use("MacOSX")
+matplotlib.use(config.PLOT_BACKEND)
 import seaborn as sns
 sns.set(style="darkgrid")
 import matplotlib.pyplot as plt
 
+import utils
 
 class EvaluationMetric():
 

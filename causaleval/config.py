@@ -33,6 +33,10 @@ ACIC_SELECTED_VALUES = ['sex', 'md_route', 'dbwt', 'estgest', 'mager41']
 
 R_HOME = '/usr/local/Cellar/r/3.6.1/lib/R'
 
+### ENV Settings
+
+PLOT_BACKEND = "MacOSX"
+
 ### COLORS
 
 CYAN = "#4ECDC4"
