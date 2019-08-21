@@ -3,8 +3,9 @@ All methods provided in https://github.com/saberpowers/causalLearning
 introduced in the paper: ﻿https://arxiv.org/pdf/1707.00102.pdf
 """
 import os
+import config
 os.environ['L_ALL'] = 'en_US.UTF-8'
-os.environ['R_HOME'] = '/usr/local/Cellar/r/3.6.1/lib/R'
+os.environ['R_HOME'] = config.R_HOME
 
 
 from rpy2.robjects.packages import importr
