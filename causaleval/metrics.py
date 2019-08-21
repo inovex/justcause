@@ -1,4 +1,5 @@
 import time
+import os
 import numpy as np
 import pandas as pd
 
@@ -154,6 +155,20 @@ class StandardEvaluation(EvaluationMetric):
 
         # Work here with the accumulated ITE predictions for multi-run behaviour
         # e.g. log variance as a measure of robustness
+        if config.SERVER and num_runs > 50:
+            # write out files for plots, if number of runs is large on the server
+            df_true = pd.DataFrame(data=train_true_ites)
+            path = os.path.join(config.LOG_FILE_PATH, str(method)+'-'+str(data_provider)+'-'+str(num_runs)-'true')
+            df_true.to_csv(path)
+            path = os.path.join(config.LOG_FILE_PATH, str(method)+'-'+str(data_provider)+'-'+str(num_runs)-'train')
+            df_pred = pd.DataFrame(data=train_true_ites)
+            df_pred.to_csv(path)
+
+        elif num_runs > 50:
+            utils.robustness_plot(train_true_ites, train_predictions)
+            utils.treatment_scatter(train_true_ites, train_predictions)
+            utils.error_robustness_plot(list(map(self.pehe_score, train_true_ites, train_predictions)))
+
 
         if size is None:
             size = 'full'

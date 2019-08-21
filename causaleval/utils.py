@@ -85,4 +85,10 @@ def treatment_scatter(true_ites, predicted_ites):
     plt.ylabel('predicted effect')
     plt.show()
 
-
+def error_robustness_plot(errors):
+    sns.set_style('whitegrid')
+    sns.lineplot(x=np.arange(len(errors)), y=errors, color=config.RED, label='PEHE')
+    plt.xlabel('#runs')
+    plt.ylabel('error score')
+    plt.legend()
+    plt.show()

@@ -36,6 +36,8 @@ R_HOME = '/usr/local/Cellar/r/3.6.1/lib/R'
 ### ENV Settings
 
 PLOT_BACKEND = "MacOSX"
+SERVER = False
+LOG_FILE_PATH = os.path.join(ROOT_DIR, 'results/plotlog')
 
 ### COLORS
 
