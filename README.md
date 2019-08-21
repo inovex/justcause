@@ -1,30 +1,86 @@
+A work in progress for causal estimator evaluation. The framework aims to make comparison of
+methods easier, by allowing to compare them across both generated and existing datasets.
+
+# General Structure
+## Methods
+`CausalMethod` provides the abstract class which the specific implementation have to inherit.
+Essentially, to add a new method, one has to overwrite its `fit()` and `predict()` functions.
+Consider `causaleval/methods/causal_forest.py` for an example that uses `rpy2` to wrap an existing method
+or see `causaleval/methods/basics/outcome_regression.py` for a simple, pure-python implementation.
+
+## Datasets
+`DataProvider` is the abstract interface to a new dataset. In the class, most of the functionality for computing
+train/test splits and epoch generators is already provided. Thus, to add a new dataset, one has to overwrite only
+`load_training_data()` and set the class attributes for `x, y, t, y_1, y_0, y_cf`. Based on that data, `DataProvider`
+will generate a train/test split and return training data of requested sizes if available.
+
+See `causaleval/data/sets/ihdp.py` for a few examples. What is special, `IHDPRelicaProvider` will
+return a different one of 1000 replications every time `get_training_data()` is called, thus the method has been
+overriden from `DataProvider` to accomodate that functionality.
+
+See `causaleval/data/generators/acic.py` for a sophisticated parametric generation that is also
+
 # Locate Datafiles
 Put the data files as required by the provider into a directory `eval/datasets/...`.
 E.g. the IHDP data is in `eval/datasets/ihdp/csv` and add add a relative path to the config.py starting
 form the content root / git root. E.g. Add relative path to ihdp `datasets/ihdp/csv`. Join that relative path
 with the dynamically determined `ROOT_PATH` via `os.path.join()`
 
+See `config.py` for possible configuration of data locations.
 
+# Setup Sacred for logging
+To use `sacred` with the MongoObserver, you have to install `mongod` first.
+
+## MongoDB
+Run `mkdir sacred` in the project root.
+Then, once `mongod` is installed, create a local mongoDB instance by running
+```bash
+mongod --db-path sacred
+```
+Configure the Observer in `experiment.py` to connect to your local host
+
+## Omniboard
+Install and run Omniboard with the default settings and it will connect to your running `mongod` instance.
+After that, the dashboard is available at `localhost:9000`.
 
 # On logging
-Results are stored row wise in a csv with fields: `Metric, Method, Dataset, Score`.
+Results are stored row wise in a csv with fields:
+`Metric, Method, Dataset, Size, Sample, Time, Score`. Meaning
+ - Metric used (e.g. PEHE, MSE on ATE, ...)
+ - Method evaluated
+ - Dataset used
+ - Size of the training sample
+ - Evaluated on Test or Train
+ - Time required for computation
+ - Score of the Metric on given method, dataset, size, sample
 
-Since it is possible to evaluate a dataset on different sizes of training etc. we will later
-add identifiers to the dataset name like `IHDP-1k` for methods trained on 1000 instances of IHDP.
 
-# Notes no DataProviders
- - Files are in np.array format when they are retrieved from the DataProvider
+# Setting up the environment
+## R - 3.6
+ You might have to install a few R packages from GitHub sources manually. Namely,
+ - https://github.com/saberpowers/causalLearning
+ - https://github.com/xnie/rlearner
 
-## Data Generation Parameters
- The following parameters should be provided in a dict to the DGP in `causaleval.data.generators.acic`:
+ via the commands
 
- - treatment
-   - relation ('strong', 'weak', 'random')
-   - num_parents (int)
- - outcome
-   - relation ('strong', 'weak', 'random')
-   - num_parents (int)
-   - constant_base (bool)
-   - homogeneous (bool)
+```R
+install.packages('devtools')
+library(devtools)
+install_github('saberpowers/causalLearning')
+install_github('xnie/rlearner')
+```
 
- - confounding (bool)
+within a local R environment. Within that R command, execute `.libPaths()` to get the path to the
+corresponding R_HOME, which you need to put in the `config.py` in order for `rpy2` to use that R
+directory with the pre-installed packages
+
+In order for the build process to work you might have to source the following or add it to your `bashrc`:
+
+```bash
+export LC_ALL="en_US.UTF-8"
+```
+
+## Python 3.7.1
+Install the packages via `pip install -r requirements.txt` within your virtualenv or conda environment
+
+
