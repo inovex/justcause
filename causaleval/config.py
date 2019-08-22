@@ -22,6 +22,7 @@ DB_NAME = 'sacred'
 DB_URL = 'localhost:27017'
 
 OUTPUT_PATH = os.path.join(ROOT_DIR, 'results') + '/'
+RESULT_PLOT_PATH = os.path.join(OUTPUT_PATH, 'plots')
 
 GENERATE_PATH = os.path.join(ROOT_DIR, 'datasets/generated/')
 
@@ -36,6 +37,7 @@ R_HOME = '/usr/local/Cellar/r/3.6.1/lib/R'
 ### ENV Settings
 
 PLOT_BACKEND = "MacOSX"
+PLOT_WRITE = True
 SERVER = False
 LOG_FILE_PATH = os.path.join(ROOT_DIR, 'results/plotlog')
 

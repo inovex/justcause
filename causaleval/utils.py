@@ -66,8 +66,7 @@ def simple_comparison_mean(y, t):
     simple_mean = np.mean(treated) - np.mean(control)
     print('simple: ' + str(simple_mean))
 
-
-def robustness_plot(true_ites, predicted_ites):
+def robustness_plot(true_ites, predicted_ites, method_name='Method'):
     true_ates = np.mean(true_ites, axis=1)
     predicted_ates = np.mean(predicted_ites, axis=1)
     sns.set_style('whitegrid')
@@ -75,20 +74,39 @@ def robustness_plot(true_ites, predicted_ites):
     sns.lineplot(x=np.arange(len(true_ates)), y=predicted_ates, color=config.RED, label='Estimated')
     plt.xlabel('#runs')
     plt.ylabel('average treatment effect')
+    plt.title(method_name)
     plt.legend()
-    plt.show()
+    if config.PLOT_WRITE:
+        path = config.RESULT_PLOT_PATH
+        plt.savefig(path + '/' + method_name + 'robustness')
+        plt.clf()
+    else:
+        plt.show()
 
-def treatment_scatter(true_ites, predicted_ites):
+def treatment_scatter(true_ite, predicted_ite, method_name='Method'):
     sns.set_style('whitegrid')
-    sns.scatterplot(true_ites[0], predicted_ites[0], color=config.GREY)
+    sns.scatterplot(true_ite, predicted_ite, color=config.GREY)
     plt.xlabel('true effect')
     plt.ylabel('predicted effect')
-    plt.show()
+    plt.title(method_name)
+    if config.PLOT_WRITE:
+        path = config.RESULT_PLOT_PATH
+        plt.savefig(path + '/' + method_name + 'treatment-scatter')
+        plt.clf()
+    else:
+        plt.show()
 
-def error_robustness_plot(errors):
+def error_robustness_plot(errors, method_name='Method'):
     sns.set_style('whitegrid')
     sns.lineplot(x=np.arange(len(errors)), y=errors, color=config.RED, label='PEHE')
     plt.xlabel('#runs')
     plt.ylabel('error score')
+    plt.title(method_name)
     plt.legend()
-    plt.show()
+    if config.PLOT_WRITE:
+        path = config.RESULT_PLOT_PATH
+        plt.savefig(path + '/' + method_name + 'error-robustness')
+        plt.clf()
+    else:
+        plt.show()
+
