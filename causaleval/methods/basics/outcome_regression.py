@@ -22,7 +22,7 @@ class SingleOutcomeRegression(CausalMethod):
         self.is_trained = False
 
     def __str__(self):
-        return "SingleOutcomeRegression - " + get_regressor_name(self.regressor)
+        return "S-Learner - " + get_regressor_name(self.regressor)
 
     @staticmethod
     def union(x, t):
@@ -67,7 +67,7 @@ class DoubleOutcomeRegression(CausalMethod):
             self.regressor_two = regressor_two
 
     def __str__(self):
-        return "DoubleOutcomeRegression - " \
+        return "T-Learner - " \
                + get_regressor_name(self.regressor_one) \
                + " & " + get_regressor_name(self.regressor_two)
 
