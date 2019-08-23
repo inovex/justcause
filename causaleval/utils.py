@@ -16,6 +16,7 @@ plt.rcParams['figure.facecolor'] = '1'
 plt.rcParams['grid.color'] = 'black'
 plt.rcParams['grid.linestyle'] = ':'
 plt.rcParams['grid.linewidth'] = 0.5
+plt.rcParams["savefig.dpi"] = 300
 
 sns.set_style('whitegrid')
 
@@ -34,22 +35,32 @@ def get_regressor_name(representation):
 
 # PLOTs
 
-def surface_plot(y1, y0, y, y_cf, x):
+def surface_plot(y1, y0, y, y_cf, x, name='default'):
 
     # Takes some time, thus use only smaller subsets
     covariates_2d = TSNE().fit_transform(x)
 
     fig = plt.figure(facecolor=(1,1,1))
     ax = fig.add_subplot(1, 2, 1, projection='3d')
-    ax.scatter(covariates_2d[:, 0], covariates_2d[:, 1], y1, color=config.CYAN, alpha=1, s=2)
-    ax.scatter(covariates_2d[:, 0], covariates_2d[:, 1], y0, color=config.GREY, alpha=1, s=2)
+    ax.scatter(covariates_2d[:, 0], covariates_2d[:, 1], y1, color=config.CYAN, alpha=1, s=2, label='Treated')
+    ax.scatter(covariates_2d[:, 0], covariates_2d[:, 1], y0, color=config.GREY, alpha=1, s=2, label='Control')
     ax.view_init(10, 45)
+    ax.set_zlabel('Outcome', fontsize=10)
+    ax.legend()
     ax2 = fig.add_subplot(1, 2, 2, projection='3d')
-    ax2.scatter(covariates_2d[:, 0], covariates_2d[:, 1], y, color=config.BLUE, alpha=1, s=2)
-    ax2.scatter(covariates_2d[:, 0], covariates_2d[:, 1], y_cf, color=config.RED, alpha=1, s=2)
+    ax2.scatter(covariates_2d[:, 0], covariates_2d[:, 1], y, color=config.BLUE, alpha=1, s=2, label='Observed')
+    ax2.scatter(covariates_2d[:, 0], covariates_2d[:, 1], y_cf, color=config.RED, alpha=1, s=2, label='Counterfactual')
     ax2.view_init(10, 45)
+    ax2.set_zlabel('Outcome', fontsize=10)
+    ax2.legend()
     fig.tight_layout()
-    plt.show()
+    if config.PLOT_WRITE:
+        path = config.RESULT_PLOT_PATH
+        plt.savefig(path + '/' + name + '-surface-plot')
+        plt.clf()
+    else:
+        plt.show()
+
 
 def ite_plot(y1, y0):
     sns.distplot(y1 - y0, bins=100, color=config.BLUE)
