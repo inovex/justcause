@@ -59,4 +59,7 @@ class TwinsDataProvider(DataProvider):
 
 if __name__ == '__main__':
     # for local tests
+    import utils
+    twins = TwinsDataProvider()
+    utils.surface_plot(twins.y_1[0:1000], twins.y_0[0:1000], twins.y[0:1000], twins.y_cf[0:1000], twins.x[0:1000])
     pass

@@ -318,16 +318,18 @@ class ACICGenerator(DataGenerator):
 if __name__ == '__main__':
 
     dict = {
-        'random' : True,
-        'deterministic': False,
-        'homogeneous' : True,
-        'confounded' : False,
+        'random' : False,
+        'deterministic': True,
+        'homogeneous' : False,
+        'confounded' : True,
         'seed' : 0
     }
 
-    a = ACICGenerator(dict)
-    a.test_generation(random=False, homogeneous=True)
-
+    import utils
+    # a = ACICGenerator(dict)
+    # a.test_generation(random=False, homogeneous=True)
+    twins = ACICGenerator(dict)
+    utils.surface_plot(twins.y_1[0:1000], twins.y_0[0:1000], twins.y[0:1000], twins.y_cf[0:1000], twins.x[0:1000])
 
 
 

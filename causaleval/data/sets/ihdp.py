@@ -5,7 +5,7 @@ import pandas as pd
 
 from causaleval.data.data_provider import DataProvider
 from causaleval import config
-from utils import surface_plot, ite_plot, plot_y_dist, simple_comparison_mean
+from utils import surface_plot, ite_plot, plot_y_dist, simple_comparison_mean, true_ate_plot, true_ate_dist_plot
 
 
 class IHDPDataProvider(DataProvider):
@@ -70,18 +70,16 @@ class IHDPReplicaProvider(DataProvider):
         filedir = os.path.join(dirname, path)
         all_files = os.listdir(filedir)
 
-        fname = os.path.join(config.ROOT_DIR, "datasets/ihdp_from_r/train.npz")
-        train = np.load(fname)
-
-        if self.counter > 999: # IHDP has 1000 replications at max
+        if self.counter > 110: # IHDP has 1000 replications at max
             self.counter = 0 # reset counter
 
         fname = os.path.join(filedir, all_files[self.counter])
+        print(fname)
         data = pd.read_csv(fname)
-        Y_0 = data['mu.0'].values
-        Y_1 = data['mu.1'].values
-        Y = data['y'].values
-        T = data['z.r'].values
+        Y_0 = data["mu.0"].values
+        Y_1 = data["mu.1"].values
+        Y = data["y"].values
+        T = data["z.r"].values
         X = data.drop(columns=['mu.0', 'mu.1', 'y', 'z.r']).values
 
         self.x = np.array(X)
@@ -110,8 +108,8 @@ class IHDPCfrProvider(DataProvider):
         return "IHDP-CFR"
 
     def get_training_data(self, size=None):
-        self.load_training_data()
         self.counter += 1
+        self.load_training_data()
         return super(IHDPCfrProvider, self).get_training_data()
 
     def get_test_data(self):
@@ -157,10 +155,14 @@ class IHDPCfrProvider(DataProvider):
 
 if __name__ == '__main__':
 
-    ihdp = IHDPCfrProvider()
-    surface_plot(ihdp.y_1, ihdp.y_0, ihdp.y, ihdp.y_cf, ihdp.x)
-    ite_plot(ihdp.y_1, ihdp.y_0)
-    plot_y_dist(ihdp.y, ihdp.y_cf)
-    simple_comparison_mean(ihdp.y, ihdp.t)
-    print('true: ', ihdp.get_true_ate())
+    ihdp = IHDPReplicaProvider(setting='A')
+    true_ates = []
+
+    for i in range(110):
+        ihdp.get_training_data() # to up the counter
+        true_ates.append(ihdp.get_true_ate())
+
+
+    true_ate_plot(true_ates, dataset='IHDP-Replica')
+    true_ate_dist_plot(true_ates, dataset='IHDP-Replica')
 
