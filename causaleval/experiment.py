@@ -37,6 +37,7 @@ from causaleval.methods.dragonnet_wrapper import DragonNetWrapper
 # Data
 from causaleval.data.generators.acic import ACICGenerator
 from causaleval.data.generators.ihdp import IHDPGenerator
+from causaleval.data.generators.toy import SWagerRealCompare, SWagerDataProvider, CovariateModulator
 from causaleval.data.sets.ihdp import IHDPDataProvider, IHDPReplicaProvider, IHDPCfrProvider
 from causaleval.data.sets.twins import TwinsDataProvider
 from causaleval.data.sets.ibm import SimpleIBMDataProvider
@@ -85,25 +86,22 @@ det_dict = {
             'seed' : 0
         }
 
-datasets = [IHDPReplicaProvider(setting="A")]
+datasets = [IHDPCfrProvider()]
+
 # Define Experiment
 methods = [
-            PropensityScoreWeighting(LinearRegression()),
-            SingleOutcomeRegression(LinearRegression()),
-            SingleOutcomeRegression(RandomForestRegressor()),
-            DoubleOutcomeRegression(RandomForestRegressor())
+    DoubleOutcomeRegression(LinearRegression(), LinearRegression()),
            ]
 
 sizes = None
-metrics = [StandardEvaluation(ex, sizes=sizes, num_runs=100)]
-
+metrics = [StandardEvaluation(ex, sizes=sizes, num_runs=1000)]
 
 
 @ex.automain
 def run(_run):
 
     print('start')
-    output = pd.DataFrame(columns=['metric', 'method', 'dataset', 'size', 'sample', 'time', 'score'])
+    output = pd.DataFrame(columns=['metric', 'method', 'dataset', 'size', 'sample', 'time', 'score', 'std'])
 
     start = time.time()
     if datasets and methods and sizes:

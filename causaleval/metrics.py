@@ -93,7 +93,7 @@ class StandardEvaluation(EvaluationMetric):
     def multi_run_function(true_ites, predicted_ites, function):
         """Evaluates a metric function with arguments true, predicted on the results of mutliple runs"""
         values = list(map(function, true_ites, predicted_ites))
-        return np.mean(values)
+        return np.mean(values), np.std(values) / np.sqrt(len(values))
 
 
     def log_all(self, method, data_provider, size, time_elapsed, pred_test, pred_train, true_test, true_train):
@@ -110,7 +110,7 @@ class StandardEvaluation(EvaluationMetric):
             self.log_method(key, method, data_provider, size, 'train', time_elapsed, function_map[key](pred_train, true_train))
             self.log_method(key, method, data_provider, size, 'test', time_elapsed, function_map[key](pred_test, true_test))
 
-    def log_method(self, score_name, method, data_provider, size, sample, time, score):
+    def log_method(self, score_name, method, data_provider, size, sample, time, score, std=0):
         """Log output to console, csv and sacred logging
 
         :param score_name:
@@ -118,12 +118,13 @@ class StandardEvaluation(EvaluationMetric):
         :param data_provider:
         :param size:
         :param sample:
-        :param score:
+        :param score: mean score
+        :param std: standard deviation
         """
         self.ex.log_scalar(score_name + ',' + str(method) + ',' + str(data_provider) + ',' + str(sample), round(score, 4))
-        print(score_name + ',' + str(method) + ',' + str(data_provider)+ ',' + str(size) + ',' + str(sample) + ',' + str(time) + ',' + str(round(score, 4)))
+        print(score_name + ',' + str(method) + ',' + str(data_provider)+ ',' + str(size) + ',' + str(sample) + ',' + str(time) + ',' + str(round(score, 4)) + ',' + str(round(std, 4)))
         self.output = self.output.append(
-            other={'metric': score_name, 'method': str(method), 'dataset': str(data_provider), 'size': size, 'sample': sample, 'time': time, 'score': round(score, 4)},
+            other={'metric': score_name, 'method': str(method), 'dataset': str(data_provider), 'size': size, 'sample': sample, 'time': time, 'score': round(score, 4), 'std': round(std, 4)},
             ignore_index=True)
 
     def multi_run(self, method, data_provider, size, num_runs):
@@ -177,10 +178,10 @@ class StandardEvaluation(EvaluationMetric):
             if str(key).casefold().split("-")[0] in self.scores:
                 # Only evaluate requested scores
                 self.log_method(key, method, data_provider, size, 'train', time_elapsed,
-                                self.multi_run_function(train_true_ites, train_predictions, function_map[key]))
+                                *self.multi_run_function(train_true_ites, train_predictions, function_map[key]))
 
                 self.log_method(key, method, data_provider, size, 'test', time_elapsed,
-                                self.multi_run_function(test_true_ites, test_predictions, function_map[key]))
+                                *self.multi_run_function(test_true_ites, test_predictions, function_map[key]))
 
         # Reset dataprovider
         data_provider.reset_cycle()
@@ -205,7 +206,7 @@ class StandardEvaluation(EvaluationMetric):
         """
 
         # Setup new DataFrame for every run of the metric, then append later
-        self.output = pd.DataFrame(columns=['metric', 'method', 'dataset', 'size', 'sample', 'time', 'score'])
+        self.output = pd.DataFrame(columns=['metric', 'method', 'dataset', 'size', 'sample', 'time', 'score', 'std'])
 
 
         num_runs = self.num_runs
