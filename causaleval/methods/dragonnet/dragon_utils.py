@@ -111,6 +111,9 @@ def make_dragonnet(input_dim, reg_l2):
     :param reg:
     :return:
     """
+
+    K.clear_session() #
+
     t_l1 = 0.
     t_l2 = reg_l2
     inputs = Input(shape=(input_dim,), name='input')
