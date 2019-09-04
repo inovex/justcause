@@ -40,6 +40,7 @@ def get_regressor_name(representation):
 def surface_plot(y1, y0, y, y_cf, x, name='default'):
 
     # Takes some time, thus use only smaller subsets
+    sns.set_style('whitegrid')
     covariates_2d = TSNE().fit_transform(x)
 
     fig = plt.figure(facecolor=(1,1,1))
@@ -64,6 +65,7 @@ def surface_plot(y1, y0, y, y_cf, x, name='default'):
         plt.show()
 
 def ite_plot(y1, y0, write=False, method_name='default'):
+    sns.set_style('whitegrid')
     sns.distplot(y1 - y0, bins=NUM_BINS, color=config.BLUE)
     plt.tight_layout()
     if config.PLOT_WRITE:
@@ -74,8 +76,10 @@ def ite_plot(y1, y0, write=False, method_name='default'):
         plt.show()
 
 def plot_y_dist(y, y_cf, write=False, method_name='default'):
+    sns.set_style('whitegrid')
     sns.distplot(y, bins=NUM_BINS, color=config.BLUE)
     sns.distplot(y_cf, bins=NUM_BINS, color=config.RED)
+    plt.tight_layout()
     if config.PLOT_WRITE:
         path = config.RESULT_PLOT_PATH
         plt.savefig(path + '/' + method_name + '-ydist')
@@ -174,3 +178,16 @@ def error_robustness_plot(errors, method_name='Method'):
     else:
         plt.show()
 
+def error_distribution_plot(errors, method_name='Method'):
+    sns.set_style('whitegrid')
+    sns.distplot(errors, bins=NUM_BINS, color=config.BLUE) # Plot distribution
+    plt.axvline(np.median(errors), 0, 1, color=config.RED) # Plot mean as vertical line
+    plt.axvline(np.mean(errors), 0, 1, color=config.YELLOW) # Plot mean as vertical line
+    plt.title(method_name)
+    plt.legend()
+    if config.PLOT_WRITE:
+        path = config.RESULT_PLOT_PATH
+        plt.savefig(path + '/' + method_name + 'error-distribution')
+        plt.clf()
+    else:
+        plt.sho
