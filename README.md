@@ -43,6 +43,14 @@ Configure the Observer in `experiment.py` to connect to your local host
 Install and run Omniboard with the default settings and it will connect to your running `mongod` instance.
 After that, the dashboard is available at `localhost:9000`.
 
+## Alternative
+When running on a cluster, or when you don't want to setup MongoDB, you can use the `FileStorageObserver` instead of
+the `MongoObserver`.
+Simply create directory `my_runs` and run the experiment via
+```bash
+python causaleval/experiment.py -F my_runs
+```
+
 # On logging
 Results are stored row wise in a csv with fields:
 `Metric, Method, Dataset, Size, Sample, Time, Score`. Meaning
@@ -56,6 +64,13 @@ Results are stored row wise in a csv with fields:
 
 
 # Setting up the environment
+## In Conda
+Using the conda environment specification file `conda_env.txt` you can setup a conda environment with Python and R
+installed:
+```bash
+conda create --name new_env --file conda_env.txt
+```
+
 ## R - 3.6
  You might have to install a few R packages from GitHub sources manually. Namely,
  - https://github.com/saberpowers/causalLearning
