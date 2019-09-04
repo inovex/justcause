@@ -2,9 +2,10 @@
 from causaleval.methods.causal_method import CausalMethod
 from causaleval.data.data_provider import DataProvider
 from causaleval.methods.ganite.ganite_model import GANITEModel
+import numpy as np
 
 class GANITEWrapper(CausalMethod):
-    def __init__(self, seed=0, learning_rate=0.001, num_epochs=5, num_covariates=25):
+    def __init__(self, seed=0, learning_rate=0.0001, num_epochs=50, num_covariates=25):
         super().__init__(seed)
         self.learning_rate = learning_rate
         self.num_epochs = num_epochs
@@ -23,17 +24,17 @@ class GANITEWrapper(CausalMethod):
         if not self.does_fit_provider(data_provider):
             self.model = self.build_model(data_provider.get_num_covariates())
 
-        batch_gen = data_provider.get_train_generator_batch(batch_size=64)
+        batch_gen = data_provider.get_train_generator_batch(batch_size=128)
         self.model.train(train_generator=batch_gen,
                          train_steps=10,
                          val_generator=batch_gen,
                          val_steps=10,
                          num_epochs=self.num_epochs,
-                         learning_rate=0.001)
+                         learning_rate=0.0001)
 
     def predict_ite(self, x, t=None, y=None):
         ys = self.model.predict(x)
-        return ys[:, 1] - ys[:, 0]
+        return np.array([row[int(1 - ix)] for row, ix in zip(ys, t)])
 
     def requires_provider(self):
         return True
