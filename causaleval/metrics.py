@@ -121,9 +121,9 @@ class StandardEvaluation(EvaluationMetric):
         :param score:
         """
         self.ex.log_scalar(score_name + ',' + str(method) + ',' + str(data_provider) + ',' + str(sample), round(score, 4))
-        print(score_name + ',' + str(method) + ',' + str(data_provider)+ ',' + str(size) + ',' + str(sample) + ',' + str(time) + ',' + str(score))
+        print(score_name + ',' + str(method) + ',' + str(data_provider)+ ',' + str(size) + ',' + str(sample) + ',' + str(time) + ',' + str(round(score, 4)))
         self.output = self.output.append(
-            other={'metric': score_name, 'method': str(method), 'dataset': str(data_provider), 'size': size, 'sample': sample, 'time': time, 'score': score},
+            other={'metric': score_name, 'method': str(method), 'dataset': str(data_provider), 'size': size, 'sample': sample, 'time': time, 'score': round(score, 4)},
             ignore_index=True)
 
     def multi_run(self, method, data_provider, size, num_runs):
@@ -138,7 +138,6 @@ class StandardEvaluation(EvaluationMetric):
             'ATE-mean'+str(num_runs): self.ate_error,
             'ENORMSE-mean'+str(num_runs) : self.enormse,
             'BIAS-mean'+str(num_runs) : self.bias,
-
         }
 
         start = time.time()
@@ -168,6 +167,7 @@ class StandardEvaluation(EvaluationMetric):
             utils.robustness_plot(train_true_ites, train_predictions, str(method))
             utils.treatment_scatter(train_true_ites[0], train_predictions[0], str(method))
             utils.error_robustness_plot(list(map(self.pehe_score, train_true_ites, train_predictions)), str(method))
+            utils.error_distribution_plot(list(map(self.pehe_score, train_true_ites, train_predictions)), str(method))
 
 
         if size is None:
@@ -213,8 +213,7 @@ class StandardEvaluation(EvaluationMetric):
         if self.sizes:
             for size in self.sizes:
                 # iterate over different sizes
-                if num_runs > 1:
-                    self.multi_run(method, data_provider, size, num_runs)
+                self.multi_run(method, data_provider, size, num_runs)
 
         else:
                 self.multi_run(method, data_provider, size=None, num_runs=num_runs)
