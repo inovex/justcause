@@ -69,6 +69,7 @@ class IHDPReplicaProvider(DataProvider):
         dirname = os.path.dirname(__file__)
         filedir = os.path.join(dirname, path)
         all_files = os.listdir(filedir)
+        all_files.sort()
 
         if self.counter > 110: # IHDP has 1000 replications at max
             self.counter = 0 # reset counter
@@ -76,11 +77,11 @@ class IHDPReplicaProvider(DataProvider):
         fname = os.path.join(filedir, all_files[self.counter])
         print(fname)
         data = pd.read_csv(fname)
-        Y_0 = data["mu.0"].values
-        Y_1 = data["mu.1"].values
+        Y_0 = data["y.0"].values
+        Y_1 = data["y.1"].values
         Y = data["y"].values
         T = data["z.r"].values
-        X = data.drop(columns=['mu.0', 'mu.1', 'y', 'z.r']).values
+        X = data.drop(columns=['y.0', 'y.1', 'y', 'z.r']).values
 
         self.x = np.array(X)
         self.t = np.array(T)
@@ -155,14 +156,14 @@ class IHDPCfrProvider(DataProvider):
 
 if __name__ == '__main__':
 
-    ihdp = IHDPReplicaProvider(setting='A')
+    ihdp = IHDPCfrProvider()
     true_ates = []
 
-    for i in range(110):
+    for i in range(1000):
         ihdp.get_training_data() # to up the counter
         true_ates.append(ihdp.get_true_ate())
 
 
-    true_ate_plot(true_ates, dataset='IHDP-Replica')
-    true_ate_dist_plot(true_ates, dataset='IHDP-Replica')
+    true_ate_plot(true_ates, dataset='IHDP-Cfr')
+    true_ate_dist_plot(true_ates, dataset='IHDP-Cfr')
 
