@@ -145,6 +145,7 @@ class StandardEvaluation(EvaluationMetric):
 
         for run in range(num_runs):
             # Perform evaluation for a number of runs
+            print('Run number: ' + str(run))
             pred_train, pred_test = self.prep_ite(data_provider, method, size=size)
             train_predictions.append(pred_train)
             test_predictions.append(pred_test)
