@@ -98,4 +98,9 @@ export LC_ALL="en_US.UTF-8"
 ## Python 3.7.1
 Install the packages via `pip install -r requirements.txt` within your virtualenv or conda environment
 
+Setup the `PYTHONPATH` variable to know the module, so that the imports work:
 
+```bash
+export PYTHONPATH=${PYTHONPATH}:/causaleval
+```
+from the root directory of this repository.
