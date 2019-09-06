@@ -5,11 +5,12 @@ from causaleval.methods.ganite.ganite_model import GANITEModel
 import numpy as np
 
 class GANITEWrapper(CausalMethod):
-    def __init__(self, seed=0, learning_rate=0.0001, num_epochs=50, num_covariates=25):
+    def __init__(self, seed=0, learning_rate=0.0001, num_epochs=50, num_covariates=25, full=False):
         super().__init__(seed)
         self.learning_rate = learning_rate
         self.num_epochs = num_epochs
         self.num_covariates = num_covariates
+        self.full = full
         self.model = self.build_model(num_covariates)
 
     def fit(self, x, t, y, refit=False) -> None:
@@ -33,8 +34,8 @@ class GANITEWrapper(CausalMethod):
                          learning_rate=0.0001)
 
     def predict_ite(self, x, t=None, y=None):
-        ys = self.model.predict(x)
-        return np.array([row[int(1 - ix)] for row, ix in zip(ys, t)])
+        ys_cf = self.model.pred_full(x, t, y)
+        return ys_cf[:, 1] - ys_cf[:, 0]
 
     def requires_provider(self):
         return True

@@ -206,6 +206,17 @@ class GANITEModel(object):
         })
         return y_pred
 
+
+    def pred_full(self, x, t, y_f):
+        batch_size = len(x)
+        y_pred = self.sess.run(self.y_pred_cf, feed_dict={
+            self.x: x,
+            self.t: t.reshape(-1, 1),
+            self.y_f: y_f.reshape(-1, 1),
+            self.z_g: np.random.uniform(size=(batch_size, self.num_treatments-1))
+        })
+        return y_pred
+
     def predict(self, x):
         batch_size = len(x)
         y_pred = self.sess.run(self.y_pred_ite, feed_dict={
