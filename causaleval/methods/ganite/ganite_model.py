@@ -81,7 +81,7 @@ class GANITEModel(object):
     def train(self, train_generator, train_steps, val_generator, val_steps, num_epochs,
               learning_rate, learning_rate_decay=0.97, iterations_per_decay=100,
               dropout=0.0, imbalance_loss_weight=0.0, l2_weight=0.0, checkpoint_path="",
-              early_stopping_patience=12, early_stopping_on_pehe=False):
+              early_stopping_patience=12, early_stopping_on_pehe=False, verbose=False):
 
         saver = tf.train.Saver(max_to_keep=0)
 
@@ -120,7 +120,8 @@ class GANITEModel(object):
             else:
                 num_epochs_without_improvement += 1
 
-            self.print_losses(epoch_idx, num_epochs,
+            if verbose:
+                self.print_losses(epoch_idx, num_epochs,
                               [train_losses_g[0], train_losses_d[0]],
                               [val_losses_g[0], val_losses_d[0]],
                               do_save)
@@ -150,7 +151,8 @@ class GANITEModel(object):
             else:
                 num_epochs_without_improvement += 1
 
-            self.print_losses(epoch_idx, num_epochs,
+            if verbose:
+                self.print_losses(epoch_idx, num_epochs,
                               [train_losses_g[0], train_losses_d[0]],
                               [val_losses_g[0], val_losses_d[0]],
                               do_save)
