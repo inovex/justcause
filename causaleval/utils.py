@@ -88,6 +88,17 @@ def plot_y_dist(y, y_cf, write=False, method_name='default'):
         plt.show()
 
 
+def dist_plot(x, method_name='default'):
+    sns.set_style('whitegrid')
+    sns.distplot(x, bins=NUM_BINS, color=config.BLUE)
+    plt.tight_layout()
+    if config.PLOT_WRITE:
+        path = config.RESULT_PLOT_PATH
+        plt.savefig(path + '/' + method_name + '-ydist')
+        plt.clf()
+    else:
+        plt.show()
+
 def simple_comparison_mean(y, t):
     treated = y[t==1]
     control = y[t==0]
@@ -110,9 +121,9 @@ def true_ate_plot(true_ates, dataset='default'):
 
 def confounder_outcome_plot(confounder, y_1, dataset='default'):
     sns.set_style('whitegrid')
-    sns.lineplot(x=confounder, y=y_1, color=config.BLUE, label='Influence of Confounder on Outcome')
+    sns.scatterplot(x=confounder, y=y_1, color=config.BLUE)
     plt.xlabel('Confounder')
-    plt.ylabel('Treated Outcome')
+    plt.ylabel('Treatment Effect')
     plt.title(dataset)
     plt.legend()
     if config.PLOT_WRITE:
@@ -121,6 +132,33 @@ def confounder_outcome_plot(confounder, y_1, dataset='default'):
         plt.clf()
     else:
         plt.show()
+
+def line_plot(x, y, label='default', xlabel='xlabel', ylabel='ylabel'):
+    sns.set_style('whitegrid')
+    sns.lineplot(x=x, y=y, color=config.BLUE, label='label')
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.legend()
+    if config.PLOT_WRITE:
+        path = config.RESULT_PLOT_PATH
+        plt.savefig(path + '/' + label + 'line_plot')
+        plt.clf()
+    else:
+        plt.show()
+
+def scatter_plot(x, y, label='default', xlabel='xlabel', ylabel='ylabel'):
+    sns.set_style('whitegrid')
+    sns.scatterplot(x=x, y=y, color=config.BLUE, label='label')
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.legend()
+    if config.PLOT_WRITE:
+        path = config.RESULT_PLOT_PATH
+        plt.savefig(path + '/' + label + 'line_plot')
+        plt.clf()
+    else:
+        plt.show()
+
 
 def true_ate_dist_plot(true_ates, dataset='default'):
     sns.set_style('whitegrid')
