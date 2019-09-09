@@ -1,5 +1,6 @@
 import copy
 import numpy as np
+from sklearn.calibration import CalibratedClassifierCV
 
 from causaleval.methods.causal_method import CausalMethod
 from causaleval.utils import get_regressor_name
@@ -8,6 +9,7 @@ class DoubleRobust(CausalMethod):
 
     def __init__(self, propensity_regressor, outcome_regressor):
         super().__init__()
+        self.given_regressor = propensity_regressor
         self.propensity_regressor = propensity_regressor
         self.outcome_regressor = outcome_regressor
         self.outcome_regressor_ctrl = copy.deepcopy(outcome_regressor)
@@ -25,7 +27,7 @@ class DoubleRobust(CausalMethod):
             self.t = t
             self.y = y
 
-        prop = self.propensity_regressor.predict(x)
+        prop = self.propensity_regressor.predict_proba(x)[:, 1]
         dr1 = np.sum(((self.t*self.y)/ (prop + self.delta)) - ((self.t - prop + self.delta)/(prop +self.delta))*self.outcome_regressor.predict(x)) / x.shape[0]
         dr0 = np.sum(((1 - self.t)*self.y/(1- prop + self.delta)) - ((self.t - prop + self.delta)/(1-prop + self.delta))*self.outcome_regressor_ctrl.predict(x))/ x.shape[0]
         return dr1 - dr0
@@ -34,6 +36,7 @@ class DoubleRobust(CausalMethod):
         # Fit propensity score model
         self.t = t
         self.y = y
+        self.propensity_regressor = CalibratedClassifierCV(self.given_regressor)
         self.propensity_regressor.fit(x, t)
         # Fit the two outcome models
         self.outcome_regressor.fit(x[t==1], y[t==1])
@@ -41,7 +44,7 @@ class DoubleRobust(CausalMethod):
 
 
     def __str__(self):
-        return "DoubleRobustEstimator - P: " +  get_regressor_name(self.propensity_regressor) + " O: " + get_regressor_name(self.outcome_regressor)
+        return "DoubleRobustEstimator - P: " +  get_regressor_name(self.given_regressor) + " O: " + get_regressor_name(self.outcome_regressor)
 
     def predict_ite(self, x, t=None, y=None):
         # Broadcast ATE to all instances
