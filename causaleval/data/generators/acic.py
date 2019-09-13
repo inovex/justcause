@@ -164,7 +164,8 @@ class ACICGenerator(DataGenerator):
                 return np.random.binomial(1, p=exp_poly)
             if relation == 'strong':
                 weight = covariates[:, self.idx_dict['dbwt']]
-                return weight < np.median(weight) # Treatment only to low birth-weight samples
+                treat = weight < np.median(weight) # Treatment only to low birth-weight samples
+                return (treat + np.random.binomial(1, 0.1, size=len(treat)) > 0)
 
     def treatment_effect(self, covariates, relation='weak', homogeneous=True, num_parents=10, use_parents=None, *args):
         """Generate treatment effect based on subset of covariates
@@ -182,7 +183,7 @@ class ACICGenerator(DataGenerator):
         """
         np.random.seed(self.params['seed']) # make sure to fix the seed for replication
         if homogeneous:
-            return np.full(len(covariates), 1.5)
+            return np.full(len(covariates), 1.5) + np.random.normal(0, 0.1, size=len(covariates))
         else:
             if use_parents is not None:
                 # Use unnormalized features to get more significant treatment effects
@@ -319,7 +320,7 @@ if __name__ == '__main__':
 
     dict = {
         'random' : False,
-        'deterministic': True,
+        'deterministic': False,
         'homogeneous' : False,
         'confounded' : True,
         'seed' : 0
@@ -329,7 +330,12 @@ if __name__ == '__main__':
     # a = ACICGenerator(dict)
     # a.test_generation(random=False, homogeneous=True)
     twins = ACICGenerator(dict)
-    utils.surface_plot(twins.y_1[0:1000], twins.y_0[0:1000], twins.y[0:1000], twins.y_cf[0:1000], twins.x[0:1000])
+
+    choice = np.random.choice(len(twins.x), size=1000)
+
+    utils.surface_plot(twins.y_1[choice], twins.y_0[choice], twins.y[choice], twins.y_cf[choice], twins.x[choice],name='ACIC-hetero-conf')
+    utils.plot_y_dist(twins.y[choice], twins.y_cf[choice], method_name='ACIC-hetero-conf')
+    utils.ite_plot(twins.y_1[choice], twins.y_0[choice], method_name='ACIC-hetero-conf')
 
 
 
