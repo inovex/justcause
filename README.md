@@ -20,13 +20,32 @@ overriden from `DataProvider` to accomodate that functionality.
 
 See `causaleval/data/generators/acic.py` for a sophisticated parametric generation that is also
 
-# Locate Datafiles
+
+# To Run Yourself
+## Locate Datafiles
 Put the data files as required by the provider into a directory `eval/datasets/...`.
 E.g. the IHDP data is in `eval/datasets/ihdp/csv` and add add a relative path to the config.py starting
 form the content root / git root. E.g. Add relative path to ihdp `datasets/ihdp/csv`. Join that relative path
 with the dynamically determined `ROOT_PATH` via `os.path.join()`
 
 See `config.py` for possible configuration of data locations.
+
+## Create Folders and Environments
+Create the folder `results` and `results/plot` to store the outputs via the command
+```bash
+mkdir -p results/plots
+```
+
+Setup the environments for Python and R as explained below.
+
+## Configure Experiment
+Configure the experiment you want to run in `experiment.py`
+
+ - Choose which dataset to run by putting the respective `DataProvider` instance
+   in the `datasets` array
+ - Choose which methods to run by putting the `CausalMethod` instances in the `methods` array
+ - Define the sizes you want to evaluate
+ - Define the number of replications via the `num_runs` parameter of `StandardEvaluation`.
 
 # Setup Sacred for logging
 To use `sacred` with the MongoObserver, you have to install `mongod` first.
@@ -51,16 +70,17 @@ Simply create directory `my_runs` and run the experiment via
 python causaleval/experiment.py -F my_runs
 ```
 
-# On logging
+## What is logged
 Results are stored row wise in a csv with fields:
-`Metric, Method, Dataset, Size, Sample, Time, Score`. Meaning
- - Metric used (e.g. PEHE, MSE on ATE, ...)
+`Metric, Method, Dataset, Size, Sample, Time, Score, Std`. Meaning
+ - Metric used (e.g. PEHE, MSE on ATE, ...) + the number of replications (e.g. PEHE100)
  - Method evaluated
  - Dataset used
  - Size of the training sample
  - Evaluated on Test or Train
  - Time required for computation
- - Score of the Metric on given method, dataset, size, sample
+ - Score of the Metric on given method, dataset, size, sample reported as mean over all replications
+ - Std error over all replications
 
 
 # Setting up the environment
@@ -104,3 +124,15 @@ Setup the `PYTHONPATH` variable to know the module, so that the imports work:
 export PYTHONPATH=${PYTHONPATH}:/causaleval
 ```
 from the root directory of this repository.
+
+# Further Work
+Some steps to continue the work on this project would be
+  - Rewrite the plot functions in `utils.py` to simply take `DataProvider` as inputs and handle the internals within
+    the functions.
+  - Implement a run-checker that ensures that all methods fit on the data and/or that no complications arise,
+    before expensive computation is started.
+    (e.g. requested size is to big for given DataProvider)
+  - Obviously, add more methods and reference datasets
+  - Write tests ;)
+
+
