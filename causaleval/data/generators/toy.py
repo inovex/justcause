@@ -17,6 +17,14 @@ def multi_effect(x):
     effect = (x[:, 1]*x[:, 2])**3 + x[:, 4]*x[:, 5]**2
     return minmax_scale(effect, feature_range=(1,10))
 
+def multi_modal_effect(X, conf_idx=6):
+    prob = (sigmoid(X[:, conf_idx]) > 0.5)
+    return np.random.normal((3*prob)+1*(1-prob), 0.1, size=len(X)) # Explicitly multimodal
+
+def exponential_effect_old(X, conf_idx=6):
+    return np.exp(1 + sigmoid(X[:, conf_idx])) # use birth weight
+
+
 class SWagerDataProvider(DataProvider):
     """
     Implements the toy examples proposed by S. Wager in a personal communication
@@ -179,6 +187,51 @@ class Second(DataProvider):
         self.y_1 = self.y_0 + ite
         self.t = T
 
+class MultiExpoACICGenerator(DataProvider):
+    def __init__(self, setting='multi-modal'):
+        """
+        :param params: dict containing 'random', 'homogeneous', 'deterministic', 'confounded'
+        """
+        self.setting = setting
+        super().__init__()
+
+    def __str__(self):
+        return "ACIC" + self.setting
+
+    def load_training_data(self):
+        covariates_df = pd.read_csv(config.IBM_PATH_ROOT + '/' + 'covariates.csv')
+        covariates_df = covariates_df.loc[:, covariates_df.var() > 0.3]
+        self.covariates_df = covariates_df.drop(columns=['sample_id'])
+        self.covariates = covariates_df[config.ACIC_USE_COVARIATES].values
+        self.x = self.covariates
+
+        conf_idx = 2
+
+        n = len(self.x)
+        p = self.x.shape[1]
+        X = StandardScaler().fit_transform(self.x)
+        self.x = X[X[:, 2] < 8]
+        X = self.x
+        noise_scale=0.1
+        noise = np.random.normal(scale=noise_scale, size=n) # add some noise
+
+        Y_0 = np.random.gamma(0.2, 1, size=len(X))
+
+        if self.setting == 'multi-modal':
+            Y_1 = Y_0 + multi_modal_effect(X, conf_idx)
+            val = X[:, conf_idx]
+        else:
+            Y_1 = Y_0 + exponential_effect_old(X, conf_idx)
+            val = X[:, conf_idx]
+
+        self.y_0 = Y_0
+        self.y_1 = Y_1
+        self.t = np.random.binomial(1, p=sigmoid(val), size=len(X))
+        union = np.c_[self.y_0, self.y_1]
+        self.y_cf = np.array([row[int(1 - ix)] for row, ix in zip(union, self.t)])
+        self.y = np.array([row[int(ix)] for row, ix in zip(union, self.t)])
+        self.x = X
+
 
 class CovariateModulator(DataProvider):
 
@@ -244,7 +297,9 @@ if __name__ == "__main__":
 
     import utils
 
-    gen = SWagerDataProvider(setting='simple')
-    utils.surface_plot(gen.y_1[0:1000], gen.y_0[0:1000], gen.y[0:1000], gen.y_cf[0:1000], gen.x[0:1000], name='SWager Simple')
-    gen = SWagerDataProvider(setting='hard')
-    utils.surface_plot(gen.y_1[0:1000], gen.y_0[0:1000], gen.y[0:1000], gen.y_cf[0:1000], gen.x[0:1000], name='SWager Hard')
+    gen = MultiExpoACICGenerator(setting='multi-modal')
+    utils.confounder_outcome_plot(gen.x[:, 2], gen.y_1 - gen.y_0, dataset='ACIC-multi-modal')
+    utils.plot_y_dist(gen.y, gen.y_cf, method_name='ACIC-multi-modal')
+    gen = MultiExpoACICGenerator(setting='exponential')
+    utils.confounder_outcome_plot(gen.x[:, 2], gen.y_1 - gen.y_0, dataset='ACIC-exponential')
+    utils.plot_y_dist(gen.y, gen.y_cf, method_name='ACIC-exponential')
