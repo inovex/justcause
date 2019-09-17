@@ -129,6 +129,7 @@ from the root directory of this repository.
 Some steps to continue the work on this project would be
   - Rewrite the plot functions in `utils.py` to simply take `DataProvider` as inputs and handle the internals within
     the functions.
+  - Implement within-sample and out-of-sample evaluation (switch between the two) as proposed in [this paper](https://arxiv.org/pdf/1606.03976.pdf).
   - Implement a run-checker that ensures that all methods fit on the data and/or that no complications arise,
     before expensive computation is started.
     (e.g. requested size is to big for given DataProvider)
