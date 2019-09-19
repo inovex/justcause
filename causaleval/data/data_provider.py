@@ -22,17 +22,28 @@ class DataProvider():
         self.set_train_test_split(train_size=train_size) # Use 80/20 as default
 
     def __str__(self):
+        """
+        Override this for the specific DataProviders
+        :return: name string
+        """
         return "Abstract Data Provider"
 
     def load_training_data(self):
         """
-        Overwrite this function to set x,y,t,y_cf with the required values for the specific dataset
+        Override this function to set x,y,t,y_cf with the required values for the specific dataset
 
-        :return:
+        see data/sets/ihdp.py for an example.
+
         """
-        raise NotImplementedError('not yet implemented for ' + str(self))
+        raise NotImplementedError('Load Data Method must be implemented for ' + str(self))
 
     def get_training_data(self, size=None):
+        """
+        Return the training data of this DataProvider
+
+        :param size: Size of the requested training data
+        :return: the training data (x, t, y)
+        """
         if self.y is None:
             self.load_training_data()
 
@@ -47,13 +58,19 @@ class DataProvider():
             return self.x[self.subselection], self.t[self.subselection], self.y[self.subselection]
 
     def get_test_data(self):
+        """
+        Return the test subset of this DataProvider
+
+        :return:
+        """
         if self.y is None:
             self.load_training_data()
 
         return self.x[self.test_selection], self.t[self.test_selection], self.y[self.test_selection]
 
     def set_train_test_split(self, train_size=0.8):
-        """Sets the train/test split for one evaluation run
+        """
+        Sets the train/test split for one evaluation run
 
         :param train_size: fraction of the whole data to be used as training
         """
@@ -62,25 +79,24 @@ class DataProvider():
         full = np.arange(length)
         self.test_selection = full[~np.isin(full, self.train_selection)]
 
-    def get_true_ite(self, data='train'):
-        return self.y_1 - self.y_0
-
     def get_test_ite(self):
+        """
+        Return true ITEs for test data
+        :return: true ITEs for test data
+        """
         return self.y_1[self.test_selection] - self.y_0[self.test_selection]
 
     def get_train_ite(self, subset=False):
         """
+        Return true ITE for training data
 
         :param subset: if true, return ite of the last retrieved subset (see get_training_data)
-        :return:
+        :return: true ITE for training data
         """
         if subset:
             return self.y_1[self.subselection] - self.y_0[self.subselection]
         else:
             return self.y_1[self.train_selection] - self.y_0[self.train_selection]
-
-    def get_true_ate(self, subset=False):
-        return np.mean(self.get_true_ite())
 
     def get_train_ate(self, subset=False):
         return np.mean(self.get_train_ite(subset))
@@ -91,9 +107,10 @@ class DataProvider():
     def get_train_generator_single(self, random=False, replacement=False):
         """
         Return a cycle generator of single objects
+
         :param random:
         :param replacement:
-        :return:
+        :return: a generator function yielding single instances
         """
         if random:
             id_generator = cycle(np.random.choice(self.x.shape[0], size=self.x.shape[0], replacement=replacement))
@@ -105,6 +122,12 @@ class DataProvider():
 
 
     def get_train_generator_batch(self, batch_size=32):
+        """
+        Return a cycle generator for batches
+
+        :param batch_size: required batch size
+        :return: a generator function yielding batches
+        """
         num_batches = int(self.x.shape[0] / batch_size)
         batch_id_generator = cycle(range(num_batches))
 
@@ -115,10 +138,11 @@ class DataProvider():
             yield (self.x[start:end], self.t[start:end]), self.y[start:end]
 
     def get_num_covariates(self):
+        """
+        Returns number of features for each instances
+        :return: number of features
+        """
         return self.x.shape[1]
-
-    def get_info(self):
-        pass
 
     def reset_cycle(self):
         """Resets the replica counter if it exists
