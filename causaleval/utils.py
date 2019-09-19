@@ -1,4 +1,5 @@
 from sklearn.manifold import TSNE
+from sklearn.linear_model import LogisticRegression
 
 import numpy as np
 import config
@@ -67,6 +68,7 @@ def surface_plot(y1, y0, y, y_cf, x, name='default'):
 def ite_plot(y1, y0, write=False, method_name='default'):
     sns.set_style('whitegrid')
     sns.distplot(y1 - y0, bins=NUM_BINS, color=config.BLUE)
+    plt.title(method_name)
     plt.tight_layout()
     if config.PLOT_WRITE:
         path = config.RESULT_PLOT_PATH
@@ -77,8 +79,11 @@ def ite_plot(y1, y0, write=False, method_name='default'):
 
 def plot_y_dist(y, y_cf, write=False, method_name='default'):
     sns.set_style('whitegrid')
-    sns.distplot(y, bins=NUM_BINS, color=config.BLUE)
-    sns.distplot(y_cf, bins=NUM_BINS, color=config.RED)
+    sns.distplot(y, bins=NUM_BINS, color=config.BLUE, label='Observed')
+    sns.distplot(y_cf, bins=NUM_BINS, color=config.RED, label='Counterfactual')
+    plt.xlabel('Outcomes')
+    plt.ylabel('Density')
+    plt.legend()
     plt.tight_layout()
     if config.PLOT_WRITE:
         path = config.RESULT_PLOT_PATH
@@ -126,6 +131,7 @@ def confounder_outcome_plot(confounder, y_1, dataset='default'):
     plt.ylabel('Treatment Effect')
     plt.title(dataset)
     plt.legend()
+    plt.tight_layout()
     if config.PLOT_WRITE:
         path = config.RESULT_PLOT_PATH
         plt.savefig(path + '/' + dataset + 'confounder-outcome')
@@ -171,6 +177,25 @@ def true_ate_dist_plot(true_ates, dataset='default'):
         plt.clf()
     else:
         plt.show()
+
+def propensity_distribution_plot(data_provider):
+    sns.set_style('whitegrid')
+    reg = LogisticRegression()
+    reg.fit(data_provider.x, data_provider.t)
+    propensity = reg.predict_proba(data_provider.x)[:, 1]
+    sns.distplot(propensity, color=config.BLUE, bins=NUM_BINS)
+    plt.xlabel('Probability of Treatment')
+    plt.ylabel('Density')
+    plt.title('Propensity Distribution')
+    plt.legend()
+    plt.tight_layout()
+    if config.PLOT_WRITE:
+        path = config.RESULT_PLOT_PATH
+        plt.savefig(path + '/' + str(data_provider) + 'propensity')
+        plt.clf()
+    else:
+        plt.show()
+
 
 def robustness_plot(true_ites, predicted_ites, method_name='Method'):
     true_ates = np.mean(true_ites, axis=1)
