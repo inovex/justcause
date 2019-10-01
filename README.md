@@ -31,6 +31,7 @@ methods easier, by allowing to compare them across both generated and existing d
 * Do imports within functions only when really necessary (there are rare cases only) otherwise on the top of the module
 * Don't set `R_HOME` environment variable and rely on what conda is doing for you. Avoid setting any kind of path via environment variables.
 * Remove all `if __name__ == "__main__":` sections from the modules in the justcause package
+* When files are downloaded keep them under `~/.justcause` (, i.e. hidden directory in the home dir) and access them. Check out how this in done under https://github.com/maciejkula/spotlight/blob/master/spotlight/datasets/_transport.py
 
 ## Installation
 
