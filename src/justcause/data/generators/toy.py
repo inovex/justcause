@@ -295,7 +295,7 @@ class CovariateModulator(DataProvider):
 
 
 import config
-os.environ['R_HOME'] = config.R_HOME
+# os.environ['R_HOME'] = config.R_HOME
 
 
 if __name__ == "__main__":

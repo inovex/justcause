@@ -27,7 +27,10 @@ methods easier, by allowing to compare them across both generated and existing d
 * Do not set environment variables inside library, rather state this somewhere in the docs. os.environ['L_ALL'] 
 * Never print something in a library, use the logging module for logging. Takes a while to comprehend
 * move the `experiment.py` module into the `scripts` folder because it's actually using the package (fix the imports accordingly)
-
+* avoid plotting to `results/plots/S-Learner - LinearRegressionrobustness.png'` in the unittests (right now the directory needs to be created for the unittests to run)
+* Do imports within functions only when really necessary (there are rare cases only) otherwise on the top of the module
+* Don't set `R_HOME` environment variable and rely on what conda is doing for you. Avoid setting any kind of path via environment variables.
+* Remove all `if __name__ == "__main__":` sections from the modules in the justcause package
 
 ## Installation
 

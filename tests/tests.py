@@ -87,7 +87,7 @@ class IntegrationTests(TestCase):
         execute a causal forest
         """
         data = SWagerDataProvider()
-        from justcause.methods import CausalForest
+        from justcause.methods.causal_forest import CausalForest
         cf = CausalForest()
         cf.fit(*data.get_training_data())
         self.assertIsNotNone(cf.predict_ite(*data.get_test_data()))
