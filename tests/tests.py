@@ -1,5 +1,5 @@
 from causaleval.data.generators.toy import SWagerDataProvider
-from causaleval.methods.basics.outcome_regression import SLearner
+from src.justcause.methods import SLearner
 from causaleval.metrics import StandardEvaluation
 
 from sklearn.linear_model import LinearRegression
@@ -82,7 +82,7 @@ class IntegrationTests(TestCase):
         execute a causal forest
         """
         data = SWagerDataProvider()
-        from causaleval.methods.causal_forest import CausalForest
+        from src.justcause.methods import CausalForest
         cf = CausalForest()
         cf.fit(*data.get_training_data())
         self.assertIsNotNone(cf.predict_ite(*data.get_test_data()))
