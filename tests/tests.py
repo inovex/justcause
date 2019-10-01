@@ -70,12 +70,23 @@ class IntegrationTests(TestCase):
             data.get_training_data(size=2001)
 
         data.set_train_test_split(train_size=0.5)
-        print(len(data.train_selection))
-        print(len(data.test_selection))
         x, t, y = data.get_training_data(size=1000)
         self.assertEqual(len(t), 0.5*len(data.t))
         x_test, t_test, y_test = data.get_test_data()
         self.assertEqual(len(t_test), 1000)
+
+
+    def test_rpy2(self):
+        """
+        Tests whether rpy2 is able to load the R environment and
+        execute a causal forest
+        """
+        data = SWagerDataProvider()
+        from causaleval.methods.causal_forest import CausalForest
+        cf = CausalForest()
+        cf.fit(*data.get_training_data())
+        self.assertIsNotNone(cf.predict_ite(*data.get_test_data()))
+
 
 
 
