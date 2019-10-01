@@ -75,7 +75,7 @@ class DataProvider():
         :param train_size: fraction of the whole data to be used as training
         """
         length = self.x.shape[0]
-        self.train_selection = np.random.choice(length, size=int(train_size*length))
+        self.train_selection = np.random.choice(length, size=int(train_size*length), replace=False)
         full = np.arange(length)
         self.test_selection = full[~np.isin(full, self.train_selection)]
 
