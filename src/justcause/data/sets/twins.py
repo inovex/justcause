@@ -1,8 +1,10 @@
 import numpy as np
 import pandas as pd
 
-from causaleval import config
-from causaleval.data.data_provider import DataProvider
+from ..data_provider import DataProvider
+
+import config
+
 
 class TwinsDataProvider(DataProvider):
     """

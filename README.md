@@ -1,10 +1,33 @@
-# justcause
+# JustCause
 
 Comparing algorithms for causality analysis in a fair and just way.
 
 ## Description
 
-A longer description of your project goes here...
+A **work in progress** for causal estimator evaluation. The framework aims to make comparison of
+methods easier, by allowing to compare them across both generated and existing datasets.
+
+#### ToDos:
+
+* make the package itself independent of Sacred, just advocate it as best practice
+* migrate all files ending in `-old` and delete them if no longer necessary
+* create some proper unittests and use pytest instead of the shipped unittest
+* add the final bachelor thesis as pdf under `references`
+* use Sphinx (checkout `docs` folder) to create command reference and some explanations.
+* convert `configs/config.py` into a `config.yaml`
+  * the content of config should not accessed from everywhere but only the necessary information passed! 
+* adhere to `pep8` and other standards. Use `pre-commit` (which is set up below) to check and correct all mistakes  
+* Don't fix things like random seed within the package, it's a library, advocate to do this outside (name this best-practice within the docs)
+* separate modules that only do math from plotting modules. Why would the generators/acic module need matplotlib as dependency
+* follow import order, first Python internal modules, then external, then the modules of your package.
+* use PyCharm and check for the curly yellow underline hints how to improve the code
+* add some example notebooks in the notebooks folder
+* add the libraries which a required (no visualisation) into setup.cfg under requires.
+* Check licences of third-party methods and add and note them accordingly. Within the __init__.py of the subpackage add a docstring and state the licences and the original authors. 
+* Do not set environment variables inside library, rather state this somewhere in the docs. os.environ['L_ALL'] 
+* Never print something in a library, use the logging module for logging. Takes a while to comprehend
+* move the `experiment.py` module into the `scripts` folder because it's actually using the package (fix the imports accordingly)
+
 
 ## Installation
 
@@ -71,8 +94,6 @@ Then take a look into the `scripts` and `notebooks` folders.
 │   └── raw                 <- The original, immutable data dump.
 ├── docs                    <- Directory for Sphinx documentation in rst or md.
 ├── environment.yaml        <- The conda environment file for reproducibility.
-├── models                  <- Trained and serialized models, model predictions,
-│                              or model summaries.
 ├── notebooks               <- Jupyter notebooks. Naming convention is a number (for
 │                              ordering), the creator's initials and a description,
 │                              e.g. `1.0-fw-initial-data-exploration`.

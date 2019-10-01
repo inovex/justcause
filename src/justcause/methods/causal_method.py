@@ -2,7 +2,9 @@
 class DataInputError(Exception):
     pass
 
-class CausalMethod():
+
+# Todo: Make this a proper abstract class
+class CausalMethod:
 
     def __init__(self, seed=0):
         """

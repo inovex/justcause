@@ -1,8 +1,9 @@
 import copy
 import numpy as np
 
-from src.justcause.methods import CausalMethod
-from causaleval.utils import get_regressor_name
+from ..causal_method import CausalMethod
+from ...utils import get_regressor_name
+
 
 class SLearner(CausalMethod):
     """

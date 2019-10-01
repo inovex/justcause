@@ -3,8 +3,9 @@ import numpy as np
 
 from sklearn.calibration import CalibratedClassifierCV
 
-from src.justcause.methods import CausalMethod
-from causaleval.utils import get_regressor_name
+from ..causal_method import CausalMethod
+from ...utils import get_regressor_name
+
 
 class PropensityScoreWeighting(CausalMethod):
 

@@ -1,6 +1,7 @@
 
-from src.justcause.methods import CausalMethod
-from src.justcause.methods import dragonnet
+from .causal_method import CausalMethod
+from .dragonnet import dragonnet
+
 
 class DragonNetWrapper(CausalMethod):
 

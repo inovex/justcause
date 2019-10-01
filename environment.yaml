@@ -5,6 +5,15 @@ channels:
   - conda-forge
 dependencies:
   - python=3.7
-  - sacred
+  - scipy
+  - pandas
   - scikit-learn
   - pip
+  - seaborn
+  - rpy2
+  - seaborn
+  - tensorflow
+  - keras
+  - pymongo
+  - pip:
+      - sacred

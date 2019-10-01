@@ -3,7 +3,7 @@ import numpy as np
 from itertools import cycle
 
 
-class DataProvider():
+class DataProvider:
 
     def __init__(self, seed=0, train_size=0.8):
         # Standard null initialization

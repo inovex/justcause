@@ -21,7 +21,7 @@ import sys
 import numpy as np
 import tensorflow as tf
 
-from src.justcause.methods import GANITEBuilder
+from .ganite_builder import GANITEBuilder
 
 
 class GANITEModel(object):

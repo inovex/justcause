@@ -3,9 +3,10 @@ import os
 import numpy as np
 import pandas as pd
 
-from causaleval.data.data_provider import DataProvider
-from causaleval import config
-from utils import surface_plot, ite_plot, plot_y_dist, simple_comparison_mean, true_ate_plot, true_ate_dist_plot
+from ..data_provider import DataProvider
+from ...utils import surface_plot, ite_plot, plot_y_dist, simple_comparison_mean, true_ate_plot, true_ate_dist_plot
+
+import config
 
 
 class IHDPDataProvider(DataProvider):

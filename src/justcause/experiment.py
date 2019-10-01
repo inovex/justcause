@@ -3,7 +3,8 @@
 import os
 import time
 import pandas as pd
-from causaleval import config
+
+import config
 
 os.environ['L_ALL'] = 'en_US.UTF-8'
 os.environ['R_HOME'] = config.R_HOME
@@ -18,7 +19,7 @@ from sklearn.ensemble.gradient_boosting import GradientBoostingRegressor
 from sklearn.neural_network import MLPRegressor
 from sklearn.linear_model import LinearRegression
 
-from causaleval.metrics import EvaluationMetric, StandardEvaluation
+from .metrics import EvaluationMetric, StandardEvaluation
 
 # Methods
 from src.justcause.methods import CausalMethod

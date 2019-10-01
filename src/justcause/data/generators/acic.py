@@ -3,18 +3,16 @@ import os
 import pandas as pd
 import numpy as np
 
-from causaleval.data.generators.generator import DataGenerator
-from causaleval import config
-from utils import surface_plot, simple_comparison_mean
-import config
+from .generator import DataGenerator
+from ...utils import surface_plot, simple_comparison_mean
 
 import scipy
 from sklearn.preprocessing import StandardScaler, minmax_scale, RobustScaler
 
-
 # To make it work on MacOS
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib
+
 
 matplotlib.use(config.PLOT_BACKEND)
 import seaborn as sns
@@ -22,8 +20,12 @@ sns.set(style="darkgrid")
 import matplotlib.pyplot as plt
 
 
-np.random.seed(0) # make sure to fix the seed for replication
+# ToDo: Avoid this workaround
+import config
+
+np.random.seed(0)  # make sure to fix the seed for replication
 exp_coeffs = np.random.normal(loc=0, scale=0.5, size=10)
+
 
 def normal_polynomial(vars):
     """
@@ -315,6 +317,7 @@ class ACICGenerator(DataGenerator):
         self.generate_file(random=False, homogeneous=True)
         self.generate_file(random=False, homogeneous=False, confounded=True) # Confounders guaranteed
         self.generate_file(random=False, homogeneous=False, deterministic=True)
+
 
 if __name__ == '__main__':
 

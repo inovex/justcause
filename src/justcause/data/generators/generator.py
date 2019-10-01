@@ -1,4 +1,5 @@
-from causaleval.data.data_provider import DataProvider
+from ..data_provider import DataProvider
+
 
 class DataGenerator(DataProvider):
 

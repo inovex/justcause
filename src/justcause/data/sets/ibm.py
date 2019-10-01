@@ -3,10 +3,10 @@ import os
 import numpy as np
 import pandas as pd
 
-from causaleval.data.data_provider import DataProvider
-from causaleval import config
+from ..data_provider import DataProvider
 
-from itertools import cycle
+import config
+
 
 class SimpleIBMDataProvider(DataProvider):
     """

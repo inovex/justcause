@@ -1,7 +1,7 @@
 
-from src.justcause.methods import CausalMethod
-from causaleval.data.data_provider import DataProvider
-from src.justcause.methods import GANITEModel
+from .causal_method import CausalMethod
+from .data.data_provider import DataProvider
+from .ganite.ganite_model import GANITEModel
 import numpy as np
 
 class GANITEWrapper(CausalMethod):

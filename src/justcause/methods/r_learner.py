@@ -6,7 +6,8 @@ from rpy2.robjects import numpy2ri
 
 import numpy as np
 
-from methods.causal_method import CausalMethod
+from .causal_method import CausalMethod
+
 
 class RLearner(CausalMethod):
     """

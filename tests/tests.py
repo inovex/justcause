@@ -1,6 +1,6 @@
-from causaleval.data.generators.toy import SWagerDataProvider
-from src.justcause.methods import SLearner
-from causaleval.metrics import StandardEvaluation
+from justcause.data.generators.toy import SWagerDataProvider
+from justcause.methods.basics.outcome_regression import SLearner
+from justcause.metrics import StandardEvaluation
 
 from sklearn.linear_model import LinearRegression
 
@@ -8,6 +8,12 @@ import sacred
 from sacred.observers import FileStorageObserver
 
 from unittest import TestCase
+
+
+# TODO: Fix this workaround here and make config a yaml in the configs folder.
+# We exploit here the fact that Python only imports once and then keeps a lookup of it.
+import config
+
 
 def test_whole_experiment():
     """
@@ -38,6 +44,7 @@ def test_whole_experiment():
 
     ex.run()
 
+
 class IntegrationTests(TestCase):
 
     def setUp(self):
@@ -57,7 +64,6 @@ class IntegrationTests(TestCase):
         """
         test_whole_experiment()
 
-
     def test_dataprovider(self):
 
         data = SWagerDataProvider()
@@ -75,14 +81,13 @@ class IntegrationTests(TestCase):
         x_test, t_test, y_test = data.get_test_data()
         self.assertEqual(len(t_test), 1000)
 
-
     def test_rpy2(self):
         """
         Tests whether rpy2 is able to load the R environment and
         execute a causal forest
         """
         data = SWagerDataProvider()
-        from src.justcause.methods import CausalForest
+        from justcause.methods import CausalForest
         cf = CausalForest()
         cf.fit(*data.get_training_data())
         self.assertIsNotNone(cf.predict_ite(*data.get_test_data()))

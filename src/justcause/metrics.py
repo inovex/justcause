@@ -3,19 +3,16 @@ import os
 import numpy as np
 import pandas as pd
 
-from sacred import Experiment
-
-from src.justcause.methods import CausalMethod
-from causaleval.data.data_provider import DataProvider
-
 import config
+
 import matplotlib
 matplotlib.use(config.PLOT_BACKEND)
 import seaborn as sns
 sns.set(style="darkgrid")
 import matplotlib.pyplot as plt
 
-import utils
+from . import utils
+
 
 class EvaluationMetric():
 

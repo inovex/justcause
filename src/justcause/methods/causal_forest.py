@@ -8,6 +8,7 @@ import numpy as np
 
 from .causal_method import CausalMethod
 
+
 class CausalForest(CausalMethod):
 
     def __init__(self, seed=0):

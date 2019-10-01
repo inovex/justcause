@@ -1,25 +1,30 @@
+import os
 
 import numpy as np
 import pandas as pd
 
 import config
-from causaleval.data.data_provider import DataProvider
+from ..data_provider import DataProvider
 from sklearn.preprocessing import RobustScaler, StandardScaler, MinMaxScaler, minmax_scale
 
 
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
+
 def exponential_effect(x):
     return np.exp(1 + x[:, 4] - x[:, 5]/2) # use birth weight
+
 
 def multi_effect(x):
     effect = (x[:, 1]*x[:, 2])**3 + x[:, 4]*x[:, 5]**2
     return minmax_scale(effect, feature_range=(1,10))
 
+
 def multi_modal_effect(X, conf_idx=6):
     prob = (sigmoid(X[:, conf_idx]) > 0.5)
     return np.random.normal((3*prob)+1*(1-prob), 0.1, size=len(X)) # Explicitly multimodal
+
 
 def exponential_effect_old(X, conf_idx=6):
     return np.exp(1 + sigmoid(X[:, conf_idx])) # use birth weight
@@ -288,7 +293,7 @@ class CovariateModulator(DataProvider):
 
 
 
-import os
+
 import config
 os.environ['R_HOME'] = config.R_HOME
 

@@ -6,7 +6,8 @@ from rpy2.robjects.vectors import StrVector, FloatVector, IntVector
 import rpy2.robjects as robjects
 from rpy2.robjects import numpy2ri
 
-from src.justcause.methods import CausalMethod
+from ..causal_method import CausalMethod
+
 
 class Bart(CausalMethod):
 

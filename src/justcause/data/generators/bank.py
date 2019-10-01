@@ -4,10 +4,11 @@ import numpy as np
 import pandas as pd
 from sklearn.preprocessing import minmax_scale, StandardScaler, RobustScaler
 
-from data.data_provider import DataProvider
-import utils
+from ..data_provider import DataProvider
+from ... import utils
 
 import config
+
 
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))

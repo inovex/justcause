@@ -3,23 +3,28 @@ import os
 import numpy as np
 import pandas as pd
 
-from data.data_provider import DataProvider
-import utils
+from ..data_provider import DataProvider
+from ... import utils
 
 import config
 
+
 def sigmoid(x):
     return 1 / (1 + np.exp(-x))
+
 
 def multi_modal_effect(X):
     prob = (sigmoid(X[:, 7]) > 0.5)
     return np.random.normal((3*prob)+1*(1-prob), 0.1, size=len(X)) # Explicitly multimodal
 
+
 def exponential_effect(X):
     return np.exp(1 + sigmoid(X[:, 7])) # use birth weight
 
+
 def small_exponential_effect(X):
     return np.exp(sigmoid(X[:, 7]) - 1) # use birth weight
+
 
 class IHDPGenerator(DataProvider):
 

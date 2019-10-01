@@ -16,7 +16,8 @@ from rpy2.robjects import numpy2ri
 
 import numpy as np
 
-from methods.causal_method import CausalMethod
+from .causal_method import CausalMethod
+
 
 def install_cl():
     """Load the `causalLearning` R package and activate necessary conversion
