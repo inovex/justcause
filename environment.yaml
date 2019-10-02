@@ -15,5 +15,8 @@ dependencies:
   - tensorflow
   - keras
   - pymongo
+  # for development
+  - pytest
+  - pytest-cov
   - pip:
       - sacred

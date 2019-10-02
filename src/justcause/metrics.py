@@ -1,3 +1,8 @@
+"""
+TODO: What does this do? It looks like calculating some metrics, running everything etc, and writing/saving logs. This needs to be split up
+
+
+"""
 import time
 import os
 import numpy as np
@@ -14,7 +19,7 @@ import matplotlib.pyplot as plt
 from . import utils
 
 
-class EvaluationMetric():
+class EvaluationMetric:
 
     def __init__(self, experiment, sizes=None, num_runs=1):
         """
@@ -64,8 +69,8 @@ class EvaluationMetric():
 class StandardEvaluation(EvaluationMetric):
     """All the scores that work with full prediction result of the ITE on test data
     """
-
-    def __init__(self, experiment, sizes=None, num_runs=1, scores=['pehe', 'ate', 'bias', 'enormse']):
+    # ToDo: Get rid of the experiment argument here.
+    def __init__(self, experiment=None, sizes=None, num_runs=1, scores=['pehe', 'ate', 'bias', 'enormse']):
         super().__init__(experiment, sizes, num_runs)
         self.scores = scores
 
@@ -92,7 +97,6 @@ class StandardEvaluation(EvaluationMetric):
         values = list(map(function, true_ites, predicted_ites))
         return np.mean(values), np.std(values) / np.sqrt(len(values))
 
-
     def log_all(self, method, data_provider, size, time_elapsed, pred_test, pred_train, true_test, true_train):
 
         function_map = {
@@ -118,7 +122,8 @@ class StandardEvaluation(EvaluationMetric):
         :param score: mean score
         :param std: standard deviation
         """
-        self.ex.log_scalar(score_name + ',' + str(method) + ',' + str(data_provider) + ',' + str(sample), round(score, 4))
+        # Todo: Interacting with scalar need to be done in the experiment not in the package
+        # self.ex.log_scalar(score_name + ',' + str(method) + ',' + str(data_provider) + ',' + str(sample), round(score, 4))
         print(score_name + ',' + str(method) + ',' + str(data_provider)+ ',' + str(size) + ',' + str(sample) + ',' + str(time) + ',' + str(round(score, 4)) + ',' + str(round(std, 4)))
         self.output = self.output.append(
             other={'metric': score_name, 'method': str(method), 'dataset': str(data_provider), 'size': size, 'sample': sample, 'time': time, 'score': round(score, 4), 'std': round(std, 4)},
@@ -129,7 +134,6 @@ class StandardEvaluation(EvaluationMetric):
         test_true_ites = []
         train_predictions = []
         test_predictions = []
-
 
         function_map = {
             'PEHE-mean'+str(num_runs) : self.pehe_score,
@@ -167,7 +171,6 @@ class StandardEvaluation(EvaluationMetric):
             utils.treatment_scatter(train_true_ites[0], train_predictions[0], str(method))
             utils.error_robustness_plot(list(map(self.pehe_score, train_true_ites, train_predictions)), str(method))
             utils.error_distribution_plot(list(map(self.pehe_score, train_true_ites, train_predictions)), str(method))
-
 
         if size is None:
             size = 'full'
@@ -215,7 +218,7 @@ class StandardEvaluation(EvaluationMetric):
                 self.multi_run(method, data_provider, size, num_runs)
 
         else:
-                self.multi_run(method, data_provider, size=None, num_runs=num_runs)
+            self.multi_run(method, data_provider, size=None, num_runs=num_runs)
 
 
 class PlotEvaluation(EvaluationMetric):
