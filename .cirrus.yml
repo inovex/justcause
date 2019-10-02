@@ -34,6 +34,7 @@ linux_task:
     - printf "Shell - %s\n" "$SHELL"
     - conda config --show
     - conda init bash
+    - exec bash -l # restart Bash
   prepare_script:
     - rm -rf .coverage junit-*.xml
     # ^  avoid information carried from one run to the other
