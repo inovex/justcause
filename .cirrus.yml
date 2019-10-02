@@ -32,7 +32,7 @@ linux_task:
     # ^  avoid information carried from one run to the other
     - conda init bash
   conda_script:
-    - conda env create -f environment.yaml -q -y
+    - conda env create -f environment.yaml -q
     - conda activate justcause
     - pre-commit install
   test_script:
