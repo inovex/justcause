@@ -22,6 +22,6 @@ dependencies:
   - coverage
   - coveralls
   - flake8
-  - pre-commmit
+  - pre_commmit
   - pip:
       - sacred
