@@ -1,4 +1,6 @@
-[![ReadTheDocs](https://readthedocs.org/projects/justcause/badge/?version=latest)](https://justcause.readthedocs.io/en/latest/?badge=latest)
+[![Docs](https://readthedocs.org/projects/justcause/badge/?version=latest)](https://justcause.readthedocs.io/en/latest/?badge=latest)
+[![CI](https://api.cirrus-ci.com/github/inovex/justcause.svg?branch=master)](https://cirrus-ci.com/github/inovex/justcause)
+[![Coverage](https://img.shields.io/coveralls/github/inovex/inovex/master.svg)](https://coveralls.io/r/inovex/justcause)
 
 # JustCause
 

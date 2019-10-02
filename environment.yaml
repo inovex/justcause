@@ -15,8 +15,13 @@ dependencies:
   - tensorflow
   - keras
   - pymongo
-  # for development
+  # for development below here
   - pytest
   - pytest-cov
+  - pytest-virtualenv
+  - coverage
+  - coveralls
+  - flake8
+  - pre-commmit
   - pip:
       - sacred

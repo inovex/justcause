@@ -1,0 +1,44 @@
+---
+# Default values to be merged into tasks:
+auto_cancellation: false
+env:
+  PATH: ${HOME}/.local/bin:${PATH}
+  # ^  add user paths
+  COVERALLS_REPO_TOKEN: vYvXrHgKfcDffAEuHHfZs9LiiDTkaQXU6
+  PIP_CACHE: ${HOME}/.cache/pip
+  LC_ALL: C.UTF-8
+  LANG: C.UTF-8
+
+
+linux_task:
+  # use custom cloning since otherwise git tags are missing
+  name: test (Linux - Anaconda)
+  install_script: &install_script
+    - apt-get install -y git
+  clone_script: |
+    if [ -z "$CIRRUS_PR" ]; then
+      git clone --recursive --branch=$CIRRUS_BRANCH https://x-access-token:${CIRRUS_REPO_CLONE_TOKEN}@github.com/${CIRRUS_REPO_FULL_NAME}.git $CIRRUS_WORKING_DIR
+      git reset --hard $CIRRUS_CHANGE_IN_REPO
+    else
+      git clone --recursive https://x-access-token:${CIRRUS_REPO_CLONE_TOKEN}@github.com/${CIRRUS_REPO_FULL_NAME}.git $CIRRUS_WORKING_DIR
+      git fetch origin pull/$CIRRUS_PR/head:pull/$CIRRUS_PR
+      git reset --hard $CIRRUS_CHANGE_IN_REPO
+    fi
+  container: {image: "continuumio/anaconda3:2019.03"}
+  pip_cache:
+    folder: $PIP_CACHE
+  prepare_script:
+    - rm -rf .coverage junit-*.xml
+    # ^  avoid information carried from one run to the other
+    - conda env create -f environment.yaml
+    - conda activate justcause
+    - pre-commit install
+  test_script:
+    - conda activate justcause
+    - py.test tests --color yes
+    - pre-commit run --all-files
+  coverage_script:
+    - conda activate justcause
+    - coverage combine .coverage
+    - coveralls
+
