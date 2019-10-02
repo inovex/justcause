@@ -30,8 +30,10 @@ linux_task:
     folder: $PIP_CACHE
   conda_cache:
     folder: /opt/conda/pkgs
-  conda_info_script:
+  info_script:
+    - printf "Shell - %s\n" "$SHELL"
     - conda config --show
+    - conda init bash
   prepare_script:
     - rm -rf .coverage junit-*.xml
     # ^  avoid information carried from one run to the other
