@@ -8,6 +8,7 @@ env:
   PIP_CACHE: ${HOME}/.cache/pip
   LC_ALL: C.UTF-8
   LANG: C.UTF-8
+  CIRRUS_SHELL: /bin/bash
 
 
 linux_task:
@@ -27,12 +28,15 @@ linux_task:
   container: {image: "continuumio/anaconda3:2019.03"}
   pip_cache:
     folder: $PIP_CACHE
+  conda_cache:
+    folder: /opt/conda/pkgs
   conda_info_script:
     - conda config --show
   prepare_script:
     - rm -rf .coverage junit-*.xml
     # ^  avoid information carried from one run to the other
-    - conda env update -n root -f environment.yaml -q  # install in root env
+    - conda env create -f environment.yaml -q  # install in root env
+    - conda activate justcause
     - pre-commit install
   test_script:
     - py.test tests --color yes
