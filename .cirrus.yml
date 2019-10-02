@@ -30,7 +30,9 @@ linux_task:
   prepare_script:
     - rm -rf .coverage junit-*.xml
     # ^  avoid information carried from one run to the other
-    - conda env create -f environment.yaml
+    - conda init bash
+  conda_script:
+    - conda env create -f environment.yaml -q -y
     - conda activate justcause
     - pre-commit install
   test_script:
