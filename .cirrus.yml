@@ -27,13 +27,14 @@ linux_task:
   container: {image: "continuumio/anaconda3:2019.03"}
   pip_cache:
     folder: $PIP_CACHE
+  conda_info_script:
+    - conda config --show
   prepare_script:
     - rm -rf .coverage junit-*.xml
     # ^  avoid information carried from one run to the other
-    - conda env update -f environment.yaml -q  # install in root env
+    - conda env update -n root -f environment.yaml -q  # install in root env
     - pre-commit install
   test_script:
-    - conda activate justcause
     - py.test tests --color yes
     - pre-commit run --all-files
   coverage_script:
