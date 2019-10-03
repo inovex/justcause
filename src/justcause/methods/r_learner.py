@@ -10,7 +10,8 @@ from .causal_method import CausalMethod
 
 class RLearner(CausalMethod):
     """
-    Uses the R package provided by X.Nie and S. Wager in ﻿https://arxiv.org/pdf/1712.04912.pdf
+    Uses the R package provided by X.Nie and S. Wager in
+    ﻿https://arxiv.org/pdf/1712.04912.pdf
     """
 
     def __init__(self, seed=0, method="lasso"):
@@ -64,7 +65,8 @@ class RLearner(CausalMethod):
 
 class XLearner(CausalMethod):
     """
-    Uses the R package provided by X.Nie and S. Wager in ﻿https://arxiv.org/pdf/1712.04912.pdf
+    Uses the R package provided by X.Nie and S. Wager in
+    ﻿https://arxiv.org/pdf/1712.04912.pdf
     """
 
     def __init__(self, seed=0, method="lasso"):

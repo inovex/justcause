@@ -3,7 +3,7 @@ import rpy2.robjects as robjects
 import rpy2.robjects.packages as rpackages
 from rpy2.robjects import numpy2ri
 from rpy2.robjects.packages import importr
-from rpy2.robjects.vectors import FloatVector, IntVector, StrVector
+from rpy2.robjects.vectors import FloatVector, StrVector
 
 from ..causal_method import CausalMethod
 

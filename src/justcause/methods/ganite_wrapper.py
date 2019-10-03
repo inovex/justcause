@@ -1,7 +1,4 @@
-import numpy as np
-
 from .causal_method import CausalMethod
-from .data.data_provider import DataProvider
 from .ganite.ganite_model import GANITEModel
 
 

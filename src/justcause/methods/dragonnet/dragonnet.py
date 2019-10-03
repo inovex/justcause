@@ -8,6 +8,21 @@ from keras.optimizers import SGD, Adam
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
+from .dragon_utils import (
+    binary_classification_loss,
+    dead_loss,
+    dragonnet_loss_binarycross,
+    make_dragonnet,
+    make_ned,
+    make_tarnet,
+    make_tarreg_loss,
+    ned_loss,
+    post_cut,
+    regression_loss,
+    track_epsilon,
+    treatment_accuracy,
+)
+
 
 def _split_output(yt_hat, t, y, y_scaler, x, index):
     q_t0 = y_scaler.inverse_transform(yt_hat[:, 0].copy())
@@ -182,8 +197,6 @@ def train_and_predict_dragons(
         t_train, t_test = t[train_index], t[test_index]
         yt_train = np.concatenate([y_train, t_train], 1)
 
-        import time
-
         start_time = time.time()
 
         dragonnet.compile(optimizer=Adam(lr=1e-3), loss=loss, metrics=metrics)
@@ -300,8 +313,6 @@ def train_and_predict_ned(
         y_train, y_test = y[train_index], y[test_index]
         t_train, t_test = t[train_index], t[test_index]
         yt_train = np.concatenate([y_train, t_train], 1)
-
-        import time
 
         start_time = time.time()
 

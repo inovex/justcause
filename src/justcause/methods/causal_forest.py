@@ -1,5 +1,6 @@
 """
-ToDo: Keep this a pure wrapper but don't just install the R packages. Rather provide this in a class method function.
+ToDo: Keep this a pure wrapper but don't just install the R packages.
+      Rather provide this in a class method function.
 ToDo: Check if this could  be done with the sklearn random forest too?
 """
 
@@ -16,7 +17,8 @@ from .causal_method import CausalMethod
 class CausalForest(CausalMethod):
     def __init__(self, seed=0):
         super().__init__(seed)
-        numpy2ri.activate()  # ToDo: Check if this should rather be done only once somewhere in __init__.py
+        # ToDo: Check if this should rather be done only once somewhere in __init__.py
+        numpy2ri.activate()
         self.grf = importr("grf")
         self.forest = None
 
@@ -41,7 +43,8 @@ class CausalForest(CausalMethod):
 
         names_to_install = [x for x in package_names if not rpackages.isinstalled(x)]
         if len(names_to_install) > 0:
-            # Todo: Expect the user to have set a proper repo and check it. This is only a workaround
+            # Todo: Expect the user to have set a proper repo and check it.
+            #       This is only a workaround
             utils.install_packages(
                 StrVector(names_to_install), repos="http://cran.us.r-project.org"
             )

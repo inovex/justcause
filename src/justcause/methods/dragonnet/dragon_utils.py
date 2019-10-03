@@ -2,7 +2,7 @@ import keras.backend as K
 import tensorflow as tf
 from keras import regularizers
 from keras.engine.topology import Layer
-from keras.layers import BatchNormalization, Concatenate, Dense, Dropout, Input
+from keras.layers import Concatenate, Dense, Input
 from keras.metrics import binary_accuracy
 from keras.models import Model
 
@@ -116,8 +116,8 @@ def make_dragonnet(input_dim, reg_l2):
 
     K.clear_session()  #
 
-    t_l1 = 0.0
-    t_l2 = reg_l2
+    t_l1 = 0.0  # noqa: F841
+    t_l2 = reg_l2  # noqa: F841
     inputs = Input(shape=(input_dim,), name="input")
 
     # representation

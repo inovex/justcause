@@ -14,7 +14,7 @@ TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONIN
 THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
 CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
-"""
+"""  # noqa: E501
 from __future__ import print_function
 
 import sys
@@ -50,7 +50,21 @@ class GANITEModel(object):
         self.sess = tf.Session(config=config)
         self.num_treatments = num_treatments
 
-        self.cf_generator_loss, self.cf_discriminator_loss, self.ite_generator_loss, self.ite_discriminator_loss, self.x, self.t, self.y_f, self.y_full, self.y_pred_cf, self.y_pred_ite, self.z_g, self.z_i = GANITEBuilder.build(
+        # ToDo: This is crazy, never return that many values
+        (
+            self.cf_generator_loss,
+            self.cf_discriminator_loss,
+            self.ite_generator_loss,
+            self.ite_discriminator_loss,
+            self.x,
+            self.t,
+            self.y_f,
+            self.y_full,
+            self.y_pred_cf,
+            self.y_pred_ite,
+            self.z_g,
+            self.z_i,
+        ) = GANITEBuilder.build(
             input_dim,
             output_dim,
             num_units=num_units,
@@ -89,7 +103,7 @@ class GANITEModel(object):
         return GANITEModel.get_scoped_variables("d_ite")
 
     def load(self, path):
-        saver = tf.train.Saver()
+        saver = tf.train.Saver()  # noqa: F841
         # saver.restore(self.sess, path)
 
     def train(
@@ -111,7 +125,7 @@ class GANITEModel(object):
         verbose=False,
     ):
 
-        saver = tf.train.Saver(max_to_keep=0)
+        saver = tf.train.Saver(max_to_keep=0)  # noqa: F841
 
         global_step_1 = tf.Variable(0, trainable=False, dtype="int64")
         global_step_2 = tf.Variable(0, trainable=False, dtype="int64")
@@ -234,7 +248,8 @@ class GANITEModel(object):
         self, epoch_idx, num_epochs, train_losses, val_losses, did_save=False
     ):
         print(
-            "Epoch [{:04d}/{:04d}] {:} TRAIN: G={:.3f} D={:.3f} VAL: G={:.3f} D={:.3f}".format(
+            "Epoch [{:04d}/{:04d}] {:} TRAIN: G={:.3f} D={:.3f} "
+            "VAL: G={:.3f} D={:.3f}".format(
                 epoch_idx,
                 num_epochs,
                 "xx" if did_save else "::",
