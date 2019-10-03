@@ -1,3 +1,8 @@
+"""
+ToDo: Keep this a pure wrapper but don't just install the R packages. Rather provide this in a class method function.
+
+"""
+
 from rpy2.robjects.packages import importr
 import rpy2.robjects.packages as rpackages
 from rpy2.robjects.vectors import StrVector, FloatVector, IntVector
@@ -13,7 +18,8 @@ class CausalForest(CausalMethod):
 
     def __init__(self, seed=0):
         super().__init__(seed)
-        self.grf = self.install_grf()
+        numpy2ri.activate()  # ToDo: Check if this should rather be done only once somewhere in __init__.py
+        self.grf = importr("grf")
         self.forest = None
 
     def __str__(self):
@@ -24,20 +30,21 @@ class CausalForest(CausalMethod):
         """Install the `grf` R package and active necessary conversion
 
         :return: The robject for `grf`
-        """
 
+        ToDo: Make this a function that can download several things, not only "grf"
+        """
         # robjects.r is a singleton
         robjects.r.options(download_file_method='curl')
         numpy2ri.activate()
         package_names = ["grf"]
         utils = rpackages.importr('utils')
-        utils.chooseCRANmirror(ind=0)
+        # ToDo: No user interaction when running functions form a library
+        # utils.chooseCRANmirror(ind=0)
 
         names_to_install = [x for x in package_names if not rpackages.isinstalled(x)]
         if len(names_to_install) > 0:
-            utils.install_packages(StrVector(names_to_install))
-
-        return importr("grf")
+            # Todo: Expect the user to have set a proper repo and check it. This is only a workaround
+            utils.install_packages(StrVector(names_to_install), repos='http://cran.us.r-project.org')
 
     def predict_ate(self, x, t=None, y=None):
         predictions = self.predict_ite(x)

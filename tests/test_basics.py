@@ -55,7 +55,7 @@ def test_dataprovider():
     assert len(t_test) == 1000
 
 
-def test_rpy2():
+def test_rpy2(grf):
     """
     Tests whether rpy2 is able to load the R environment and
     execute a causal forest
