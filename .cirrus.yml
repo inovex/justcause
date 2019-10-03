@@ -46,7 +46,6 @@ linux_task:
   test_script:
     - source /opt/conda/etc/profile.d/conda.sh &> /dev/null
     - conda activate $ENV_NAME &> /dev/null
-    - conda list
     - py.test tests --color yes
     - pre-commit run --all-files
   coverage_script:
