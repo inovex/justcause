@@ -1,6 +1,6 @@
 """
 ToDo: Keep this a pure wrapper but don't just install the R packages. Rather provide this in a class method function.
-
+ToDo: Check if this could  be done with the sklearn random forest too?
 """
 
 from rpy2.robjects.packages import importr
