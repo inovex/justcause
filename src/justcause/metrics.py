@@ -164,11 +164,12 @@ class StandardEvaluation(EvaluationMetric):
             df_pred = pd.DataFrame(data=train_true_ites)
             df_pred.to_csv(path)
 
-        else:
-            utils.robustness_plot(train_true_ites, train_predictions, str(method))
-            utils.treatment_scatter(train_true_ites[0], train_predictions[0], str(method))
-            utils.error_robustness_plot(list(map(self.pehe_score, train_true_ites, train_predictions)), str(method))
-            utils.error_distribution_plot(list(map(self.pehe_score, train_true_ites, train_predictions)), str(method))
+        # ToDo: See where this should go. Do not just plot during the experiment run
+        #else:
+            # utils.robustness_plot(train_true_ites, train_predictions, str(method))
+            # utils.treatment_scatter(train_true_ites[0], train_predictions[0], str(method))
+            # utils.error_robustness_plot(list(map(self.pehe_score, train_true_ites, train_predictions)), str(method))
+            # utils.error_distribution_plot(list(map(self.pehe_score, train_true_ites, train_predictions)), str(method))
 
         if size is None:
             size = 'full'
