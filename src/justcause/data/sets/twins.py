@@ -9,8 +9,10 @@ class TwinsDataProvider(DataProvider):
     """
     The Twin dataset provider
 
-    The data itself is not a treatment study, but rather an observation of the mortality rates of twins.
-    We synthetically create a 'control'/'treatment' as being the younger / older twin, respectively.
+    The data itself is not a treatment study, but rather an observation
+    of the mortality rates of twins.
+    We synthetically create a 'control'/'treatment' as being the
+    younger / older twin, respectively.
     """
 
     def __init__(self):
@@ -30,7 +32,8 @@ class TwinsDataProvider(DataProvider):
         df = pd.concat([df, y_df[["mort_0", "mort_1"]]], axis=1)
         df = df.dropna()
         df = df[df["dbirwt_0"] < 2000]
-        df_norm = ((df - df.min())) / (df.max() - df.min())
+        df_norm = (df - df.min()) / (df.max() - df.min())
+
         w = np.random.uniform(-0.1, 0.1, df.shape[1])
         weighted = np.dot(df_norm.values, w)
         n = np.random.normal(0, 0.1, df.shape[0])

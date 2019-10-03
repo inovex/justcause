@@ -4,14 +4,7 @@ import config
 import numpy as np
 import pandas as pd
 
-from ...utils import (
-    ite_plot,
-    plot_y_dist,
-    simple_comparison_mean,
-    surface_plot,
-    true_ate_dist_plot,
-    true_ate_plot
-)
+from ...utils import true_ate_dist_plot, true_ate_plot
 from ..data_provider import DataProvider
 
 

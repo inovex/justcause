@@ -29,7 +29,8 @@ class DataProvider:
 
     def load_training_data(self):
         """
-        Override this function to set x,y,t,y_cf with the required values for the specific dataset
+        Override this function to set x,y,t,y_cf with the required values
+        for the specific dataset
 
         see data/sets/ihdp.py for an example.
 
@@ -107,7 +108,8 @@ class DataProvider:
         """
         Return true ITE for training data
 
-        :param subset: if true, return ite of the last retrieved subset (see get_training_data)
+        :param subset: if true, return ite of the last retrieved subset
+                      (see get_training_data)
         :return: true ITE for training data
         """
         if subset:
@@ -167,8 +169,8 @@ class DataProvider:
     def reset_cycle(self):
         """Resets the replica counter if it exists
 
-        Providers that have access to multiple replicas of the dataset will return a different
-        replica for each run.
+        Providers that have access to multiple replicas of the dataset will
+        return a different replica for each run.
 
         :return:
         """

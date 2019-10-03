@@ -1,14 +1,7 @@
-import os
-
 import config
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import (
-    MinMaxScaler,
-    RobustScaler,
-    StandardScaler,
-    minmax_scale
-)
+from sklearn.preprocessing import StandardScaler, minmax_scale
 
 from ..data_provider import DataProvider
 
@@ -94,7 +87,7 @@ class SWagerDataProvider(DataProvider):
         elif self.setting == "more_conf_small":
             # confounded treatment effect, small.
             ite = sigmoid(X[:, 2] + X[:, 3])
-            ite_test = sigmoid(X_test[:, 2] + X_test[:, 3]) / 2
+            ite_test = sigmoid(X_test[:, 2] + X_test[:, 3]) / 2  # noqa: F841
             T = np.random.binomial(
                 1, sigmoid(X[:, 2] + X[:, 3]), size=n
             )  # people with higher effect get treatment
@@ -113,7 +106,8 @@ class SWagerDataProvider(DataProvider):
 class SWagerRealCompare(DataProvider):
     def __init__(self, setting="simple"):
         """
-        :param params: dict containing 'random', 'homogeneous', 'deterministic', 'confounded'
+        :param params: dict containing 'random', 'homogeneous', 'deterministic',
+                       'confounded'
         """
         self.setting = setting
         super().__init__()
@@ -129,7 +123,7 @@ class SWagerRealCompare(DataProvider):
         self.x = self.covariates
 
         n = len(self.x)
-        p = self.x.shape[1]
+        p = self.x.shape[1]  # noqa: F841
         X = StandardScaler().fit_transform(self.x)
         self.x = X
         noise_scale = 0
@@ -161,7 +155,8 @@ class SWagerRealCompare(DataProvider):
 class Second(DataProvider):
     def __init__(self, setting="simple"):
         """
-        :param params: dict containing 'random', 'homogeneous', 'deterministic', 'confounded'
+        :param params: dict containing 'random', 'homogeneous', 'deterministic',
+                       'confounded'
         """
         self.setting = setting
         super().__init__()
@@ -177,7 +172,7 @@ class Second(DataProvider):
         self.x = self.covariates
 
         n = len(self.x)
-        p = self.x.shape[1]
+        p = self.x.shape[1]  # noqa: F841
         X = StandardScaler().fit_transform(self.x)
         self.x = X
         noise_scale = 0.1
@@ -211,7 +206,8 @@ class Second(DataProvider):
 class MultiExpoACICGenerator(DataProvider):
     def __init__(self, setting="multi-modal"):
         """
-        :param params: dict containing 'random', 'homogeneous', 'deterministic', 'confounded'
+        :param params: dict containing 'random', 'homogeneous', 'deterministic',
+                       'confounded'
         """
         self.setting = setting
         super().__init__()
@@ -229,12 +225,13 @@ class MultiExpoACICGenerator(DataProvider):
         conf_idx = 2
 
         n = len(self.x)
-        p = self.x.shape[1]
+        p = self.x.shape[1]  # noqa: F841
         X = StandardScaler().fit_transform(self.x)
         self.x = X[X[:, 2] < 8]
         X = self.x
         noise_scale = 0.1
-        noise = np.random.normal(scale=noise_scale, size=n)  # add some noise
+        # add some noise
+        noise = np.random.normal(scale=noise_scale, size=n)  # noqa: F841
 
         Y_0 = np.random.gamma(0.2, 1, size=len(X))
 
@@ -257,7 +254,8 @@ class MultiExpoACICGenerator(DataProvider):
 class CovariateModulator(DataProvider):
     def __init__(self, setting="big"):
         """
-        :param params: dict containing 'random', 'homogeneous', 'deterministic', 'confounded'
+        :param params: dict containing 'random', 'homogeneous', 'deterministic',
+                       'confounded'
         """
         self.setting = setting
         super().__init__()

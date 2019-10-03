@@ -20,7 +20,8 @@ exp_coeffs = np.random.normal(loc=0, scale=0.5, size=10)
 
 def normal_polynomial(vars):
     """
-    Calculate the averaged value of linear function with normal sampled coefficients for the input vars
+    Calculate the averaged value of linear function with normal
+    sampled coefficients for the input vars
     Usually returns results around 0, if inputs are normalized
     :param vars:
     :return:
@@ -67,7 +68,8 @@ class ACICGenerator(DataGenerator):
     def __init__(self, params):
         """
 
-        :param params: dict containing 'random', 'homogeneous', 'deterministic', 'confounded'
+        :param params: dict containing 'random', 'homogeneous',
+                       'deterministic', 'confounded'
         """
         covariates_df = pd.read_csv(config.IBM_PATH_ROOT + "/" + "covariates.csv")
         covariates_df = covariates_df.loc[:, covariates_df.var() > 0.3]
@@ -150,8 +152,10 @@ class ACICGenerator(DataGenerator):
     ):
         """
 
-        :param covariates: covariate matrix of shape (n, k) with n instances and k features
-        :param num_parents: number of parents on which treatment assignment should depend
+        :param covariates: covariate matrix of shape (n, k) with n instances and k
+                           features
+        :param num_parents: number of parents on which treatment assignment should
+                            depend
         :param relation: strength of the relationship from parents to treatment
         :param use_parents: use predefined set of parent covariates
             parents should be the subset of the covariate matrix
@@ -194,18 +198,24 @@ class ACICGenerator(DataGenerator):
     ):
         """Generate treatment effect based on subset of covariates
 
-        Currently, the function is called with the parents selected in outcome_assignment(), thus use_parents
-        always contains the relevant covariate-submatrix
+        Currently, the function is called with the parents selected in
+        outcome_assignment(), thus use_parents always contains the
+        relevant covariate-submatrix
 
-        :param covariates: covariate matrix of shape (n, k) with n instances and k features
-        :param relation: strength of the relationship from parents to treatment effect (strength of confounding)
-        :param homogeneous: Whether or not treatment effect should be homogeneous / equal for all instances
-        :param num_parents: number of parents on which outcome generation should depend
+        :param covariates: covariate matrix of shape (n, k) with n
+                           instances and k features
+        :param relation: strength of the relationship from parents to
+                         treatment effect (strength of confounding)
+        :param homogeneous: Whether or not treatment effect should be
+                            homogeneous / equal for all instances
+        :param num_parents: number of parents on which outcome generation
+                            should depend
         :param use_parents: use predefined set of parent covariates
             parents should be the subset of the covariate matrix
         :return: treatment effect vector
         """
-        np.random.seed(self.params["seed"])  # make sure to fix the seed for replication
+        # make sure to fix the seed for replication ToDo: don't do it here
+        np.random.seed(self.params["seed"])
         if homogeneous:
             return np.full(len(covariates), 1.5) + np.random.normal(
                 0, 0.1, size=len(covariates)
@@ -225,9 +235,11 @@ class ACICGenerator(DataGenerator):
                     effect.reshape(-1, 1), feature_range=(1, 2)
                 ).reshape(1, -1)[0]
             elif relation == "strong":
-                # Relation is deterministic and treatment effect is binary (either 1 or 0)
+                # Relation is deterministic and treatment effect is binary
+                # (either 1 or 0)
                 # confounders = minmax_scale(confounders, feature_range=(-1.5,1.5))
-                # exp_poly = scipy.special.expit(np.array(list(map(normal_polynomial, confounders))))
+                # exp_poly = scipy.special.expit(np.array(list(map(normal_polynomial,
+                #                                                  confounders))))
 
                 weight = (
                     RobustScaler()
@@ -248,13 +260,15 @@ class ACICGenerator(DataGenerator):
     ):
         """
 
-        :param covariates: covariate matrix of shape (n, k) with n instances and k features
+        :param covariates: covariate matrix of shape (n, k) with n instances and k
+                           features
         :param num_parents: number of parents on which outcome generation should depend
         :param constant_base: Whether the y_0 surface ought to be constant
         :param relation: strength of the relationship from parents to treatment
         :param use_parents: use predefined set of parent covariates
             parents should be the subset of the covariate matrix
-        :param homogeneous: Whether or not treatment effect should be homogeneous / equal for all instances
+        :param homogeneous: Whether or not treatment effect should be homogeneous
+                           / equal for all instances
         :return: binary treatment vector
         """
         np.random.seed(self.params["seed"])  # make sure to fix the seed for replication
@@ -294,7 +308,8 @@ class ACICGenerator(DataGenerator):
         :param deterministic: Whether assignment ought to be deterministic
             deterministic assignment results in a no-overlap condition
         :return: t, ys, y, y_cf
-            treatment vector, both outcomes, observed outcomes according to treatment, counterfactual outcomes
+            treatment vector, both outcomes, observed outcomes according to treatment,
+            counterfactual outcomes
         """
         np.random.seed(self.params["seed"])  # make sure to fix the seed for replication
 

@@ -10,5 +10,6 @@ class DataGenerator(DataProvider):
 
         self.params = params
 
-        # Call super constructor only after setting the attributes to make sure all the init functions work
+        # Call super constructor only after setting the attributes to
+        # make sure all the init functions work
         super().__init__()

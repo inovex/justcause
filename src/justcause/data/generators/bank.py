@@ -3,7 +3,7 @@ import os
 import config
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import RobustScaler, StandardScaler, minmax_scale
+from sklearn.preprocessing import StandardScaler, minmax_scale
 
 from ... import utils
 from ..data_provider import DataProvider
@@ -13,11 +13,12 @@ def sigmoid(x):
     return 1 / (1 + np.exp(-x))
 
 
-## CLEANING CODE FROM: https://www.kaggle.com/aleksandradeis/bank-marketing-analysis
+# CLEANING CODE FROM: https://www.kaggle.com/aleksandradeis/bank-marketing-analysis
 
 
 def get_dummy_from_bool(row, column_name):
-    """ Returns 0 if value in column_name is no, returns 1 if value in column_name is yes"""
+    """Returns 0 if value in column_name is no, returns 1 if value in
+    column_name is yes"""
     return 1 if row[column_name] == "yes" else 0
 
 
@@ -45,7 +46,8 @@ def clean_data(df):
 
     cleaned_df = df.copy()
 
-    # convert columns containing 'yes' and 'no' values to boolean variables and drop original columns
+    # convert columns containing 'yes' and 'no' values to boolean variables
+    # and drop original columns
     bool_columns = ["default", "housing", "loan", "y"]
     for bool_col in bool_columns:
         cleaned_df[bool_col + "_bool"] = df.apply(
@@ -98,10 +100,11 @@ class MarketingData(DataProvider):
         #
         # data = pd.read_csv(path, sep=';')
         # cleaned_data = clean_data(data)
-        # data = cleaned_data.iloc[:, :25].drop(columns=del_col) # only use customer data
+        # only use customer data below
+        # data = cleaned_data.iloc[:, :25].drop(columns=del_col)
         path = os.path.join(config.ROOT_DIR, "datasets/banking/clean.csv")
         data = pd.read_csv(path)
-        age, balance, duration = (
+        age, balance, duration = (  # noqa: F841 ToDo: fix this
             data["age"].values,
             data["balance"].values,
             data["duration"].values,
@@ -127,7 +130,7 @@ class MarketingData(DataProvider):
         self.y_1 = self.y_0 + ite
         self.t = np.random.binomial(1, 1 - sigmoid(standard_age), size=len(age))
         self.y = (self.y_1 * self.t) + self.y_0 * (1 - self.t)
-        self.y_cf = self.y_1 * (1 - self.t) + self.y_0 * (self.t)
+        self.y_cf = self.y_1 * (1 - self.t) + self.y_0 * self.t
         self.x = data.values
 
 
@@ -156,6 +159,7 @@ if __name__ == "__main__":
 
     twins = gen
     choice = np.random.choice(len(twins.x), size=1000)
-    # utils.surface_plot(twins.y_1[choice], twins.y_0[choice], twins.y[choice], twins.y_cf[choice], twins.x[choice],name='Marketing')
+    # utils.surface_plot(twins.y_1[choice], twins.y_0[choice], twins.y[choice],
+    #                    twins.y_cf[choice], twins.x[choice],name='Marketing')
     utils.simple_comparison_mean(gen.y, gen.t)
     print(gen.get_train_ate())

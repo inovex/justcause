@@ -16,6 +16,7 @@ methods easier, by allowing to compare them across both generated and existing d
 
 #### ToDos:
 
+* Get rid of all those unused variables, currently suppressed with `# noqa: F841`
 * The package itself should not depend on sacred, only the experiment a user of the package sets up. Thus remove it from metrics.py
 * Separate Loggin/Writing stuff from the actual calculation of metrics in metrics.py (single level of responsibility)
 * make the package itself independent of Sacred, just advocate it as best practice
