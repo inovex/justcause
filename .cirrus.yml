@@ -56,4 +56,3 @@ linux_task:
     - conda activate $ENV_NAME
     - coverage combine .coverage
     - coveralls
-

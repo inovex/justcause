@@ -1,11 +1,9 @@
-
 class DataInputError(Exception):
     pass
 
 
 # Todo: Make this a proper abstract class
 class CausalMethod:
-
     def __init__(self, seed=0):
         """
 
@@ -58,4 +56,4 @@ class CausalMethod:
         return False
 
     def fit_provider(self, data_provider):
-        raise NotImplementedError('No provider based training implemented')
+        raise NotImplementedError("No provider based training implemented")

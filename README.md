@@ -1,6 +1,9 @@
 [![Docs](https://readthedocs.org/projects/justcause/badge/?version=latest)](https://justcause.readthedocs.io/en/latest/?badge=latest)
 [![CI](https://api.cirrus-ci.com/github/inovex/justcause.svg?branch=master)](https://cirrus-ci.com/github/inovex/justcause)
 [![Coverage](https://img.shields.io/coveralls/github/inovex/inovex/master.svg)](https://coveralls.io/r/inovex/justcause)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![PyPI-Server](https://img.shields.io/pypi/v/justcause.svg)](https://pypi.org/project/justcause/)
+
 
 # JustCause
 
@@ -22,26 +25,26 @@ methods easier, by allowing to compare them across both generated and existing d
 * use Sphinx (checkout `docs` folder) to create command reference and some explanations.
 * remove `configs/config.py` by passing only relevant information as arguments to the functions of the package. Configuration
   of an experiment is subject to the experiment itself.
-* adhere to `pep8` and other standards. Use `pre-commit` (which is set up below) to check and correct all mistakes  
-* Don't fix things like random seed within the package, it's a library, advocate to do this outside 
+* adhere to `pep8` and other standards. Use `pre-commit` (which is set up below) to check and correct all mistakes
+* Don't fix things like random seed within the package, it's a library, advocate to do this outside
  (name this best-practice within the docs)
 * separate modules that only do math from plotting modules. Why would the generators/acic module need matplotlib as dependency
 * follow import order, first Python internal modules, then external, then the modules of your package.
 * use PyCharm and check for the curly yellow underline hints how to improve the code
 * add some example notebooks in the notebooks folder
 * add the libraries which a required (no visualisation) into setup.cfg under requires.
-* Check licences of third-party methods and add and note them accordingly. Within the __init__.py of the subpackage 
-  add a docstring and state the licences and the original authors. 
-* Do not set environment variables inside library, rather state this somewhere in the docs. os.environ['L_ALL'] 
+* Check licences of third-party methods and add and note them accordingly. Within the __init__.py of the subpackage
+  add a docstring and state the licences and the original authors.
+* Do not set environment variables inside library, rather state this somewhere in the docs. os.environ['L_ALL']
 * Never print something in a library, use the logging module for logging. Takes a while to comprehend
 * move the `experiment.py` module into the `scripts` folder because it's actually using the package (fix the imports accordingly)
-* avoid plotting to `results/plots/S-Learner - LinearRegressionrobustness.png'` in the unittests (right now the directory 
+* avoid plotting to `results/plots/S-Learner - LinearRegressionrobustness.png'` in the unittests (right now the directory
   needs to be created for the unittests to run)
 * Do imports within functions only when really necessary (there are rare cases only) otherwise on the top of the module
-* Don't set `R_HOME` environment variable and rely on what conda is doing for you. Avoid setting any kind of path 
+* Don't set `R_HOME` environment variable and rely on what conda is doing for you. Avoid setting any kind of path
   via environment variables.
 * Remove all `if __name__ == "__main__":` sections from the modules in the justcause package
-* When files are downloaded keep them under `~/.justcause` (, i.e. hidden directory in the home dir) and access them. 
+* When files are downloaded keep them under `~/.justcause` (, i.e. hidden directory in the home dir) and access them.
   Check out how this in done under https://github.com/maciejkula/spotlight/blob/master/spotlight/datasets/_transport.py
 * Use cirrus as CI system.
 * Consider using the abstract base classes of Scikit-Learn with their Mixin concept instead of providing an own.

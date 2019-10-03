@@ -139,5 +139,3 @@ Some steps to continue the work on this project would be
   - Obviously, add more methods and reference datasets
   - Implement experiment as a module, which is given methods, data and settings of the experiments and returns the full
   - Write tests ;)
-
-

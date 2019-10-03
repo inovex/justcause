@@ -4,21 +4,19 @@ This needs to be split up
 
 
 """
-import time
 import os
-import numpy as np
-import pandas as pd
+import time
 
 import config
-
-import seaborn as sns
-sns.set(style="darkgrid")
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import seaborn as sns
 
+sns.set(style="darkgrid")
 
 
 class EvaluationMetric:
-
     def __init__(self, experiment, sizes=None, num_runs=1):
         """
 
@@ -67,11 +65,17 @@ class EvaluationMetric:
 class StandardEvaluation(EvaluationMetric):
     """All the scores that work with full prediction result of the ITE on test data
     """
+
     # ToDo: Get rid of the experiment argument here.
-    def __init__(self, experiment=None, sizes=None, num_runs=1, scores=['pehe', 'ate', 'bias', 'enormse']):
+    def __init__(
+        self,
+        experiment=None,
+        sizes=None,
+        num_runs=1,
+        scores=["pehe", "ate", "bias", "enormse"],
+    ):
         super().__init__(experiment, sizes, num_runs)
         self.scores = scores
-
 
     @staticmethod
     def pehe_score(true, predicted):
@@ -83,11 +87,14 @@ class StandardEvaluation(EvaluationMetric):
 
     @staticmethod
     def enormse(true, predicted):
-        return np.sqrt(np.sum(np.power((1 - (predicted + 0.0001) /(true + 0.0001)), 2))/true.shape[0])
+        return np.sqrt(
+            np.sum(np.power((1 - (predicted + 0.0001) / (true + 0.0001)), 2))
+            / true.shape[0]
+        )
 
     @staticmethod
     def bias(true, predicted):
-        return np.sum(predicted - true)/true.shape[0]
+        return np.sum(predicted - true) / true.shape[0]
 
     @staticmethod
     def multi_run_function(true_ites, predicted_ites, function):
@@ -95,21 +102,48 @@ class StandardEvaluation(EvaluationMetric):
         values = list(map(function, true_ites, predicted_ites))
         return np.mean(values), np.std(values) / np.sqrt(len(values))
 
-    def log_all(self, method, data_provider, size, time_elapsed, pred_test, pred_train, true_test, true_train):
+    def log_all(
+        self,
+        method,
+        data_provider,
+        size,
+        time_elapsed,
+        pred_test,
+        pred_train,
+        true_test,
+        true_train,
+    ):
 
         function_map = {
-            'PEHE' : self.pehe_score,
-            'ATE' : self.ate_error,
-            'ENORMSE' : self.enormse,
-            'BIAS' : self.bias,
-
+            "PEHE": self.pehe_score,
+            "ATE": self.ate_error,
+            "ENORMSE": self.enormse,
+            "BIAS": self.bias,
         }
 
         for key in function_map:
-            self.log_method(key, method, data_provider, size, 'train', time_elapsed, function_map[key](pred_train, true_train))
-            self.log_method(key, method, data_provider, size, 'test', time_elapsed, function_map[key](pred_test, true_test))
+            self.log_method(
+                key,
+                method,
+                data_provider,
+                size,
+                "train",
+                time_elapsed,
+                function_map[key](pred_train, true_train),
+            )
+            self.log_method(
+                key,
+                method,
+                data_provider,
+                size,
+                "test",
+                time_elapsed,
+                function_map[key](pred_test, true_test),
+            )
 
-    def log_method(self, score_name, method, data_provider, size, sample, time, score, std=0):
+    def log_method(
+        self, score_name, method, data_provider, size, sample, time, score, std=0
+    ):
         """Log output to console, csv and sacred logging
 
         :param score_name:
@@ -122,10 +156,36 @@ class StandardEvaluation(EvaluationMetric):
         """
         # Todo: Interacting with scalar need to be done in the experiment not in the package
         # self.ex.log_scalar(score_name + ',' + str(method) + ',' + str(data_provider) + ',' + str(sample), round(score, 4))
-        print(score_name + ',' + str(method) + ',' + str(data_provider)+ ',' + str(size) + ',' + str(sample) + ',' + str(time) + ',' + str(round(score, 4)) + ',' + str(round(std, 4)))
+        print(
+            score_name
+            + ","
+            + str(method)
+            + ","
+            + str(data_provider)
+            + ","
+            + str(size)
+            + ","
+            + str(sample)
+            + ","
+            + str(time)
+            + ","
+            + str(round(score, 4))
+            + ","
+            + str(round(std, 4))
+        )
         self.output = self.output.append(
-            other={'metric': score_name, 'method': str(method), 'dataset': str(data_provider), 'size': size, 'sample': sample, 'time': time, 'score': round(score, 4), 'std': round(std, 4)},
-            ignore_index=True)
+            other={
+                "metric": score_name,
+                "method": str(method),
+                "dataset": str(data_provider),
+                "size": size,
+                "sample": sample,
+                "time": time,
+                "score": round(score, 4),
+                "std": round(std, 4),
+            },
+            ignore_index=True,
+        )
 
     def multi_run(self, method, data_provider, size, num_runs):
         train_true_ites = []
@@ -134,21 +194,23 @@ class StandardEvaluation(EvaluationMetric):
         test_predictions = []
 
         function_map = {
-            'PEHE-mean'+str(num_runs) : self.pehe_score,
-            'ATE-mean'+str(num_runs): self.ate_error,
-            'ENORMSE-mean'+str(num_runs) : self.enormse,
-            'BIAS-mean'+str(num_runs) : self.bias,
+            "PEHE-mean" + str(num_runs): self.pehe_score,
+            "ATE-mean" + str(num_runs): self.ate_error,
+            "ENORMSE-mean" + str(num_runs): self.enormse,
+            "BIAS-mean" + str(num_runs): self.bias,
         }
 
         start = time.time()
 
         for run in range(num_runs):
             # Perform evaluation for a number of runs
-            print('Run number: ' + str(run))
+            print("Run number: " + str(run))
             pred_train, pred_test = self.prep_ite(data_provider, method, size=size)
             train_predictions.append(pred_train)
             test_predictions.append(pred_test)
-            train_true_ites.append(data_provider.get_train_ite(subset=(size is not None)))
+            train_true_ites.append(
+                data_provider.get_train_ite(subset=(size is not None))
+            )
             test_true_ites.append(data_provider.get_test_ite())
 
         time_elapsed = time.time() - start
@@ -158,38 +220,62 @@ class StandardEvaluation(EvaluationMetric):
         if config.SERVER and num_runs > 50:
             # write out files for plots, if number of runs is large on the server
             df_true = pd.DataFrame(data=train_true_ites)
-            path = os.path.join(config.LOG_FILE_PATH, str(method)+'-'+str(data_provider)+'-'+str(num_runs)-'true')
+            path = os.path.join(
+                config.LOG_FILE_PATH,
+                str(method) + "-" + str(data_provider) + "-" + str(num_runs) - "true",
+            )
             df_true.to_csv(path)
-            path = os.path.join(config.LOG_FILE_PATH, str(method)+'-'+str(data_provider)+'-'+str(num_runs)-'train')
+            path = os.path.join(
+                config.LOG_FILE_PATH,
+                str(method) + "-" + str(data_provider) + "-" + str(num_runs) - "train",
+            )
             df_pred = pd.DataFrame(data=train_true_ites)
             df_pred.to_csv(path)
 
         # ToDo: See where this should go. Do not just plot during the experiment run
-        #else:
-            # utils.robustness_plot(train_true_ites, train_predictions, str(method))
-            # utils.treatment_scatter(train_true_ites[0], train_predictions[0], str(method))
-            # utils.error_robustness_plot(list(map(self.pehe_score, train_true_ites, train_predictions)), str(method))
-            # utils.error_distribution_plot(list(map(self.pehe_score, train_true_ites, train_predictions)), str(method))
+        # else:
+        # utils.robustness_plot(train_true_ites, train_predictions, str(method))
+        # utils.treatment_scatter(train_true_ites[0], train_predictions[0], str(method))
+        # utils.error_robustness_plot(list(map(self.pehe_score, train_true_ites, train_predictions)), str(method))
+        # utils.error_distribution_plot(list(map(self.pehe_score, train_true_ites, train_predictions)), str(method))
 
         if size is None:
-            size = 'full'
+            size = "full"
 
         for key in function_map:
             if str(key).casefold().split("-")[0] in self.scores:
                 # Only evaluate requested scores
-                self.log_method(key, method, data_provider, size, 'train', time_elapsed,
-                                *self.multi_run_function(train_true_ites, train_predictions, function_map[key]))
+                self.log_method(
+                    key,
+                    method,
+                    data_provider,
+                    size,
+                    "train",
+                    time_elapsed,
+                    *self.multi_run_function(
+                        train_true_ites, train_predictions, function_map[key]
+                    )
+                )
 
-                self.log_method(key, method, data_provider, size, 'test', time_elapsed,
-                                *self.multi_run_function(test_true_ites, test_predictions, function_map[key]))
+                self.log_method(
+                    key,
+                    method,
+                    data_provider,
+                    size,
+                    "test",
+                    time_elapsed,
+                    *self.multi_run_function(
+                        test_true_ites, test_predictions, function_map[key]
+                    )
+                )
 
         # Reset dataprovider
         data_provider.reset_cycle()
 
     def plot_residuals(self, pred_ite, true_ite):
-        sns.distplot(true_ite, color='black')
-        sns.distplot(pred_ite, color='gray')
-        sns.distplot(true_ite - pred_ite, color='red')
+        sns.distplot(true_ite, color="black")
+        sns.distplot(pred_ite, color="gray")
+        sns.distplot(true_ite - pred_ite, color="red")
         print(np.mean(true_ite))
         print(np.mean(pred_ite))
         plt.show()
@@ -206,8 +292,18 @@ class StandardEvaluation(EvaluationMetric):
         """
 
         # Setup new DataFrame for every run of the metric, then append later
-        self.output = pd.DataFrame(columns=['metric', 'method', 'dataset', 'size', 'sample', 'time', 'score', 'std'])
-
+        self.output = pd.DataFrame(
+            columns=[
+                "metric",
+                "method",
+                "dataset",
+                "size",
+                "sample",
+                "time",
+                "score",
+                "std",
+            ]
+        )
 
         num_runs = self.num_runs
 
@@ -230,5 +326,3 @@ class PlotEvaluation(EvaluationMetric):
 
     def plot_error_distribution(self):
         pass
-
-

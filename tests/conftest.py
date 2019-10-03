@@ -14,4 +14,5 @@ import pytest
 def grf():
     """Assure the installation of Generalized Random Forests"""
     from justcause.methods.causal_forest import CausalForest
+
     CausalForest.install_grf()

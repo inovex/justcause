@@ -1,11 +1,12 @@
 import time
+
+import keras.backend as K
 import numpy as np
 import tensorflow as tf
-from sklearn.preprocessing import StandardScaler
-from sklearn.model_selection import train_test_split
-import keras.backend as K
+from keras.callbacks import Callback, EarlyStopping, ReduceLROnPlateau, TerminateOnNaN
 from keras.optimizers import SGD, Adam
-from keras.callbacks import EarlyStopping, ReduceLROnPlateau, TerminateOnNaN, Callback
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
 
 
 def _split_output(yt_hat, t, y, y_scaler, x, index):
@@ -19,15 +20,35 @@ def _split_output(yt_hat, t, y, y_scaler, x, index):
         eps = np.zeros_like(yt_hat[:, 2])
 
     y = y_scaler.inverse_transform(y.copy())
-    var = "average propensity for treated: {} and untreated: {}".format(g[t.squeeze() == 1.].mean(),
-                                                                        g[t.squeeze() == 0.].mean())
+    var = "average propensity for treated: {} and untreated: {}".format(
+        g[t.squeeze() == 1.0].mean(), g[t.squeeze() == 0.0].mean()
+    )
     print(var)
 
-    return {'q_t0': q_t0, 'q_t1': q_t1, 'g': g, 't': t, 'y': y, 'x': x, 'index': index, 'eps': eps}
+    return {
+        "q_t0": q_t0,
+        "q_t1": q_t1,
+        "g": g,
+        "t": t,
+        "y": y,
+        "x": x,
+        "index": index,
+        "eps": eps,
+    }
 
-def train_dragon(t, y_unscaled, x, targeted_regularization=True,
-                 knob_loss=dragonnet_loss_binarycross, ratio=1., val_split=0.1,
-                 batch_size=512, num_epochs=100, verbose=1):
+
+def train_dragon(
+    t,
+    y_unscaled,
+    x,
+    targeted_regularization=True,
+    knob_loss=dragonnet_loss_binarycross,
+    ratio=1.0,
+    val_split=0.1,
+    batch_size=512,
+    num_epochs=100,
+    verbose=1,
+):
     """Build and Train the DragonNet Model on given data
 
     :param t: treatment treatment to train on
@@ -57,12 +78,10 @@ def train_dragon(t, y_unscaled, x, targeted_regularization=True,
 
     start_time = time.time()
 
-    dragonnet.compile(
-        optimizer=Adam(lr=1e-3),
-        loss=loss, metrics=metrics)
+    dragonnet.compile(optimizer=Adam(lr=1e-3), loss=loss, metrics=metrics)
 
     class EarlyStoppingByLossVal(Callback):
-        def __init__(self, monitor='regression_loss', value=400, verbose=0):
+        def __init__(self, monitor="regression_loss", value=400, verbose=0):
             super(Callback, self).__init__()
             self.monitor = monitor
             self.value = value
@@ -80,20 +99,31 @@ def train_dragon(t, y_unscaled, x, targeted_regularization=True,
             # TODO: Implement sacred logging without circular dependencies
             pass
 
-
     adam_callbacks = [
         TerminateOnNaN(),
-        EarlyStopping(monitor='regression_loss', patience=10, min_delta=0.),
-        ReduceLROnPlateau(monitor='loss', factor=0.5, patience=5, verbose=verbose, mode='auto',
-                          min_delta=1e-8, cooldown=0, min_lr=0),
-        SacredLogLoss()
-
+        EarlyStopping(monitor="regression_loss", patience=10, min_delta=0.0),
+        ReduceLROnPlateau(
+            monitor="loss",
+            factor=0.5,
+            patience=5,
+            verbose=verbose,
+            mode="auto",
+            min_delta=1e-8,
+            cooldown=0,
+            min_lr=0,
+        ),
+        SacredLogLoss(),
     ]
 
-    dragonnet.fit(x, yt, callbacks=adam_callbacks,
-                  validation_split=val_split,
-                  epochs=num_epochs,
-                  batch_size=batch_size, verbose=verbose)
+    dragonnet.fit(
+        x,
+        yt,
+        callbacks=adam_callbacks,
+        validation_split=val_split,
+        epochs=num_epochs,
+        batch_size=batch_size,
+        verbose=verbose,
+    )
 
     elapsed_time = time.time() - start_time
     if verbose:
@@ -102,11 +132,20 @@ def train_dragon(t, y_unscaled, x, targeted_regularization=True,
     return dragonnet
 
 
+def train_and_predict_dragons(
+    t,
+    y_unscaled,
+    x,
+    targeted_regularization=True,
+    output_dir="",
+    knob_loss=dragonnet_loss_binarycross,
+    ratio=1.0,
+    dragon=1,
+    val_split=0.1,
+    batch_size=512,
+):
 
-def train_and_predict_dragons(t, y_unscaled, x, targeted_regularization=True, output_dir='',
-                              knob_loss=dragonnet_loss_binarycross, ratio=1., dragon=1, val_split=0.1,batch_size=512):
-
-    verbose=1
+    verbose = 1
     y_scaler = StandardScaler().fit(y_unscaled)
     y = y_scaler.transform(y_unscaled)
     train_outputs = []
@@ -119,7 +158,12 @@ def train_and_predict_dragons(t, y_unscaled, x, targeted_regularization=True, ou
         elif dragon == 1:
             dragonnet = make_dragonnet(x.shape[1], 0.01)
 
-        metrics = [regression_loss, binary_classification_loss, treatment_accuracy, track_epsilon]
+        metrics = [
+            regression_loss,
+            binary_classification_loss,
+            treatment_accuracy,
+            track_epsilon,
+        ]
 
         if targeted_regularization:
             loss = make_tarreg_loss(ratio=ratio, dragonnet_loss=knob_loss)
@@ -128,51 +172,79 @@ def train_and_predict_dragons(t, y_unscaled, x, targeted_regularization=True, ou
 
         tf.random.set_random_seed(i)
         np.random.seed(i)
-        train_index, test_index = train_test_split(np.arange(x.shape[0]), test_size=0, random_state=1)
+        train_index, test_index = train_test_split(
+            np.arange(x.shape[0]), test_size=0, random_state=1
+        )
         test_index = train_index
-
 
         x_train, x_test = x[train_index], x[test_index]
         y_train, y_test = y[train_index], y[test_index]
         t_train, t_test = t[train_index], t[test_index]
         yt_train = np.concatenate([y_train, t_train], 1)
 
-        import time;
+        import time
+
         start_time = time.time()
 
-        dragonnet.compile(
-            optimizer=Adam(lr=1e-3),
-            loss=loss, metrics=metrics)
+        dragonnet.compile(optimizer=Adam(lr=1e-3), loss=loss, metrics=metrics)
 
         adam_callbacks = [
             TerminateOnNaN(),
-            EarlyStopping(monitor='val_loss', patience=2, min_delta=0.),
-            ReduceLROnPlateau(monitor='loss', factor=0.5, patience=5, verbose=verbose, mode='auto',
-                              min_delta=1e-8, cooldown=0, min_lr=0)
-
+            EarlyStopping(monitor="val_loss", patience=2, min_delta=0.0),
+            ReduceLROnPlateau(
+                monitor="loss",
+                factor=0.5,
+                patience=5,
+                verbose=verbose,
+                mode="auto",
+                min_delta=1e-8,
+                cooldown=0,
+                min_lr=0,
+            ),
         ]
 
-        dragonnet.fit(x_train, yt_train, callbacks=adam_callbacks,
-                      validation_split=val_split,
-                      epochs=100,
-                      batch_size=batch_size, verbose=verbose)
+        dragonnet.fit(
+            x_train,
+            yt_train,
+            callbacks=adam_callbacks,
+            validation_split=val_split,
+            epochs=100,
+            batch_size=batch_size,
+            verbose=verbose,
+        )
 
         sgd_callbacks = [
             TerminateOnNaN(),
-            EarlyStopping(monitor='val_loss', patience=40, min_delta=0.),
-            ReduceLROnPlateau(monitor='loss', factor=0.5, patience=5, verbose=verbose, mode='auto',
-                              min_delta=0., cooldown=0, min_lr=0)
+            EarlyStopping(monitor="val_loss", patience=40, min_delta=0.0),
+            ReduceLROnPlateau(
+                monitor="loss",
+                factor=0.5,
+                patience=5,
+                verbose=verbose,
+                mode="auto",
+                min_delta=0.0,
+                cooldown=0,
+                min_lr=0,
+            ),
         ]
 
         # should pick something better!
         sgd_lr = 1e-5
         momentum = 0.9
-        dragonnet.compile(optimizer=SGD(lr=sgd_lr, momentum=momentum, nesterov=True), loss=loss,
-                          metrics=metrics)
-        dragonnet.fit(x_train, yt_train, callbacks=sgd_callbacks,
-                      validation_split=val_split,
-                      epochs=300,
-                      batch_size=batch_size, verbose=verbose)
+        dragonnet.compile(
+            optimizer=SGD(lr=sgd_lr, momentum=momentum, nesterov=True),
+            loss=loss,
+            metrics=metrics,
+        )
+        dragonnet.fit(
+            x_train,
+            yt_train,
+            callbacks=sgd_callbacks,
+            validation_split=val_split,
+            epochs=300,
+            batch_size=batch_size,
+            verbose=verbose,
+        )
 
         elapsed_time = time.time() - start_time
         print("***************************** elapsed_time is: ", elapsed_time)
@@ -180,17 +252,33 @@ def train_and_predict_dragons(t, y_unscaled, x, targeted_regularization=True, ou
         yt_hat_test = dragonnet.predict(x_test)
         yt_hat_train = dragonnet.predict(x_train)
 
-        test_outputs += [_split_output(yt_hat_test, t_test, y_test, y_scaler, x_test, test_index)]
-        train_outputs += [_split_output(yt_hat_train, t_train, y_train, y_scaler, x_train, train_index)]
+        test_outputs += [
+            _split_output(yt_hat_test, t_test, y_test, y_scaler, x_test, test_index)
+        ]
+        train_outputs += [
+            _split_output(
+                yt_hat_train, t_train, y_train, y_scaler, x_train, train_index
+            )
+        ]
         K.clear_session()
 
     return test_outputs, train_outputs
 
 
-def train_and_predict_ned(t, y_unscaled, x, targeted_regularization=True, output_dir='',
-                          knob_loss=dragonnet_loss_binarycross, ratio=1., dragon=1,val_split=0.1, batch_size=512):
+def train_and_predict_ned(
+    t,
+    y_unscaled,
+    x,
+    targeted_regularization=True,
+    output_dir="",
+    knob_loss=dragonnet_loss_binarycross,
+    ratio=1.0,
+    dragon=1,
+    val_split=0.1,
+    batch_size=512,
+):
 
-    verbose=0
+    verbose = 0
     y_scaler = StandardScaler().fit(y_unscaled)
     y = y_scaler.transform(y_unscaled)
 
@@ -206,47 +294,76 @@ def train_and_predict_ned(t, y_unscaled, x, targeted_regularization=True, output
 
         tf.random.set_random_seed(i)
         np.random.seed(i)
-        train_index, test_index = train_test_split(np.arange(x.shape[0]), test_size=0.)
+        train_index, test_index = train_test_split(np.arange(x.shape[0]), test_size=0.0)
         test_index = train_index
         x_train, x_test = x[train_index], x[test_index]
         y_train, y_test = y[train_index], y[test_index]
         t_train, t_test = t[train_index], t[test_index]
         yt_train = np.concatenate([y_train, t_train], 1)
 
-        import time;
+        import time
+
         start_time = time.time()
 
-        nednet.compile(
-            optimizer=Adam(lr=1e-3),
-            loss=ned_loss, metrics=metrics_ned)
+        nednet.compile(optimizer=Adam(lr=1e-3), loss=ned_loss, metrics=metrics_ned)
 
         adam_callbacks = [
             TerminateOnNaN(),
-            EarlyStopping(monitor='val_loss', patience=2, min_delta=0.),
-            ReduceLROnPlateau(monitor='loss', factor=0.5, patience=5, verbose=verbose, mode='auto',
-                              min_delta=1e-8, cooldown=0, min_lr=0)
+            EarlyStopping(monitor="val_loss", patience=2, min_delta=0.0),
+            ReduceLROnPlateau(
+                monitor="loss",
+                factor=0.5,
+                patience=5,
+                verbose=verbose,
+                mode="auto",
+                min_delta=1e-8,
+                cooldown=0,
+                min_lr=0,
+            ),
         ]
 
-        nednet.fit(x_train, yt_train, callbacks=adam_callbacks,
-                   validation_split=val_split,
-                   epochs=100,
-                   batch_size=batch_size, verbose=verbose)
+        nednet.fit(
+            x_train,
+            yt_train,
+            callbacks=adam_callbacks,
+            validation_split=val_split,
+            epochs=100,
+            batch_size=batch_size,
+            verbose=verbose,
+        )
 
         sgd_callbacks = [
             TerminateOnNaN(),
-            EarlyStopping(monitor='val_loss', patience=40, min_delta=0.),
-            ReduceLROnPlateau(monitor='loss', factor=0.5, patience=5, verbose=verbose, mode='auto',
-                              min_delta=0., cooldown=0, min_lr=0)]
+            EarlyStopping(monitor="val_loss", patience=40, min_delta=0.0),
+            ReduceLROnPlateau(
+                monitor="loss",
+                factor=0.5,
+                patience=5,
+                verbose=verbose,
+                mode="auto",
+                min_delta=0.0,
+                cooldown=0,
+                min_lr=0,
+            ),
+        ]
 
         sgd_lr = 1e-5
         momentum = 0.9
-        nednet.compile(optimizer=SGD(lr=sgd_lr, momentum=momentum, nesterov=True), loss=ned_loss,
-                       metrics=metrics_ned)
+        nednet.compile(
+            optimizer=SGD(lr=sgd_lr, momentum=momentum, nesterov=True),
+            loss=ned_loss,
+            metrics=metrics_ned,
+        )
         print(nednet.summary())
-        nednet.fit(x_train, yt_train, callbacks=sgd_callbacks,
-                   validation_split=val_split,
-                   epochs=300,
-                   batch_size=batch_size, verbose=verbose)
+        nednet.fit(
+            x_train,
+            yt_train,
+            callbacks=sgd_callbacks,
+            validation_split=val_split,
+            epochs=300,
+            batch_size=batch_size,
+            verbose=verbose,
+        )
 
         t_hat_test = nednet.predict(x_test)[:, 1]
         t_hat_train = nednet.predict(x_train)[:, 1]
@@ -254,45 +371,69 @@ def train_and_predict_ned(t, y_unscaled, x, targeted_regularization=True, output
         # cutting the activation layer
         cut_net = post_cut(nednet, x.shape[1], 0.01)
 
-
-        cut_net.compile(
-            optimizer=Adam(lr=1e-3),
-            loss=dead_loss, metrics=metrics_cut)
-
+        cut_net.compile(optimizer=Adam(lr=1e-3), loss=dead_loss, metrics=metrics_cut)
 
         adam_callbacks = [
             TerminateOnNaN(),
-            EarlyStopping(monitor='val_loss', patience=2, min_delta=0.),
-            ReduceLROnPlateau(monitor='loss', factor=0.5, patience=5, verbose=verbose, mode='auto',
-                              min_delta=1e-8, cooldown=0, min_lr=0)
+            EarlyStopping(monitor="val_loss", patience=2, min_delta=0.0),
+            ReduceLROnPlateau(
+                monitor="loss",
+                factor=0.5,
+                patience=5,
+                verbose=verbose,
+                mode="auto",
+                min_delta=1e-8,
+                cooldown=0,
+                min_lr=0,
+            ),
         ]
         print(cut_net.summary())
 
-        cut_net.fit(x_train, yt_train, callbacks=adam_callbacks,
-                    validation_split=val_split,
-                    epochs=100,
-                    batch_size=batch_size, verbose=verbose)
+        cut_net.fit(
+            x_train,
+            yt_train,
+            callbacks=adam_callbacks,
+            validation_split=val_split,
+            epochs=100,
+            batch_size=batch_size,
+            verbose=verbose,
+        )
 
         elapsed_time = time.time() - start_time
         print("***************************** elapsed_time is: ", elapsed_time)
 
         sgd_callbacks = [
             TerminateOnNaN(),
-            EarlyStopping(monitor='val_loss', patience=40, min_delta=0.),
-            ReduceLROnPlateau(monitor='loss', factor=0.5, patience=5, verbose=verbose, mode='auto',
-                              min_delta=0., cooldown=0, min_lr=0)]
-
+            EarlyStopping(monitor="val_loss", patience=40, min_delta=0.0),
+            ReduceLROnPlateau(
+                monitor="loss",
+                factor=0.5,
+                patience=5,
+                verbose=verbose,
+                mode="auto",
+                min_delta=0.0,
+                cooldown=0,
+                min_lr=0,
+            ),
+        ]
 
         sgd_lr = 1e-5
         momentum = 0.9
-        cut_net.compile(optimizer=SGD(lr=sgd_lr, momentum=momentum, nesterov=True), loss=dead_loss,
-                        metrics=metrics_cut)
+        cut_net.compile(
+            optimizer=SGD(lr=sgd_lr, momentum=momentum, nesterov=True),
+            loss=dead_loss,
+            metrics=metrics_cut,
+        )
 
-
-        cut_net.fit(x_train, yt_train, callbacks=sgd_callbacks,
-                    validation_split=val_split,
-                    epochs=300,
-                    batch_size=batch_size, verbose=verbose)
+        cut_net.fit(
+            x_train,
+            yt_train,
+            callbacks=sgd_callbacks,
+            validation_split=val_split,
+            epochs=300,
+            batch_size=batch_size,
+            verbose=verbose,
+        )
 
         y_hat_test = cut_net.predict(x_test)
         y_hat_train = cut_net.predict(x_train)
@@ -300,9 +441,14 @@ def train_and_predict_ned(t, y_unscaled, x, targeted_regularization=True, output
         yt_hat_test = np.concatenate([y_hat_test, t_hat_test.reshape(-1, 1)], 1)
         yt_hat_train = np.concatenate([y_hat_train, t_hat_train.reshape(-1, 1)], 1)
 
-        test_outputs += [_split_output(yt_hat_test, t_test, y_test, y_scaler, x_test, test_index)]
-        train_outputs += [_split_output(yt_hat_train, t_train, y_train, y_scaler, x_train, train_index)]
+        test_outputs += [
+            _split_output(yt_hat_test, t_test, y_test, y_scaler, x_test, test_index)
+        ]
+        train_outputs += [
+            _split_output(
+                yt_hat_train, t_train, y_train, y_scaler, x_train, train_index
+            )
+        ]
         K.clear_session()
 
     return test_outputs, train_outputs
-

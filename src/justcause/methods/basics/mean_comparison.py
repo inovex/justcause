@@ -22,14 +22,13 @@ class SimpleMeanComparison(CausalMethod):
         self.is_trained = False
 
     def __str__(self):
-        return 'SimpleMeanComparison'
+        return "SimpleMeanComparison"
 
     def predict_ate(self, x, t=None, y=None):
         return self.ate
 
     def fit(self, x, t, y, refit=False) -> None:
-        self.ate = np.mean(y[t==1]) - np.mean(y[t==0])
+        self.ate = np.mean(y[t == 1]) - np.mean(y[t == 0])
 
     def predict_ite(self, x, t=None, y=None):
         return np.full(x.shape[0], self.predict_ate(x, t, y))
-

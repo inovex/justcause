@@ -3,20 +3,19 @@ All methods provided in https://github.com/saberpowers/causalLearning
 introduced in the paper: ﻿https://arxiv.org/pdf/1707.00102.pdf
 """
 import os
+
 import config
-os.environ['L_ALL'] = 'en_US.UTF-8'
-os.environ['R_HOME'] = config.R_HOME
-
-
-from rpy2.robjects.packages import importr
-import rpy2.robjects.packages as rpackages
-from rpy2.robjects.vectors import StrVector, FloatVector, IntVector
-import rpy2.robjects as robjects
-from rpy2.robjects import numpy2ri
-
 import numpy as np
+import rpy2.robjects as robjects
+import rpy2.robjects.packages as rpackages
+from rpy2.robjects import numpy2ri
+from rpy2.robjects.packages import importr
+from rpy2.robjects.vectors import FloatVector, IntVector, StrVector
 
 from .causal_method import CausalMethod
+
+os.environ["L_ALL"] = "en_US.UTF-8"
+os.environ["R_HOME"] = config.R_HOME
 
 
 def install_cl():
@@ -26,17 +25,18 @@ def install_cl():
     """
 
     # robjects.r is a singleton
-    robjects.r.options(download_file_method='curl')
+    robjects.r.options(download_file_method="curl")
     numpy2ri.activate()
     package_names = ["devtools"]
-    utils = rpackages.importr('utils')
+    utils = rpackages.importr("utils")
     utils.chooseCRANmirror(ind=0)
 
     names_to_install = [x for x in package_names if not rpackages.isinstalled(x)]
     if len(names_to_install) > 0:
         utils.install_packages(StrVector(names_to_install))
 
-    return importr('causalLearning')
+    return importr("causalLearning")
+
 
 class CausalLearningMethod(CausalMethod):
     """ABSTRACT"""
@@ -48,13 +48,12 @@ class CausalLearningMethod(CausalMethod):
 
     def predict_ite(self, x, t=None, y=None):
         if self.model is None:
-            raise AssertionError('Must fit the method before prediction')
+            raise AssertionError("Must fit the method before prediction")
 
         return np.array(robjects.r.predict(self.model, x)).reshape(1, -1)[0]
 
 
 class CausalBoosting(CausalLearningMethod):
-
     def __init__(self, seed=0):
         super().__init__()
 
@@ -62,14 +61,16 @@ class CausalBoosting(CausalLearningMethod):
         return "CausalBoosting"
 
     def fit(self, x, t, y, refit=False):
-        print('fit causal boost')
-        self.model = self.cl.causalBoosting(x, IntVector(t), FloatVector(y), num_trees=500)
+        print("fit causal boost")
+        self.model = self.cl.causalBoosting(
+            x, IntVector(t), FloatVector(y), num_trees=500
+        )
 
     def predict_ite(self, x, t=None, y=None):
         if self.model is None:
-            raise AssertionError('Must fit the method before prediction')
+            raise AssertionError("Must fit the method before prediction")
 
-        pred = np.array(robjects.r.predict(self.model, x, t, type='treatment.effect'))
+        pred = np.array(robjects.r.predict(self.model, x, t, type="treatment.effect"))
 
         return np.mean(pred, axis=1)
 
@@ -82,12 +83,11 @@ class PolinatedTransformedOutcomeForest(CausalLearningMethod):
         return "PTOforest"
 
     def fit(self, x, t, y, refit=False):
-        print('fit PTOForest')
+        print("fit PTOForest")
         self.model = self.cl.PTOforest(x, IntVector(t), FloatVector(y))
 
 
 class CausalMars(CausalLearningMethod):
-
     def __init__(self, seed=0):
         super().__init__()
         self.cl = install_cl()
@@ -97,12 +97,14 @@ class CausalMars(CausalLearningMethod):
         return "CausalMARS"
 
     def fit(self, x, t, y, refit=False):
-        print('fit causalMARS')
+        print("fit causalMARS")
         self.model = self.cl.causalMARS(x, IntVector(t), FloatVector(y))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
 
     from data.sets.ihdp import IHDPCfrProvider
+
     ihdp = IHDPCfrProvider()
     cb = CausalBoosting()
     cb.fit(*ihdp.get_training_data())

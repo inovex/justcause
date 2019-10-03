@@ -1,8 +1,9 @@
 import copy
+
 import numpy as np
 
-from ..causal_method import CausalMethod
 from ...utils import get_regressor_name
+from ..causal_method import CausalMethod
 
 
 class SLearner(CausalMethod):
@@ -30,7 +31,9 @@ class SLearner(CausalMethod):
         return np.c_[x, t]
 
     def predict_ite(self, x, t=None, y=None):
-        return self.regressor.predict(self.union(x, np.ones(x.shape[0]))) - self.regressor.predict(self.union(x, np.zeros(x.shape[0])))
+        return self.regressor.predict(
+            self.union(x, np.ones(x.shape[0]))
+        ) - self.regressor.predict(self.union(x, np.zeros(x.shape[0])))
 
     def predict_ate(self, x, t=None, y=None):
         return np.mean(self.predict_ite(x))
@@ -39,6 +42,7 @@ class SLearner(CausalMethod):
         train = self.union(x, t)
         self.regressor.fit(train, y)
         self.is_trained = True
+
 
 class WeightedSLearner(CausalMethod):
     """
@@ -67,7 +71,9 @@ class WeightedSLearner(CausalMethod):
         return np.c_[x, t]
 
     def predict_ite(self, x, t=None, y=None):
-        return self.regressor.predict(self.union(x, np.ones(x.shape[0]))) - self.regressor.predict(self.union(x, np.zeros(x.shape[0])))
+        return self.regressor.predict(
+            self.union(x, np.ones(x.shape[0]))
+        ) - self.regressor.predict(self.union(x, np.zeros(x.shape[0])))
 
     def predict_ate(self, x, t=None, y=None):
         return np.mean(self.predict_ite(x))
@@ -81,6 +87,7 @@ class WeightedSLearner(CausalMethod):
         train = self.union(x, t)
         self.regressor.fit(train, y, sample_weight=weights)
         self.is_trained = True
+
 
 class WeightedTLearner(CausalMethod):
     """
@@ -119,8 +126,8 @@ class WeightedTLearner(CausalMethod):
         weights = 1 / prob
         x_treatment = x[t == 1]
         x_control = x[t == 0]
-        self.regressor_one.fit(x_treatment, y[t == 1], sample_weight=weights[t==1])
-        self.regressor_two.fit(x_control, y[t == 0], sample_weight=weights[t==0])
+        self.regressor_one.fit(x_treatment, y[t == 1], sample_weight=weights[t == 1])
+        self.regressor_two.fit(x_control, y[t == 0], sample_weight=weights[t == 0])
 
 
 class TLearner(CausalMethod):
@@ -149,9 +156,12 @@ class TLearner(CausalMethod):
             self.regressor_two = regressor_two
 
     def __str__(self):
-        return "T-Learner - " \
-               + get_regressor_name(self.regressor_one) \
-               + " & " + get_regressor_name(self.regressor_two)
+        return (
+            "T-Learner - "
+            + get_regressor_name(self.regressor_one)
+            + " & "
+            + get_regressor_name(self.regressor_two)
+        )
 
     def predict_ate(self, x, t=None, y=None):
         return np.mean(self.predict_ite(x))
@@ -164,4 +174,3 @@ class TLearner(CausalMethod):
 
     def predict_ite(self, x, t=None, y=None):
         return self.regressor_one.predict(x) - self.regressor_two.predict(x)
-

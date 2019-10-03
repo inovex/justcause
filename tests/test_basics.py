@@ -1,16 +1,14 @@
-from justcause.data.generators.toy import SWagerDataProvider
-from justcause.methods.basics.outcome_regression import SLearner
-from justcause.metrics import StandardEvaluation
-from justcause.methods.causal_forest import CausalForest
-
-from sklearn.linear_model import LinearRegression
-
+import pytest
 
 # TODO: Fix this workaround here and make config a yaml in the configs folder.
 # We exploit here the fact that Python only imports once and then keeps a lookup of it.
 import config
+from sklearn.linear_model import LinearRegression
 
-import pytest
+from justcause.data.generators.toy import SWagerDataProvider
+from justcause.methods.basics.outcome_regression import SLearner
+from justcause.methods.causal_forest import CausalForest
+from justcause.metrics import StandardEvaluation
 
 
 def test_experiment():
@@ -26,7 +24,7 @@ def test_experiment():
     metric = StandardEvaluation(sizes=None, num_runs=1)
     metric.evaluate(data, method)
     assert len(metric.output.index) == 8  # 4 scores on train/test each
-    assert metric.output['score'][0] != 0
+    assert metric.output["score"][0] != 0
 
     # test multirun
     metric = StandardEvaluation(sizes=None, num_runs=5)
@@ -50,7 +48,7 @@ def test_dataprovider():
 
     data.set_train_test_split(train_size=0.5)
     x, t, y = data.get_training_data(size=1000)
-    assert len(t) == 0.5*len(data.t)
+    assert len(t) == 0.5 * len(data.t)
     x_test, t_test, y_test = data.get_test_data()
     assert len(t_test) == 1000
 

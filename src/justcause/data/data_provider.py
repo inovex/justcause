@@ -1,10 +1,9 @@
-import numpy as np
-
 from itertools import cycle
+
+import numpy as np
 
 
 class DataProvider:
-
     def __init__(self, seed=0, train_size=0.8):
         # Standard null initialization
         self.x = None
@@ -19,7 +18,7 @@ class DataProvider:
 
         np.random.seed(seed)
         self.load_training_data()
-        self.set_train_test_split(train_size=train_size) # Use 80/20 as default
+        self.set_train_test_split(train_size=train_size)  # Use 80/20 as default
 
     def __str__(self):
         """
@@ -35,7 +34,9 @@ class DataProvider:
         see data/sets/ihdp.py for an example.
 
         """
-        raise NotImplementedError('Load Data Method must be implemented for ' + str(self))
+        raise NotImplementedError(
+            "Load Data Method must be implemented for " + str(self)
+        )
 
     def get_training_data(self, size=None):
         """
@@ -48,14 +49,24 @@ class DataProvider:
             self.load_training_data()
 
         if size is None:
-            return self.x[self.train_selection], self.t[self.train_selection], self.y[self.train_selection]
+            return (
+                self.x[self.train_selection],
+                self.t[self.train_selection],
+                self.y[self.train_selection],
+            )
         else:
             if size > len(self.train_selection):
-                raise AssertionError('requested training size too big for ' + str(self))
+                raise AssertionError("requested training size too big for " + str(self))
 
             # Choose a subset of the training_sample
-            self.subselection = self.train_selection[np.random.choice(len(self.train_selection), size=size)]
-            return self.x[self.subselection], self.t[self.subselection], self.y[self.subselection]
+            self.subselection = self.train_selection[
+                np.random.choice(len(self.train_selection), size=size)
+            ]
+            return (
+                self.x[self.subselection],
+                self.t[self.subselection],
+                self.y[self.subselection],
+            )
 
     def get_test_data(self):
         """
@@ -66,7 +77,11 @@ class DataProvider:
         if self.y is None:
             self.load_training_data()
 
-        return self.x[self.test_selection], self.t[self.test_selection], self.y[self.test_selection]
+        return (
+            self.x[self.test_selection],
+            self.t[self.test_selection],
+            self.y[self.test_selection],
+        )
 
     def set_train_test_split(self, train_size=0.8):
         """
@@ -75,7 +90,9 @@ class DataProvider:
         :param train_size: fraction of the whole data to be used as training
         """
         length = self.x.shape[0]
-        self.train_selection = np.random.choice(length, size=int(train_size*length), replace=False)
+        self.train_selection = np.random.choice(
+            length, size=int(train_size * length), replace=False
+        )
         full = np.arange(length)
         self.test_selection = full[~np.isin(full, self.train_selection)]
 
@@ -113,13 +130,16 @@ class DataProvider:
         :return: a generator function yielding single instances
         """
         if random:
-            id_generator = cycle(np.random.choice(self.x.shape[0], size=self.x.shape[0], replacement=replacement))
+            id_generator = cycle(
+                np.random.choice(
+                    self.x.shape[0], size=self.x.shape[0], replacement=replacement
+                )
+            )
         else:
             id_generator = cycle(range(self.x.shape[0]))
         while True:
             ID = next(id_generator)
             yield self.x[ID], self.t[ID], self.y[ID]
-
 
     def get_train_generator_batch(self, batch_size=32):
         """

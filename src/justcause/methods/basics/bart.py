@@ -1,16 +1,14 @@
 import numpy as np
-
-from rpy2.robjects.packages import importr
-import rpy2.robjects.packages as rpackages
-from rpy2.robjects.vectors import StrVector, FloatVector, IntVector
 import rpy2.robjects as robjects
+import rpy2.robjects.packages as rpackages
 from rpy2.robjects import numpy2ri
+from rpy2.robjects.packages import importr
+from rpy2.robjects.vectors import FloatVector, IntVector, StrVector
 
 from ..causal_method import CausalMethod
 
 
 class Bart(CausalMethod):
-
     def __init__(self, seed=0):
         super().__init__(seed)
         self.bm = self.install_bart()
@@ -27,11 +25,11 @@ class Bart(CausalMethod):
         """
 
         # robjects.r is a singleton
-        robjects.r.options(download_file_method='curl')
+        robjects.r.options(download_file_method="curl")
         print(robjects.r("version"))
         numpy2ri.activate()
         package_names = ["BayesTree"]
-        utils = rpackages.importr('utils')
+        utils = rpackages.importr("utils")
         utils.chooseCRANmirror(ind=1)
 
         names_to_install = [x for x in package_names if not rpackages.isinstalled(x)]
@@ -54,5 +52,3 @@ class Bart(CausalMethod):
     def fit(self, x, t, y, refit=False) -> None:
         train = self.union(x, t)
         self.model = robjects.r.bart(train, FloatVector(y))
-
-
