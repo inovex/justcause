@@ -2,19 +2,19 @@
 # Default values to be merged into tasks:
 auto_cancellation: false
 env:
-  PATH: ${HOME}/.local/bin:${PATH}
-  # ^  add user paths
+  PATH: /opt/conda/bin:$PATH
   COVERALLS_REPO_TOKEN: zVMEAj6vQZiEmwZOIKtZIcHU3JJOsBsi3
   PIP_CACHE: ${HOME}/.cache/pip
+  CONDA_CACHE: /opt/conda/pkgs
   LC_ALL: C.UTF-8
   LANG: C.UTF-8
-  CIRRUS_SHELL: /bin/bash
+  # CIRRUS_SHELL: /bin/bash
 
 
 linux_task:
   # use custom cloning since otherwise git tags are missing
   name: test (Linux - Anaconda)
-  install_script: &install_script
+  install_script:
     - apt-get install -y git
   clone_script: |
     if [ -z "$CIRRUS_PR" ]; then
@@ -25,18 +25,15 @@ linux_task:
       git fetch origin pull/$CIRRUS_PR/head:pull/$CIRRUS_PR
       git reset --hard $CIRRUS_CHANGE_IN_REPO
     fi
-  container: {image: "continuumio/anaconda3:2019.03"}
+  container: {image: "continuumio/anaconda3:latest"}
   pip_cache:
     folder: $PIP_CACHE
   conda_cache:
-    folder: /opt/conda/pkgs
+    folder: $CONDA_CACHE
   info_script:
-    - printf "Shell - %s\n" "$SHELL"
     - conda config --show
-    # set up conda here
-    - conda init bash
   prepare_script:
-    - source /root/.bashrc
+    - source /opt/conda/etc/profile.d/conda.sh
     - rm -rf .coverage junit-*.xml
     # ^  avoid information carried from one run to the other
     - conda env create -f environment.yaml -q  # install in root env
@@ -44,8 +41,12 @@ linux_task:
     - python setup.py develop
     - pre-commit install
   test_script:
-    - source /root/.bashrc
+    - source /opt/conda/etc/profile.d/conda.sh
     - conda activate justcause
+    - conda list
+    - python -c "import rpy2; print(rpy2.__path__)"
+    - python -c "import rpy2.robjects"
+    - echo "R_HOME" $R_HOME
     - py.test tests --color yes
     - pre-commit run --all-files
   coverage_script:

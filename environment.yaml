@@ -10,6 +10,7 @@ dependencies:
   - scikit-learn
   - pip
   - seaborn
+  - r-base
   - rpy2
   - seaborn
   - tensorflow

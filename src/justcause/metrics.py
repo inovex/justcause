@@ -1,5 +1,6 @@
 """
-TODO: What does this do? It looks like calculating some metrics, running everything etc, and writing/saving logs. This needs to be split up
+TODO: What does this do? It looks like calculating some metrics, running everything etc, and writing/saving logs.
+This needs to be split up
 
 
 """
@@ -14,7 +15,6 @@ import seaborn as sns
 sns.set(style="darkgrid")
 import matplotlib.pyplot as plt
 
-from . import utils
 
 
 class EvaluationMetric:
