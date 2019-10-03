@@ -9,7 +9,6 @@ env:
   LANG: C.UTF-8
   ENV_NAME: justcause
   ENV_PATH: /opt/conda/envs/{ENV_NAME}/
-  R_CACHE: ${ENV_PATH}/lib/R/library/
   # CIRRUS_SHELL: /bin/bash
 
 
@@ -38,8 +37,6 @@ linux_task:
     - conda activate $ENV_NAME &> /dev/null
     - python setup.py develop
     - pre-commit install
-  r_cache: # deactivate in case of caching errors, only speeds things up
-    folder: $R_CACHE
   info_script:
     - conda list -n $ENV_NAME
     - conda config --show
