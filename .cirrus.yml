@@ -33,26 +33,27 @@ linux_task:
     folder: $PIP_CACHE
   conda_cache:
     folder: $CONDA_CACHE
-  info_script:
-    - conda config --show
   prepare_script:
     - source /opt/conda/etc/profile.d/conda.sh &> /dev/null
     - rm -rf .coverage junit-*.xml
     # ^  avoid information carried from one run to the other
     - conda env create -f environment.yaml -q  # install in root env
-    - conda activate $ENV_NAME
+    - conda activate $ENV_NAME &> /dev/null
     - python setup.py develop
     - pre-commit install
-  r_cache: # deactivate in case of cashing errors, only speeds things up
+  r_cache: # deactivate in case of caching errors, only speeds things up
     folder: $R_CACHE
+  info_script:
+    - conda list -h $ENV_NAME
+    - conda config --show
   test_script:
     - source /opt/conda/etc/profile.d/conda.sh &> /dev/null
-    - conda activate $ENV_NAME
+    - conda activate $ENV_NAME &> /dev/null
     - conda list
     - py.test tests --color yes
     - pre-commit run --all-files
   coverage_script:
     - source /opt/conda/etc/profile.d/conda.sh &> /dev/null
-    - conda activate $ENV_NAME
+    - conda activate $ENV_NAME &> /dev/null
     - coverage combine .coverage
     - coveralls
