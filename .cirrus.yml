@@ -5,7 +5,6 @@ env:
   PATH: /opt/conda/bin:$PATH
   COVERALLS_REPO_TOKEN: zVMEAj6vQZiEmwZOIKtZIcHU3JJOsBsi3
   PIP_CACHE: ${HOME}/.cache/pip
-  CONDA_CACHE: /opt/conda/pkgs
   LC_ALL: C.UTF-8
   LANG: C.UTF-8
   ENV_NAME: justcause
@@ -31,8 +30,6 @@ linux_task:
   container: {image: "continuumio/anaconda3:latest"}
   pip_cache:
     folder: $PIP_CACHE
-  conda_cache:
-    folder: $CONDA_CACHE
   prepare_script:
     - source /opt/conda/etc/profile.d/conda.sh &> /dev/null
     - rm -rf .coverage junit-*.xml
