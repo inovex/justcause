@@ -33,18 +33,23 @@ linux_task:
   info_script:
     - printf "Shell - %s\n" "$SHELL"
     - conda config --show
+    # set up conda here
     - conda init bash
-    - exec bash -l # restart Bash
   prepare_script:
+    - source /root/.bashrc
     - rm -rf .coverage junit-*.xml
     # ^  avoid information carried from one run to the other
     - conda env create -f environment.yaml -q  # install in root env
     - conda activate justcause
+    - python setup.py develop
     - pre-commit install
   test_script:
+    - source /root/.bashrc
+    - conda activate justcause
     - py.test tests --color yes
     - pre-commit run --all-files
   coverage_script:
+    - source /root/.bashrc
     - conda activate justcause
     - coverage combine .coverage
     - coveralls
