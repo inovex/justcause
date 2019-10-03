@@ -42,17 +42,17 @@ ACIC_USE_COVARIATES = [
 
 ACIC_SELECTED_VALUES = ["sex", "md_route", "dbwt", "estgest", "mager41"]
 
-### R Settings
+# R Settings
 
 # R_HOME = '/usr/local/Cellar/r/3.6.1/lib/R'
 
-### ENV Settings
+# ENV Settings
 
 PLOT_WRITE = True
 SERVER = False
 LOG_FILE_PATH = os.path.join(ROOT_DIR, "results/plotlog")
 
-### COLORS
+# COLORS
 
 CYAN = "#4ECDC4"
 BLUE = "#59D2FE"

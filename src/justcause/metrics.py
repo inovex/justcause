@@ -1,5 +1,6 @@
 """
-TODO: What does this do? It looks like calculating some metrics, running everything etc, and writing/saving logs.
+TODO: What does this do? It looks like calculating some metrics, running everything etc,
+      and writing/saving logs.
 This needs to be split up
 
 
@@ -98,7 +99,8 @@ class StandardEvaluation(EvaluationMetric):
 
     @staticmethod
     def multi_run_function(true_ites, predicted_ites, function):
-        """Evaluates a metric function with arguments true, predicted on the results of mutliple runs"""
+        """Evaluates a metric function with arguments true, predicted on the results of
+        mutliple runs"""
         values = list(map(function, true_ites, predicted_ites))
         return np.mean(values), np.std(values) / np.sqrt(len(values))
 
@@ -154,8 +156,10 @@ class StandardEvaluation(EvaluationMetric):
         :param score: mean score
         :param std: standard deviation
         """
-        # Todo: Interacting with scalar need to be done in the experiment not in the package
-        # self.ex.log_scalar(score_name + ',' + str(method) + ',' + str(data_provider) + ',' + str(sample), round(score, 4))
+        # Todo: Interacting with scalar need to be done in the experiment
+        #       not in the package
+        # self.ex.log_scalar(score_name + ',' + str(method) + ',' + str(data_provider)
+        #                    + ',' + str(sample), round(score, 4))
         print(
             score_name
             + ","
@@ -236,8 +240,10 @@ class StandardEvaluation(EvaluationMetric):
         # else:
         # utils.robustness_plot(train_true_ites, train_predictions, str(method))
         # utils.treatment_scatter(train_true_ites[0], train_predictions[0], str(method))
-        # utils.error_robustness_plot(list(map(self.pehe_score, train_true_ites, train_predictions)), str(method))
-        # utils.error_distribution_plot(list(map(self.pehe_score, train_true_ites, train_predictions)), str(method))
+        # utils.error_robustness_plot(list(map(self.pehe_score,
+        #  train_true_ites, train_predictions)), str(method))
+        # utils.error_distribution_plot(list(map(self.pehe_score, train_true_ites,
+        # train_predictions)), str(method))
 
         if size is None:
             size = "full"
