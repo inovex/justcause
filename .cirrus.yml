@@ -41,7 +41,7 @@ linux_task:
   r_cache: # deactivate in case of caching errors, only speeds things up
     folder: $R_CACHE
   info_script:
-    - conda list -l $ENV_NAME
+    - conda list -n $ENV_NAME
     - conda config --show
   test_script:
     - source /opt/conda/etc/profile.d/conda.sh &> /dev/null
