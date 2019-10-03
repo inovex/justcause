@@ -36,7 +36,6 @@ ACIC_SELECTED_VALUES = ['sex', 'md_route', 'dbwt', 'estgest', 'mager41']
 
 ### ENV Settings
 
-PLOT_BACKEND = "MacOSX"
 PLOT_WRITE = True
 SERVER = False
 LOG_FILE_PATH = os.path.join(ROOT_DIR, 'results/plotlog')

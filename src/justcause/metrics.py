@@ -10,8 +10,6 @@ import pandas as pd
 
 import config
 
-import matplotlib
-matplotlib.use(config.PLOT_BACKEND)
 import seaborn as sns
 sns.set(style="darkgrid")
 import matplotlib.pyplot as plt

@@ -7,17 +7,10 @@ from .generator import DataGenerator
 from ...utils import surface_plot, simple_comparison_mean
 
 import scipy
-from sklearn.preprocessing import StandardScaler, minmax_scale, RobustScaler
+from sklearn.preprocessing import minmax_scale, RobustScaler
 
-# To make it work on MacOS
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib
-
-
-matplotlib.use(config.PLOT_BACKEND)
 import seaborn as sns
 sns.set(style="darkgrid")
-import matplotlib.pyplot as plt
 
 
 # ToDo: Avoid this workaround

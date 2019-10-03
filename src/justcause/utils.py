@@ -4,10 +4,7 @@ from sklearn.linear_model import LogisticRegression
 import numpy as np
 import config
 
-# To make it work on MacOS
-from mpl_toolkits.mplot3d import Axes3D
-import matplotlib
-matplotlib.use(config.PLOT_BACKEND)
+
 import seaborn as sns
 import matplotlib.pyplot as plt
 
