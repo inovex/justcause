@@ -7,6 +7,9 @@
 # Ignore Result outputs
 /results
 
+# Ignore Result outputs during test
+/tests/results
+
 # Created by https://www.gitignore.io/api/venv,python,pycharm
 # Edit at https://www.gitignore.io/?templates=venv,python,pycharm
 
