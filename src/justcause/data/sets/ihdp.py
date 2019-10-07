@@ -1,97 +1,8 @@
 import os
 
-import config
 import numpy as np
-import pandas as pd
 
-from ...utils import true_ate_dist_plot, true_ate_plot
 from ..data_provider import DataProvider
-
-
-class IHDPDataProvider(DataProvider):
-    def __init__(self, seed=0, train_size=0.8):
-        super().__init__(seed, train_size)
-
-    def __str__(self):
-        return "IHDP"
-
-    def load_training_data(self):
-        path = config.IHDP_PATH
-        dirname = os.path.dirname(__file__)
-        filedir = os.path.join(dirname, path)
-        all_files = os.listdir(filedir)
-
-        T, Y, Y_cf, X = np.array([]), np.array([]), np.array([]), np.empty((1, 25))
-
-        for file in all_files:
-            filepath = os.path.join(filedir, file)
-            data = np.loadtxt(filepath, delimiter=",")
-            T, Y, Y_cf = (
-                np.append(T, data[:, 0]),
-                np.append(Y, data[:, 1][:, np.newaxis]),
-                np.append(Y_cf, data[:, 2][:, np.newaxis]),
-            )
-            X = np.append(X, data[:, 5:], axis=0)
-            break  # only use one of the different data set versions
-
-        X = X[1:]
-        self.x = np.array(X)
-        self.t = np.array(T)
-        self.y = np.array(Y)
-        self.y_cf = np.array(Y_cf)
-        union = np.c_[self.y, self.y_cf]
-        self.y_1 = np.array([row[int(1 - ix)] for row, ix in zip(union, self.t)])
-        self.y_0 = np.array([row[int(ix)] for row, ix in zip(union, self.t)])
-
-    def get_num_covariates(self):
-        return 25
-
-
-class IHDPReplicaProvider(DataProvider):
-    """Using script-generated files"""
-
-    def __init__(self, seed=0, train_size=0.8, setting="A"):
-        self.setting = setting
-        super().__init__(seed, train_size)
-
-    def __str__(self):
-        return "IHDP-Replica" + self.setting
-
-    def get_training_data(self, size=None):
-        self.load_training_data()
-        self.counter += 1
-        return super(IHDPReplicaProvider, self).get_training_data()
-
-    def load_training_data(self):
-        if self.setting == "A":
-            path = config.IHDP_REPLICA_PATH
-        else:
-            path = config.IHDP_REPLICA_PATH_SETTING_B
-
-        dirname = os.path.dirname(__file__)
-        filedir = os.path.join(dirname, path)
-        all_files = os.listdir(filedir)
-        all_files.sort()
-
-        if self.counter > 110:  # IHDP has 1000 replications at max
-            self.counter = 0  # reset counter
-
-        fname = os.path.join(filedir, all_files[self.counter])
-        print(fname)
-        data = pd.read_csv(fname)
-        Y_0 = data["y.0"].values
-        Y_1 = data["y.1"].values
-        Y = data["y"].values
-        T = data["z.r"].values
-        X = data.drop(columns=["y.0", "y.1", "y", "z.r"]).values
-
-        self.x = np.array(X)
-        self.t = np.array(T)
-        self.y = np.array(Y)
-        self.y_0 = np.array(Y_0)
-        self.y_1 = np.array(Y_1)
-        union = np.c_[self.y_0, self.y_1]
-        self.y_cf = np.array([row[int(1 - ix)] for row, ix in zip(union, self.t)])
 
 
 class IHDPCfrProvider(DataProvider):
@@ -131,9 +42,10 @@ class IHDPCfrProvider(DataProvider):
         return self.test["mu1"][:, self.counter] - self.test["mu0"][:, self.counter]
 
     def load_all(self):
-        fname = os.path.join(config.ROOT_DIR, "datasets/ihdp-cfr/train.npz")
+        path = "/Users/MaximilianFranz/Documents/ba/eval/justcause/datasets/ihdp-cfr"
+        fname = os.path.join(path, "train.npz")
         train = np.load(fname)
-        fname = os.path.join(config.ROOT_DIR, "datasets/ihdp-cfr/test.npz")
+        fname = os.path.join(path, "test.npz")
         self.test = np.load(fname)
         self.train = train
 
@@ -156,16 +68,3 @@ class IHDPCfrProvider(DataProvider):
         self.y_0 = self.y0_all[:, self.counter]
         self.y_1 = self.y1_all[:, self.counter]
         self.y_cf = self.ycf_all[:, self.counter]
-
-
-if __name__ == "__main__":
-
-    ihdp = IHDPCfrProvider()
-    true_ates = []
-
-    for i in range(1000):
-        ihdp.get_training_data()  # to up the counter
-        true_ates.append(ihdp.get_true_ate())
-
-    true_ate_plot(true_ates, dataset="IHDP-Cfr")
-    true_ate_dist_plot(true_ates, dataset="IHDP-Cfr")
