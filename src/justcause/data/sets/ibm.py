@@ -1,50 +1,20 @@
-import config
-import numpy as np
 import pandas as pd
+from sklearn.datasets.base import Bunch
 
-from ..data_provider import DataProvider
+from ..transport import load_parquet_dataset
 
 
-class SimpleIBMDataProvider(DataProvider):
-    """
-    Simply return one of 50k sized datasets for now
-    """
+def load_ibm_acic():
+    base = "https://raw.github.com/inovex/justcause-data/master/ibm_acic/"
 
-    def __init__(self):
-        super().__init__()
+    covariates, replications = load_parquet_dataset(base, "ibm_acic")
 
-    def __str__(self):
-        return "IBM"
+    full = pd.merge(covariates, replications, how="left", on="sample_id")
+    full["ite"] = full["y_1"] - full["y_0"]
 
-    def load_training_data(self):
-        params = pd.read_csv(config.IBM_PATH + "/" + "params.csv")
-        id = params[params["size"] == 50000]["ufid"].iloc[0]
+    cov_names = list(covariates.columns)
+    cov_names.remove("sample_id")
 
-        factual = pd.read_csv(config.IBM_PATH + "/" + "factuals" + "/" + id + ".csv")
-        counterfactual = pd.read_csv(
-            config.IBM_PATH + "/" + "counterfactuals" + "/" + id + "_cf.csv"
-        )
-        covariates = pd.read_csv(config.IBM_PATH_ROOT + "/" + "covariates.csv")
-        self.x = (
-            covariates[covariates["sample_id"].isin(list(factual["sample_id"]))]
-            .drop(columns=["sample_id"])
-            .values
-        )
-        self.y = factual["y"].values
-        self.t = factual["z"].values
-        union = counterfactual[["y0", "y1"]].values
+    acic = Bunch(data=full, covariate_names=cov_names, has_test=False)
 
-        # Retrieve counterfactuals
-        cf = []
-        i = 0
-        for t in self.t:
-            cf.append(union[i, 1 - t])
-            i += 1
-
-        self.params = params[params["ufid"] == id]
-        self.y_cf = np.array(cf)
-        self.y_1 = counterfactual["y1"]
-        self.y_0 = counterfactual["y0"]
-
-    def get_params(self):
-        return self.params
+    return acic
