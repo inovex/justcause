@@ -1,3 +1,5 @@
+# This environment is for developers of JustCause and includes
+# more dependencies than necessary if you just want to use it.
 name: justcause
 channels:
   - r
@@ -16,6 +18,7 @@ dependencies:
   - tensorflow
   - keras
   - pymongo
+  - pyarrow
   # for development below here
   - pytest
   - pytest-cov
