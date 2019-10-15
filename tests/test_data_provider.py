@@ -7,6 +7,7 @@ import pandas as pd
 
 from justcause.data.sets.ibm import load_ibm_acic
 from justcause.data.sets.ihdp import load_ihdp
+from justcause.data.sets.twins import load_twins
 from justcause.data.transport import create_data_dir, download, get_local_data_path
 
 
@@ -36,6 +37,14 @@ def test_ibm_dataprovider():
     rep = ibm.data[ibm.data["rep"] == 0]
     assert len(rep) == rep["size"].iloc[0]
     assert len(ibm.data.groupby("rep")) == 50  # number of replications
+
+
+def test_twins_dataprovider():
+
+    twins = load_twins()
+    assert twins is not None
+    assert twins.data is not None
+    assert len(twins.data) == 8215
 
 
 def test_transport(tmpdir):
