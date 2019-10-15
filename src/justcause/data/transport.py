@@ -6,7 +6,7 @@ import requests
 DATA_DIR = os.path.join(os.path.expanduser("~"), "justcause_data")
 
 COV_FILE = "covariates.gzip"
-REP_FILE = "replications.gzip"
+REP_FILE = "outcomes.gzip"
 
 
 def create_data_dir(path):
