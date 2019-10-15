@@ -1,9 +1,5 @@
 import pytest
 
-# TODO: Fix this workaround here and make config a yaml in the configs folder.
-#       We exploit here the fact that Python only imports once and then
-#       keeps a lookup of it.
-import config  # noqa: F401
 from sklearn.linear_model import LinearRegression
 
 from justcause.data.generators.toy import SWagerDataProvider

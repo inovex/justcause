@@ -5,52 +5,55 @@ import pytest
 import numpy as np
 import pandas as pd
 
+from justcause.data.sets.ibm import load_ibm_acic
 from justcause.data.sets.ihdp import load_ihdp
-from justcause.data.transport import create_data_dir, download, get_data
-
-test_dir = "tests/results/create_dir"
+from justcause.data.transport import create_data_dir, download, get_local_data_path
 
 
-class TestDataProvider:
-    def test_ihdp_dataprovider(self):
-        """ Tests the new IHDP dataprovider"""
+def test_ihdp_dataprovider():
+    """ Tests the new IHDP dataprovider"""
+    ihdp = load_ihdp()
+    assert ihdp is not None
+    assert ihdp.data is not None
+    assert ihdp.covariate_names is not None
+    all_true = np.all(np.isin(ihdp.covariate_names, list(ihdp.data.columns)))
+    assert all_true
 
-        ihdp = load_ihdp()
-        assert ihdp is not None
-        assert ihdp.data is not None
-        assert ihdp.covariate_names is not None
-        all_true = np.all(np.isin(ihdp.covariate_names, list(ihdp.data.columns)))
-        assert all_true
+    rep = ihdp.data.loc[ihdp.data["rep"] == 0]
+    assert len(rep) == 747  # number of samples in rep
+    assert len(ihdp.data.groupby("rep")) == 1000  # number of reps
+    assert ihdp.has_test
+    assert len(rep.loc[rep["test"]]) == 75  # number of test samples in rep
 
-        rep = ihdp.data.loc[ihdp.data["rep"] == 0]
-        assert len(rep) == 747  # number of samples in rep
-        assert len(ihdp.data.groupby("rep")) == 1000  # number of reps
-        assert ihdp.has_test
-        assert len(rep.loc[rep["test"]]) == 75  # number of test samples in rep
 
-    def test_transport(self):
-        """ Test utility functions for data loading"""
+def test_ibm_dataprovider():
 
-        create_data_dir(test_dir)
-        assert os.path.isdir(test_dir)
+    ibm = load_ibm_acic()
+    assert ibm is not None
+    assert ibm.data is not None
+    all_true = np.all(np.isin(ibm.covariate_names, list(ibm.data.columns)))
+    assert all_true
+    rep = ibm.data[ibm.data["rep"] == 0]
+    assert len(rep) == rep["size"].iloc[0]
+    assert len(ibm.data.groupby("rep")) == 50  # number of replications
 
-        url = "https://raw.github.com/inovex/justcause-data/master/ihdp/covariates.gzip"
-        result_path = test_dir + "/cov.gzip"
-        download(url, result_path)
-        assert os.path.isfile(result_path)
-        assert pd.read_parquet(result_path) is not None
 
-        with pytest.raises(IOError):
-            get_data(
-                url,
-                dest_subdir="doesnotexist",
-                dest_filename="doesnotmatter",
-                download_if_missing=False,
-            )
+def test_transport(tmpdir):
+    """ Test utility functions for data loading"""
 
-    def teardown_method(cls):
-        """ Remove created directory"""
-        import shutil
+    create_data_dir(tmpdir)
+    assert os.path.isdir(tmpdir)
 
-        if os.path.isdir(test_dir):
-            shutil.rmtree(test_dir, ignore_errors=True)
+    url = "https://raw.github.com/inovex/justcause-data/master/ihdp/covariates.gzip"
+    result_path = str(tmpdir) + "/cov.gzip"
+    download(url, result_path)
+    assert os.path.isfile(result_path)
+    assert pd.read_parquet(result_path) is not None
+
+    with pytest.raises(IOError):
+        get_local_data_path(
+            url,
+            dest_subdir="doesnotexist",
+            dest_filename="doesnotmatter",
+            download_if_missing=False,
+        )
