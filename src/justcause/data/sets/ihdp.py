@@ -1,11 +1,12 @@
 import pandas as pd
 from sklearn.datasets.base import Bunch
 
+from . import DATA_PATH
 from ..transport import load_parquet_dataset
 
 
 def load_ihdp():
-    base = "https://raw.github.com/inovex/justcause-data/master/ihdp/"
+    base = DATA_PATH + "ihdp"
 
     covariates, replications = load_parquet_dataset(base, "ihdp")
 
