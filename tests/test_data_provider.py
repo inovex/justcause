@@ -45,6 +45,9 @@ def test_twins_dataprovider():
     assert twins is not None
     assert twins.data is not None
     assert len(twins.data) == 8215
+    assert np.max(twins.data["y_1"]) == 1
+    assert np.min(twins.data["y_1"]) == 0
+    assert len(twins.data[twins.data["rep"] == 0]) == 8215  # Only one replication
 
 
 def test_transport(tmpdir):
