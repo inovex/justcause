@@ -44,7 +44,7 @@ def data_from_generative_function(
     If covariate is a callable, size must be specified
 
     Args:
-        covariates: set of covariates or callable to generate them
+        covariates: set of covariates as np.array or callable to generate them
         treatment_fct: callable taking parameters (covariates)
         outcome_fct: callable taking parameters (covariates)
         size: number of samples in each replication
@@ -73,8 +73,8 @@ def data_from_generative_function(
 
     for i in range(replications):
         replication = pd.DataFrame(columns=STANDARD_COLUMNS)
-        replication["t"] = treatment_fct(covariates.values)
-        replication = _add_outcomes(covariates.values, replication, outcome_fct)
+        replication["t"] = treatment_fct(covariates)
+        replication = _add_outcomes(covariates, replication, outcome_fct)
         replication["sample_id"] = np.arange(len(covariates))
         rep_df = rep_df.append(replication, ignore_index=True)
 
