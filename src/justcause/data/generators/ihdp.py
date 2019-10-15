@@ -28,12 +28,14 @@ def get_ihdp_covariates():
 
 def outcome_fct(covariates, setting="multi-modal"):
     Y_0 = np.random.normal(0, 0.2, size=len(covariates))
+    Y_1 = Y_0 + multi_modal_effect(covariates)
 
-    if setting == "multi-modal":
-        Y_1 = Y_0 + multi_modal_effect(covariates)
-    else:
-        Y_1 = Y_0 + exponential_effect(covariates)
+    return Y_0, Y_1
 
+
+def expo_outcome_fct(covariates):
+    Y_0 = np.random.normal(0, 0.2, size=len(covariates))
+    Y_1 = Y_0 + exponential_effect(covariates)
     return Y_0, Y_1
 
 
@@ -42,7 +44,14 @@ def treatment_assignment(cov):
 
 
 def multi_expo_on_ihdp(setting="multi-modal", size=None, replications=1):
-    covariates = get_ihdp_covariates()
+    # Use covariates as nd.array
+    covariates = get_ihdp_covariates().drop("sample_id", axis="columns").values
+
+    if setting == "multi-modal":
+        outcome = outcome_fct
+    else:
+        outcome = expo_outcome_fct
+
     return data_from_generative_function(
-        covariates, treatment_assignment, outcome_fct, replications=replications
+        covariates, treatment_assignment, outcome, size=size, replications=replications
     )

@@ -76,6 +76,7 @@ def data_from_generative_function(
         replication["t"] = treatment_fct(covariates)
         replication = _add_outcomes(covariates, replication, outcome_fct)
         replication["sample_id"] = np.arange(len(covariates))
+        replication["rep"] = i
         rep_df = rep_df.append(replication, ignore_index=True)
 
     df = pd.merge(cov_df, rep_df, how="inner", on="sample_id")
