@@ -1,9 +1,7 @@
 import numpy as np
-import pandas as pd
 
 from . import data_from_generative_function
-from ..sets import DATA_PATH
-from ..transport import get_local_data_path
+from ..sets.ihdp import get_ihdp_covariates
 
 
 def sigmoid(x):
@@ -17,13 +15,6 @@ def multi_modal_effect(covariates):
 
 def exponential_effect(X):
     return np.exp(1 + sigmoid(X[:, 7]))  # use birth weight
-
-
-def get_ihdp_covariates():
-    url = DATA_PATH + "ihdp/covariates.gzip"
-    path = get_local_data_path(url, "ihdp", "covariates")
-    covariates = pd.read_parquet(path)
-    return covariates
 
 
 def outcome_fct(covariates, setting="multi-modal"):
