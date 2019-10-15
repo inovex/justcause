@@ -50,3 +50,6 @@ linux_task:
     - conda activate $ENV_NAME &> /dev/null
     - coverage combine .coverage
     - coveralls
+
+# For the MacOS task, C-header might have to be installed via
+# `installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /`
