@@ -18,7 +18,7 @@ dependencies:
   - tensorflow
   - keras
   - pymongo
-  - pyarrow
+  - pyarrow>=0.14  # Mac problems with 0.13
   # for development below here
   - pytest
   - pytest-cov
