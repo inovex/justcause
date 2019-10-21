@@ -6,49 +6,43 @@ import numpy as np
 import pandas as pd
 
 from justcause.data import get_train_test
-from justcause.data.sets.ibm import load_ibm_acic
-from justcause.data.sets.ihdp import load_ihdp
-from justcause.data.sets.twins import load_twins
 from justcause.data.transport import create_data_dir, download, get_local_data_path
 
 
-def test_ihdp_dataprovider():
+def test_ihdp_dataprovider(ihdp_data):
     """ Tests the new IHDP dataprovider"""
-    ihdp = load_ihdp()
-    assert ihdp is not None
-    assert ihdp.data is not None
-    assert ihdp.covariate_names is not None
-    all_true = np.all(np.isin(ihdp.covariate_names, list(ihdp.data.columns)))
+    assert ihdp_data is not None
+    assert ihdp_data.data is not None
+    assert ihdp_data.covariate_names is not None
+    all_true = np.all(np.isin(ihdp_data.covariate_names, list(ihdp_data.data.columns)))
     assert all_true
 
-    rep = ihdp.data.loc[ihdp.data["rep"] == 0]
+    rep = ihdp_data.data.loc[ihdp_data.data["rep"] == 0]
     assert len(rep) == 747  # number of samples in rep
-    assert len(ihdp.data.groupby("rep")) == 1000  # number of reps
-    assert ihdp.has_test
+    assert len(ihdp_data.data.groupby("rep")) == 1000  # number of reps
+    assert ihdp_data.has_test
     assert len(rep.loc[rep["test"]]) == 75  # number of test samples in rep
 
 
-def test_ibm_dataprovider():
-
-    ibm = load_ibm_acic()
-    assert ibm is not None
-    assert ibm.data is not None
-    all_true = np.all(np.isin(ibm.covariate_names, list(ibm.data.columns)))
+def test_ibm_dataprovider(ibm_data):
+    assert ibm_data is not None
+    assert ibm_data.data is not None
+    all_true = np.all(np.isin(ibm_data.covariate_names, list(ibm_data.data.columns)))
     assert all_true
-    rep = ibm.data[ibm.data["rep"] == 0]
+    rep = ibm_data.data[ibm_data.data["rep"] == 0]
     assert len(rep) == rep["size"].iloc[0]
-    assert len(ibm.data.groupby("rep")) == 50  # number of replications
+    assert len(ibm_data.data.groupby("rep")) == 50  # number of replications
 
 
-def test_twins_dataprovider():
-
-    twins = load_twins()
-    assert twins is not None
-    assert twins.data is not None
-    assert len(twins.data) == 8215
-    assert np.max(twins.data["y_1"]) == 1
-    assert np.min(twins.data["y_1"]) == 0
-    assert len(twins.data[twins.data["rep"] == 0]) == 8215  # Only one replication
+def test_twins_dataprovider(twins_data):
+    assert twins_data is not None
+    assert twins_data.data is not None
+    assert len(twins_data.data) == 8215
+    assert np.max(twins_data.data["y_1"]) == 1
+    assert np.min(twins_data.data["y_1"]) == 0
+    assert (
+        len(twins_data.data[twins_data.data["rep"] == 0]) == 8215
+    )  # Only one replication
 
 
 def test_transport(tmpdir):
@@ -70,16 +64,6 @@ def test_transport(tmpdir):
             dest_filename="doesnotmatter",
             download_if_missing=False,
         )
-
-
-@pytest.fixture
-def ihdp_data():
-    return load_ihdp()
-
-
-@pytest.fixture
-def ibm_data():
-    return load_ibm_acic()
 
 
 def test_train_test_split_provided(ihdp_data):

@@ -14,12 +14,12 @@ def generate_covariates(size, num_covariates):
 
 
 def simple_treatment(covariates):
-    """ Random assignment"""
+    """Random assignment"""
     return np.random.binomial(1, 0.5, size=len(covariates))  # random assignment
 
 
 def hard_treatment(covariates):
-    """ Confounded assignment"""
+    """Confounded assignment"""
     return np.random.binomial(1, sigmoid(covariates[:, 1]), size=len(covariates))
 
 
@@ -41,7 +41,7 @@ def hard_outcomes(covariates):
 
 
 def toy_example_dgp(setting="simple", size=1000, num_covariates=10, replications=1):
-    """ Generates a toy example proposed by Stefan Wager"""
+    """Generates a toy example proposed by Stefan Wager"""
     covariates = generate_covariates(size, num_covariates=num_covariates)
 
     if setting == "simple":
@@ -57,7 +57,7 @@ def toy_example_dgp(setting="simple", size=1000, num_covariates=10, replications
 
 
 def toy_example_emcs(setting="simple", size=1000, num_covariates=10, replications=1):
-    """ Generates the same toy example but on real covariates"""
+    """Generates the same toy example but on real covariates"""
     covariates = get_ibm_acic_covariates().values
     if size > len(covariates):
         raise AssertionError(
