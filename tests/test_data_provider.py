@@ -5,6 +5,7 @@ import pytest
 import numpy as np
 import pandas as pd
 
+from justcause.data import get_train_test
 from justcause.data.sets.ibm import load_ibm_acic
 from justcause.data.sets.ihdp import load_ihdp
 from justcause.data.sets.twins import load_twins
@@ -69,3 +70,35 @@ def test_transport(tmpdir):
             dest_filename="doesnotmatter",
             download_if_missing=False,
         )
+
+
+@pytest.fixture
+def ihdp_data():
+    return load_ihdp()
+
+
+@pytest.fixture
+def ibm_data():
+    return load_ibm_acic()
+
+
+def test_train_test_split_provided(ihdp_data):
+    """ Tests use of provided test indizes as split"""
+    print(ihdp_data.data.head())
+    train, test = get_train_test(ihdp_data)
+
+    train_rep = train.loc[train["rep"] == 0]
+    test_rep = test.loc[test["rep"] == 0]
+    assert len(train_rep.loc[~train_rep["test"]]) == 672
+    assert len(test_rep.loc[test_rep["test"]]) == 75
+    assert len(train.groupby("rep")) == 1000  # number of replications still the same
+
+
+def test_train_test_split_generated(ibm_data):
+
+    num_instances = len(ibm_data.data[ibm_data.data["rep"] == 0])
+    train, test = get_train_test(ibm_data, train_size=0.8)
+    train_rep = train.loc[train["rep"] == 0]
+    test_rep = test.loc[test["rep"] == 0]
+    assert len(train_rep) == int(num_instances * 0.8)
+    assert len(test_rep) == int(num_instances * 0.2)
