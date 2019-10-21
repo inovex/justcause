@@ -31,10 +31,33 @@ def expo_outcome_fct(covariates):
 
 
 def treatment_assignment(cov):
+    """ Assigns treatment based on covariate"""
     return np.random.binomial(1, p=sigmoid(cov[:, 7]))
 
 
 def multi_expo_on_ihdp(setting="multi-modal", size=None, replications=1):
+    """
+    Reproduces a specific DGP based on IHDP covariates.
+
+    Y_0 = N(0, 0.2)
+    Y_1 = Y_0 + \tau
+    T = BERN[sigmoid(X_8)]
+
+    and \tau is either
+    \tau = exp(1 + sigmoid(X_8)) # exponential
+
+    or
+    c = I(sigmoid(X_8) > 0.5) # indicator based on feature
+    \tau = N(3*c + (1 - c), 0.1)
+
+    Args:
+        setting: either 'multi-modal' or 'exponential'
+        size: number of instances
+        replications: number of replications
+
+    Returns: the Bunch containing data and information
+
+    """
     # Use covariates as nd.array
     covariates = get_ihdp_covariates().drop("sample_id", axis="columns").values
 
