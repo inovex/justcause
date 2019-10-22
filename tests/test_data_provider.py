@@ -13,7 +13,7 @@ from justcause.data.utils import get_train_test
 RUNS_ON_CIRRUS = bool(strtobool(os.environ.get("CIRRUS_CI", "false")))
 
 
-@pytest.mark.skipif(RUNS_ON_CIRRUS, reason="Memory limits on Cirrus CI")
+# @pytest.mark.skipif(RUNS_ON_CIRRUS, reason="Memory limits on Cirrus CI")
 def test_ihdp_dataprovider(ihdp_data):
     """ Tests the new IHDP dataprovider"""
     assert ihdp_data is not None
@@ -29,7 +29,6 @@ def test_ihdp_dataprovider(ihdp_data):
     assert len(rep.loc[rep["test"]]) == 75  # number of test samples in rep
 
 
-@pytest.mark.skipif(RUNS_ON_CIRRUS, reason="Memory limits on Cirrus CI")
 def test_ibm_dataprovider(ibm_data):
     assert ibm_data is not None
     assert ibm_data.data is not None
@@ -37,10 +36,9 @@ def test_ibm_dataprovider(ibm_data):
     assert all_true
     rep = ibm_data.data[ibm_data.data["rep"] == 0]
     assert len(rep) == rep["size"].iloc[0]
-    assert len(ibm_data.data.groupby("rep")) == 50  # number of replications
+    assert len(ibm_data.data.groupby("rep")) == 2  # number of replications
 
 
-@pytest.mark.skipif(RUNS_ON_CIRRUS, reason="Memory limits on Cirrus CI")
 def test_twins_dataprovider(twins_data):
     assert twins_data is not None
     assert twins_data.data is not None
@@ -69,7 +67,6 @@ def test_transport(tmpdir):
         get_local_data_path(non_existant_path, download_if_missing=False)
 
 
-@pytest.mark.skipif(RUNS_ON_CIRRUS, reason="Memory limits on Cirrus CI")
 def test_train_test_split_provided(ihdp_data):
     """Tests use of provided test indices as split"""
     train, test = get_train_test(ihdp_data)
@@ -78,7 +75,7 @@ def test_train_test_split_provided(ihdp_data):
     test_rep = test.loc[test["rep"] == 0]
     assert len(train_rep.loc[~train_rep["test"]]) == 672
     assert len(test_rep.loc[test_rep["test"]]) == 75
-    assert len(train.groupby("rep")) == 1000  # number of replications still the same
+    assert len(train.groupby("rep")) == 1000
 
 
 def test_train_test_split_generated(ibm_data):

@@ -29,7 +29,7 @@ def ihdp_data():
 
 @pytest.fixture
 def ibm_data():
-    return load_ibm_acic()
+    return load_ibm_acic(select_rep=[0, 1])
 
 
 @pytest.fixture
