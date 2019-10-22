@@ -72,6 +72,7 @@ def test_transport(tmpdir):
         )
 
 
+@pytest.mark.skipif(RUNS_ON_CIRRUS, reason="Memory limits on Cirrus CI")
 def test_train_test_split_provided(ihdp_data):
     """ Tests use of provided test indizes as split"""
     train, test = get_train_test(ihdp_data)
