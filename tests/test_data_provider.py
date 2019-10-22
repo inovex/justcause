@@ -1,4 +1,5 @@
 import os
+from distutils.util import strtobool
 
 import pytest
 
@@ -8,10 +9,10 @@ import pandas as pd
 from justcause.data import get_train_test
 from justcause.data.transport import create_data_dir, download, get_local_data_path
 
-RUNS_ON_CIRRUS = os.environ.get("CI", False)
+RUNS_ON_CIRRUS = bool(strtobool(os.environ.get("CIRRUS_CI", "false")))
 
 
-@pytest.mark.skipif(RUNS_ON_CIRRUS, "No huge downloads on Cirrus CI")
+@pytest.mark.skipif(RUNS_ON_CIRRUS, reason="Memory limits on Cirrus CI")
 def test_ihdp_dataprovider(ihdp_data):
     """ Tests the new IHDP dataprovider"""
     assert ihdp_data is not None
@@ -27,7 +28,7 @@ def test_ihdp_dataprovider(ihdp_data):
     assert len(rep.loc[rep["test"]]) == 75  # number of test samples in rep
 
 
-@pytest.mark.skipif(RUNS_ON_CIRRUS, "No huge downloads on Cirrus CI")
+@pytest.mark.skipif(RUNS_ON_CIRRUS, reason="Memory limits on Cirrus CI")
 def test_ibm_dataprovider(ibm_data):
     assert ibm_data is not None
     assert ibm_data.data is not None
@@ -38,7 +39,7 @@ def test_ibm_dataprovider(ibm_data):
     assert len(ibm_data.data.groupby("rep")) == 50  # number of replications
 
 
-@pytest.mark.skipif(RUNS_ON_CIRRUS, "No huge downloads on Cirrus CI")
+@pytest.mark.skipif(RUNS_ON_CIRRUS, reason="Memory limits on Cirrus CI")
 def test_twins_dataprovider(twins_data):
     assert twins_data is not None
     assert twins_data.data is not None
@@ -73,7 +74,6 @@ def test_transport(tmpdir):
 
 def test_train_test_split_provided(ihdp_data):
     """ Tests use of provided test indizes as split"""
-    print(ihdp_data.data.head())
     train, test = get_train_test(ihdp_data)
 
     train_rep = train.loc[train["rep"] == 0]
