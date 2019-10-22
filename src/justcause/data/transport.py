@@ -63,9 +63,9 @@ def get_local_data_path(
     Raises: IOError if file does not exist and download is set to False
 
     """
+    url = urljoin(str(base_url), str(path))
     path = DATA_DIR / path
     create_data_dir(path.parent)
-    url = urljoin(str(base_url), str(path))
 
     if not path.is_file():
         if download_if_missing:
