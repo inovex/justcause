@@ -56,7 +56,7 @@ def test_transport(tmpdir):
     create_data_dir(tmpdir)
     assert os.path.isdir(tmpdir)
 
-    url = "https://raw.github.com/inovex/justcause-data/master/ihdp/covariates.gzip"
+    url = "https://raw.github.com/inovex/justcause-data/master/ihdp/covariates.parquet"
     result_path = tmpdir / Path("cov.gzip")
     download(url, result_path)
     assert result_path.is_file()
