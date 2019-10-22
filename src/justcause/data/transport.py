@@ -7,9 +7,7 @@ from urllib.parse import urljoin
 
 import requests
 
-from . import DATA_DIR
-
-DATA_URL = "https://raw.github.com/inovex/justcause-data/master/"
+from . import DATA_DIR, DATA_URL
 
 _logger = logging.getLogger(__name__)
 
