@@ -1,15 +1,20 @@
-import os
+from __future__ import annotations
 
-import pandas as pd
+import logging
+from os import PathLike
+from pathlib import Path
+from urllib.parse import urljoin
+
 import requests
 
-DATA_DIR = os.path.join(os.path.expanduser("~"), "justcause_data")
+from . import DATA_DIR
 
-COV_FILE = "covariates.gzip"
-REP_FILE = "outcomes.gzip"
+DATA_URL = "https://raw.github.com/inovex/justcause-data/master/"
+
+_logger = logging.getLogger(__name__)
 
 
-def create_data_dir(path):
+def create_data_dir(path: Path):
     """
     Creates the directory at the given path if it does not exist
 
@@ -19,82 +24,53 @@ def create_data_dir(path):
     Returns:
 
     """
+    if not path.is_dir():
+        path.mkdir(parents=True)
 
-    if not os.path.isdir(path):
-        os.makedirs(path)
 
-
-def download(url, dest_path):
+def download(url: str, dest_path: PathLike, chunk_size: int = 2 ** 20):
     """ Download file at url to specified location
 
     Args:
         url:
         dest_path:
+        chunk_size:
 
     """
-
     req = requests.get(url, stream=True)
     req.raise_for_status()
 
     with open(dest_path, "wb") as fd:
-        print("downloading from ", url)
-        for chunk in req.iter_content(chunk_size=2 ** 20):
+        _logger.info(f"Downloading from {url}...")
+        for chunk in req.iter_content(chunk_size=chunk_size):
             fd.write(chunk)
 
 
-def get_local_data_path(url, dest_subdir, dest_filename, download_if_missing=True):
-    """ Downloads the file from url if necessary; returns local file path
+def get_local_data_path(
+    path: PathLike, download_if_missing: bool = True, base_url: str = DATA_URL
+) -> PathLike:
+    """Downloads the file from url if necessary; returns local file path
 
     If the requested local file does not exist, it is downloaded form the url and the
     local path is returned
 
     Args:
-        url: url from where to download
-        dest_subdir: name of the subdirectory
-        dest_filename: name of the file
+        path: name of the subdirectory
         download_if_missing: download the
+        base_url: base url of repository
 
     Returns: path to the file
     Raises: IOError if file does not exist and download is set to False
 
     """
+    path = DATA_DIR / path
+    create_data_dir(path.parent)
+    url = urljoin(str(base_url), str(path))
 
-    data_dir = os.path.join(os.path.abspath(DATA_DIR), dest_subdir)
-
-    create_data_dir(data_dir)
-
-    dest_path = os.path.join(data_dir, dest_filename)
-
-    if not os.path.isfile(dest_path):
+    if not path.is_file():
         if download_if_missing:
-            download(url, dest_path)
+            download(url, path)
         else:
             raise IOError("Dataset missing.")
 
-    return dest_path
-
-
-def load_parquet_dataset(base_url, dest_subdir):
-    """ Load dataset stored in parquet at the specified directory
-
-    Takes advantage of the efficient storage format parquet
-
-    Args:
-        base_url: base url where the files can be found
-        dest_subdir: base directory where to put the results
-
-    Returns:
-
-    """
-    COV_URL = os.path.join(base_url, COV_FILE)
-    REP_URL = os.path.join(base_url, REP_FILE)
-
-    cov_path = get_local_data_path(
-        COV_URL, dest_subdir, COV_FILE, download_if_missing=True
-    )
-    cov = pd.read_parquet(cov_path)
-    rep_path = get_local_data_path(
-        REP_URL, dest_subdir, REP_FILE, download_if_missing=True
-    )
-    rep = pd.read_parquet(rep_path)
-    return cov, rep
+    return path

@@ -1,13 +1,14 @@
 import os
 from distutils.util import strtobool
+from pathlib import Path
 
 import pytest
 
 import numpy as np
 import pandas as pd
 
-from justcause.data import get_train_test
 from justcause.data.transport import create_data_dir, download, get_local_data_path
+from justcause.data.utils import get_train_test
 
 RUNS_ON_CIRRUS = bool(strtobool(os.environ.get("CIRRUS_CI", "false")))
 
@@ -46,35 +47,30 @@ def test_twins_dataprovider(twins_data):
     assert len(twins_data.data) == 8215
     assert np.max(twins_data.data["y_1"]) == 1
     assert np.min(twins_data.data["y_1"]) == 0
-    assert (
-        len(twins_data.data[twins_data.data["rep"] == 0]) == 8215
-    )  # Only one replication
+    single_replication = twins_data.data[twins_data.data["rep"] == 0]
+    assert len(single_replication) == 8215
 
 
 def test_transport(tmpdir):
     """ Test utility functions for data loading"""
 
+    tmpdir = Path(tmpdir)  # convert to pathlib Path
     create_data_dir(tmpdir)
     assert os.path.isdir(tmpdir)
 
     url = "https://raw.github.com/inovex/justcause-data/master/ihdp/covariates.gzip"
-    result_path = str(tmpdir) + "/cov.gzip"
+    result_path = tmpdir / Path("cov.gzip")
     download(url, result_path)
-    assert os.path.isfile(result_path)
+    assert result_path.is_file()
     assert pd.read_parquet(result_path) is not None
 
     with pytest.raises(IOError):
-        get_local_data_path(
-            url,
-            dest_subdir="doesnotexist",
-            dest_filename="doesnotmatter",
-            download_if_missing=False,
-        )
+        get_local_data_path(Path("does/not/exist"), download_if_missing=False)
 
 
 @pytest.mark.skipif(RUNS_ON_CIRRUS, reason="Memory limits on Cirrus CI")
 def test_train_test_split_provided(ihdp_data):
-    """ Tests use of provided test indizes as split"""
+    """Tests use of provided test indices as split"""
     train, test = get_train_test(ihdp_data)
 
     train_rep = train.loc[train["rep"] == 0]

@@ -29,6 +29,8 @@ linux_task:
   container: {image: "continuumio/anaconda3:latest"}
   pip_cache:
     folder: $PIP_CACHE
+  justcause_data_cache:
+    folder: ${HOME}/justcause_data
   prepare_script:
     - source /opt/conda/etc/profile.d/conda.sh &> /dev/null
     - rm -rf .coverage junit-*.xml

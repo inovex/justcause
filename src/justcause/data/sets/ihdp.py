@@ -1,29 +1,23 @@
 import pandas as pd
 from sklearn.datasets.base import Bunch
 
-from . import DATA_PATH
-from ..transport import get_local_data_path, load_parquet_dataset
+from . import get_covariates_df, get_outcomes_df
+
+DATASET_NAME = "ihdp"
 
 
-def load_ihdp():
-    base = DATA_PATH + "ihdp"
+def load_ihdp() -> Bunch:
+    covariates = get_covariates_df(DATASET_NAME)
+    outcomes = get_outcomes_df(DATASET_NAME)
 
-    covariates, replications = load_parquet_dataset(base, "ihdp")
-
-    replications["sample_id"] = replications.groupby("rep").cumcount()
-    full = pd.merge(covariates, replications, how="left", on="sample_id")
+    outcomes["sample_id"] = outcomes.groupby("rep").cumcount()
+    full = pd.merge(covariates, outcomes, how="left", on="sample_id")
     full["ite"] = full["y_1"] - full["y_0"]
 
-    cov_names = list(covariates.columns)
-    cov_names.remove("sample_id")
-
-    ihdp = Bunch(data=full, covariate_names=cov_names, has_test=True)
-
-    return ihdp
+    cov_names = [col for col in covariates.columns if col != "sample_id"]
+    bunch = Bunch(data=full, covariate_names=cov_names, has_test=True)
+    return bunch
 
 
-def get_ihdp_covariates():
-    url = DATA_PATH + "ihdp/covariates.gzip"
-    path = get_local_data_path(url, "ihdp", "covariates")
-    covariates = pd.read_parquet(path)
-    return covariates
+def get_ihdp_covariates() -> pd.DataFrame:
+    return get_covariates_df(DATASET_NAME)
