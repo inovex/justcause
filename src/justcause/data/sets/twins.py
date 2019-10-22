@@ -1,17 +1,22 @@
+from typing import Optional
+
 import numpy as np
 import pandas as pd
 from sklearn.datasets.base import Bunch
 
-from . import get_covariates_df, get_outcomes_df
+from ..utils import Indices, get_covariates_df, get_outcomes_df, select_replication
 
 DATASET_NAME = "twins"
 
 
-def load_twins() -> Bunch:
+def load_twins(select_rep: Optional[Indices] = None) -> Bunch:
     covariates = get_covariates_df(DATASET_NAME)
     outcomes = get_outcomes_df(DATASET_NAME)
 
-    full = pd.merge(covariates, outcomes, how="left", on="sample_id")
+    if select_rep is not None:
+        outcomes = select_replication(outcomes, select_rep)
+
+    full = pd.merge(covariates, outcomes, on="sample_id")
     full["ite"] = full["y_1"] - full["y_0"]
     full["rep"] = np.repeat(0, len(full))
 

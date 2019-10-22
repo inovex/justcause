@@ -1,16 +1,21 @@
+from typing import Optional
+
 import pandas as pd
 from sklearn.datasets.base import Bunch
 
-from . import get_covariates_df, get_outcomes_df
+from ..utils import Indices, get_covariates_df, get_outcomes_df, select_replication
 
 DATASET_NAME = "ibm_acic"
 
 
-def load_ibm_acic() -> Bunch:
+def load_ibm_acic(select_rep: Optional[Indices] = None) -> Bunch:
     covariates = get_covariates_df(DATASET_NAME)
     outcomes = get_outcomes_df(DATASET_NAME)
 
-    full = pd.merge(covariates, outcomes, how="left", on="sample_id")
+    if select_rep is not None:
+        outcomes = select_replication(outcomes, select_rep)
+
+    full = pd.merge(covariates, outcomes, on="sample_id")
     full["ite"] = full["y_1"] - full["y_0"]
 
     cov_names = [col for col in covariates.columns if col != "sample_id"]

@@ -9,7 +9,7 @@
 
 import pytest
 
-from justcause.data.sets.ibm import load_ibm_acic
+from justcause.data.sets.ibm_acic import load_ibm_acic
 from justcause.data.sets.ihdp import load_ihdp
 from justcause.data.sets.twins import load_twins
 

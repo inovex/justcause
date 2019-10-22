@@ -1,7 +1,7 @@
 import numpy as np
 
 from . import data_from_generative_function
-from ..sets.ibm import get_ibm_acic_covariates
+from ..sets.ibm_acic import get_ibm_acic_covariates
 
 # Todo: pass RandomState to all functions using randomness
 
