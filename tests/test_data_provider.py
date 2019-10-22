@@ -64,8 +64,9 @@ def test_transport(tmpdir):
     assert result_path.is_file()
     assert pd.read_parquet(result_path) is not None
 
+    non_existant_path = tmpdir / Path("does/not/exist")
     with pytest.raises(IOError):
-        get_local_data_path(Path("does/not/exist"), download_if_missing=False)
+        get_local_data_path(non_existant_path, download_if_missing=False)
 
 
 @pytest.mark.skipif(RUNS_ON_CIRRUS, reason="Memory limits on Cirrus CI")
