@@ -8,8 +8,8 @@ from sklearn.model_selection import train_test_split
 
 from .transport import get_local_data_path
 
-COVARIATES_FILE = Path("covariates.gzip")
-OUTCOMES_FILE = Path("outcomes.gzip")
+COVARIATES_FILE = Path("covariates.parquet")
+OUTCOMES_FILE = Path("outcomes.parquet")
 
 #: Type alias
 Indices = Union[List[int], int]
