@@ -4,19 +4,18 @@ from os import PathLike
 import pandas as pd
 
 from ..transport import get_local_data_path
-from .. import DATA_DIR
 
 COVARIATES_FILE = Path("covariates.gzip")
 OUTCOMES_FILE = Path("outcomes.gzip")
 
 
 def get_covariates_df(dataset_name: str) -> pd.DataFrame:
-    path = DATA_DIR / Path(dataset_name) / COVARIATES_FILE
+    path = Path(dataset_name) / COVARIATES_FILE
     return get_dataframe(path)
 
 
 def get_outcomes_df(dataset_name: str) -> pd.DataFrame:
-    path = DATA_DIR / Path(dataset_name) / OUTCOMES_FILE
+    path = Path(dataset_name) / OUTCOMES_FILE
     return get_dataframe(path)
 
 
