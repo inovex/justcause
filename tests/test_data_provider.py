@@ -81,7 +81,6 @@ def test_train_test_split_provided(ihdp_data):
     assert len(train.groupby("rep")) == 1000  # number of replications still the same
 
 
-@pytest.mark.xfail
 def test_train_test_split_generated(ibm_data):
     num_instances = len(ibm_data.data[ibm_data.data["rep"] == 0])
     train, test = get_train_test(ibm_data, train_size=0.8)
