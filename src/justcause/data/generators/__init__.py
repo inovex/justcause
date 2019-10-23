@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd
 from sklearn.utils import Bunch
 
-STANDARD_COLUMNS = ["t", "y", "y_cf", "y_0", "y_1", "ite", "rep", "sample_id"]
+from .. import DATA_COLS
 
 
 def _add_outcomes(covariates, df, outcome_fct):
@@ -67,12 +67,12 @@ def data_from_generative_function(
     # TODO: Allow to add specific covariate names
     cov_col = ["x" + str(i) for i in range(covariates.shape[1])]
 
-    rep_df = pd.DataFrame(STANDARD_COLUMNS)
+    rep_df = pd.DataFrame(DATA_COLS)
     cov_df = pd.DataFrame(data=covariates, columns=cov_col)
     cov_df["sample_id"] = np.arange(len(covariates))
 
     for i in range(replications):
-        replication = pd.DataFrame(columns=STANDARD_COLUMNS)
+        replication = pd.DataFrame(columns=DATA_COLS)
         replication["t"] = treatment_fct(covariates)
         replication = _add_outcomes(covariates, replication, outcome_fct)
         replication["sample_id"] = np.arange(len(covariates))

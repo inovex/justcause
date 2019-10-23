@@ -16,7 +16,7 @@ def load_twins() -> Bunch:
     full["rep"] = np.repeat(0, len(full))
 
     cov_names = [col for col in covariates.columns if col != "sample_id"]
-    bunch = Bunch(data=full, covariate_names=cov_names, has_test=True)
+    bunch = Bunch(data=full, covariate_names=cov_names)
     return bunch
 
 

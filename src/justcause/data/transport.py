@@ -69,6 +69,6 @@ def get_local_data_path(
         if download_if_missing:
             download(url, path)
         else:
-            raise IOError("Dataset missing.")
+            raise IOError(f"Dataset {path} is missing.")
 
     return path

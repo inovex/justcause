@@ -4,6 +4,7 @@ from . import data_from_generative_function
 from ..sets.ibm_acic import get_ibm_acic_covariates
 
 # Todo: pass RandomState to all functions using randomness
+# Use sklearn.utils.check_random_state for this
 
 
 def sigmoid(x):

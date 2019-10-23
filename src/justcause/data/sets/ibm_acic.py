@@ -19,7 +19,7 @@ def load_ibm_acic(select_rep: Optional[Indices] = None) -> Bunch:
     full["ite"] = full["y_1"] - full["y_0"]
 
     cov_names = [col for col in covariates.columns if col != "sample_id"]
-    bunch = Bunch(data=full, covariate_names=cov_names, has_test=False)
+    bunch = Bunch(data=full, covariate_names=cov_names)
     return bunch
 
 

@@ -42,8 +42,6 @@ methods easier, by allowing to compare them across both generated and existing d
 * avoid plotting to `results/plots/S-Learner - LinearRegressionrobustness.png'` in the unittests (right now the directory
   needs to be created for the unittests to run)
 * Do imports within functions only when really necessary (there are rare cases only) otherwise on the top of the module
-* Don't set `R_HOME` environment variable and rely on what conda is doing for you. Avoid setting any kind of path
-  via environment variables.
 * Remove all `if __name__ == "__main__":` sections from the modules in the justcause package
 * When files are downloaded keep them under `~/.justcause` (, i.e. hidden directory in the home dir) and access them.
   Check out how this in done under https://github.com/maciejkula/spotlight/blob/master/spotlight/datasets/_transport.py
@@ -100,30 +98,20 @@ Then take a look into the `scripts` and `notebooks` folders.
    ```
    conda env update -f environment.lock.yaml --prune
    ```
-## Project Organization
-
-```
-├── AUTHORS.rst             <- List of developers and maintainers.
-├── CHANGELOG.rst           <- Changelog to keep track of new features and fixes.
-├── LICENSE.txt             <- License as chosen on the command-line.
-├── README.md               <- The top-level README for developers.s
-├── docs                    <- Directory for Sphinx documentation in rst or md.
-├── environment.yaml        <- The conda environment file for reproducibility.
-├── notebooks               <- Jupyter notebooks. Naming convention is a number (for
-│                              ordering), the creator's initials and a description,
-│                              e.g. `1.0-fw-initial-data-exploration`.
-├── scripts                 <- Analysis and production scripts which import the
-│                              actual PYTHON_PKG, e.g. train_model.
-├── setup.cfg               <- Declarative configuration of your project.
-├── setup.py                <- Use `python setup.py develop` to install for development or
-|                              or create a distribution with `python setup.py bdist_wheel`.
-├── src
-│   └── justcause           <- Actual Python package where the main functionality goes.
-├── tests                   <- Unit tests which can be run with `py.test`.
-├── .coveragerc             <- Configuration for coverage reports of unit tests.
-├── .isort.cfg              <- Configuration for git hook that sorts imports.
-└── .pre-commit-config.yaml <- Configuration of pre-commit git hooks.
-```
+# Further Work
+Some steps to continue the work on this project would be
+  - Implement a fully parametric DGP, following the dimensions roughly outlined in Chapter 4 of my thesis
+  - Rewrite the plot functions in `utils.py` to simply take `DataProvider` as inputs and handle the internals within
+    the functions.
+  - Implement within-sample and out-of-sample evaluation (switch between the two) as proposed in [this paper](https://arxiv.org/pdf/1606.03976.pdf).
+  - Implement a run-checker that ensures that all methods fit on the data and/or that no complications arise,
+    before expensive computation is started.
+    (e.g. requested size is to big for given DataProvider)
+  - Enable evaluation without `sacred` logging, only storing results.
+  - Ensure train/test split can be requested for all DataProviders
+  - Obviously, add more methods and reference datasets
+  - Implement experiment as a module, which is given methods, data and settings of the experiments and returns the full
+  - Write tests ;)
 
 ## Note
 
