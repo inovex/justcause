@@ -1,5 +1,5 @@
-from .causal_method import CausalMethod
-from .ganite.ganite_model import GANITEModel
+from justcause.contrib.ganite.ganite_model import GANITEModel
+from justcause.learners.tree.causal_method import CausalMethod
 
 
 class GANITEWrapper(CausalMethod):

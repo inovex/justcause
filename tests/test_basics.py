@@ -3,8 +3,8 @@ import pytest
 from sklearn.linear_model import LinearRegression
 
 # from justcause.data.generators.toy import SWagerDataProvider
-from justcause.methods.basics.outcome_regression import SLearner
-from justcause.methods.causal_forest import CausalForest
+from justcause.learners.meta.outcome_regression import SLearner
+from justcause.learners.tree.causal_forest import CausalForest
 from justcause.metrics import StandardEvaluation
 
 # Todo: Fix the tests here!

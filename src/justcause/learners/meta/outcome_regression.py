@@ -2,8 +2,8 @@ import copy
 
 import numpy as np
 
-from ...utils import get_regressor_name
-from ..causal_method import CausalMethod
+from justcause.learners.tree.causal_method import CausalMethod
+from justcause.utils import get_regressor_name
 
 
 class SLearner(CausalMethod):
@@ -17,7 +17,7 @@ class SLearner(CausalMethod):
     def __init__(self, regressor, seed=0):
         """
 
-        :param regressor: a sklearn regressor with methods `fit` and `predict`
+        :param regressor: a sklearn regressor with learners `fit` and `predict`
         """
         super().__init__(seed)
         self.regressor = regressor
@@ -55,7 +55,7 @@ class WeightedSLearner(CausalMethod):
     def __init__(self, propensity_regressor, regressor, dgp, seed=0):
         """
 
-        :param regressor: a sklearn regressor with methods `fit` and `predict`
+        :param regressor: a sklearn regressor with learners `fit` and `predict`
         """
         super().__init__(seed)
         self.propensity_regressor = propensity_regressor
@@ -100,7 +100,7 @@ class WeightedTLearner(CausalMethod):
     def __init__(self, propensity_regressor, regressor, dgp, seed=0):
         """
 
-        :param regressor: a sklearn regressor with methods `fit` and `predict`
+        :param regressor: a sklearn regressor with learners `fit` and `predict`
         """
         super().__init__(seed)
         self.propensity_regressor = propensity_regressor
@@ -142,8 +142,8 @@ class TLearner(CausalMethod):
         """
 
         :param seed: Random seed
-        :param regressor: a sklearn regressor with methods `fit` and `predict`
-        :param regressor_two: a sklearn regressor with methods `fit` and `predict`
+        :param regressor: a sklearn regressor with learners `fit` and `predict`
+        :param regressor_two: a sklearn regressor with learners `fit` and `predict`
         """
         super().__init__(seed)
         self.regressor_one = regressor

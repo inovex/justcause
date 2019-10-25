@@ -1,5 +1,5 @@
 """
-All methods provided in https://github.com/saberpowers/causalLearning
+All learners provided in https://github.com/saberpowers/causalLearning
 introduced in the paper: ﻿https://arxiv.org/pdf/1707.00102.pdf
 """
 import os
@@ -12,7 +12,7 @@ from rpy2.robjects import numpy2ri
 from rpy2.robjects.packages import importr
 from rpy2.robjects.vectors import FloatVector, IntVector, StrVector
 
-from .causal_method import CausalMethod
+from justcause.learners.tree.causal_method import CausalMethod
 
 os.environ["L_ALL"] = "en_US.UTF-8"
 os.environ["R_HOME"] = config.R_HOME

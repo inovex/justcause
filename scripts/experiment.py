@@ -9,7 +9,7 @@ from sacred.observers import MongoObserver
 from sklearn.linear_model import LinearRegression
 
 from justcause.data.sets.ihdp import IHDPCfrProvider
-from justcause.methods.basics.outcome_regression import DoubleOutcomeRegression
+from justcause.learners.meta.outcome_regression import DoubleOutcomeRegression
 from justcause.metrics import StandardEvaluation
 
 DB_NAME = "sacred"

@@ -5,7 +5,7 @@ from rpy2.robjects import numpy2ri
 from rpy2.robjects.packages import importr
 from rpy2.robjects.vectors import FloatVector, IntVector, StrVector
 
-from .causal_method import CausalMethod
+from justcause.learners.tree.causal_method import CausalMethod
 
 
 class RLearner(CausalMethod):

@@ -17,7 +17,7 @@ from justcause.data.sets.twins import load_twins
 @pytest.fixture
 def grf():
     """Assure the installation of Generalized Random Forests"""
-    from justcause.methods.causal_forest import CausalForest
+    from justcause.learners.tree.causal_forest import CausalForest
 
     CausalForest.install_grf()
 

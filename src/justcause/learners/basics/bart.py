@@ -1,3 +1,5 @@
+# Check if this even works.
+
 import numpy as np
 import rpy2.robjects as robjects
 import rpy2.robjects.packages as rpackages
@@ -5,7 +7,7 @@ from rpy2.robjects import numpy2ri
 from rpy2.robjects.packages import importr
 from rpy2.robjects.vectors import FloatVector, StrVector
 
-from ..causal_method import CausalMethod
+from justcause.learners.tree.causal_method import CausalMethod
 
 
 class Bart(CausalMethod):
