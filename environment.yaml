@@ -20,6 +20,7 @@ dependencies:
   - pymongo
   - pyarrow>=0.14  # Mac problems with 0.13
   # for development below here
+  - jupyterlab
   - pytest
   - pytest-cov
   - pytest-virtualenv
