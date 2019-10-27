@@ -1,5 +1,5 @@
 from justcause.data.generators.ihdp import multi_expo_on_ihdp
-from justcause.data.generators.toy import toy_example_dgp, toy_example_emcs
+from justcause.data.generators.toy import toy_data_synthetic, toy_example_emcs
 
 
 def test_ihdp_generator():
@@ -18,14 +18,14 @@ def test_toy_generator():
     size = 10000
     replications = 5
 
-    toy = toy_example_dgp(setting="simple", size=size, replications=replications)
+    toy = toy_data_synthetic(setting="simple", size=size, replications=replications)
     assert len(toy.data) == size * replications
     assert len(toy.data.groupby("rep")) == replications
 
     size = 100
     replications = 50
 
-    toy = toy_example_dgp(setting="hard", size=size, replications=replications)
+    toy = toy_data_synthetic(setting="hard", size=size, replications=replications)
     assert len(toy.data) == size * replications
     assert len(toy.data.groupby("rep")) == replications
 
