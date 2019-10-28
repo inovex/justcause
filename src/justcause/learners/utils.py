@@ -11,7 +11,7 @@ def replace_factual_outcomes(y_0, y_1, y, t):
     """
     for i in range(len(t)):
         if t[i] == 1:
-            y_1 = y[i]
+            y_1[i] = y[i]
         else:
-            y_0 = y[i]
+            y_0[i] = y[i]
     return y_0, y_1

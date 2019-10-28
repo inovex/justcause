@@ -82,11 +82,18 @@ class WeightedSLearner(BaseSLearner):
         :param regressor: a sklearn regressor with methods `fit` and `predict`
         """
         super().__init__(regressor)
-        assert (
-            "predict_proba" in propensity_regressor
+        assert hasattr(
+            propensity_regressor, "predict_proba"
         ), "propensity regressor must have predict_proba function"
 
         self.propensity_regressor = propensity_regressor
+
+    def __str__(self):
+        return ("{}(regressor={}, propensity={})").format(
+            self.__class__.__name__,
+            self.regressor.__class__.__name__,
+            self.propensity_regressor.__class__.__name__,
+        )
 
     def fit(self, x, t, y, propensity=None) -> None:
         if propensity is not None:
@@ -94,7 +101,7 @@ class WeightedSLearner(BaseSLearner):
             ipt = 1 / propensity
         else:
             self.propensity_regressor.fit(x, t)
-            ipt = 1 / self.propensity_regressor.predict_proba(x)
+            ipt = 1 / self.propensity_regressor.predict_proba(x)[:, 1]
 
         train = np.c_[x, t]
         self.regressor.fit(train, y, sample_weight=ipt)
