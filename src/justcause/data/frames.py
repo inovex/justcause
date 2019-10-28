@@ -17,8 +17,9 @@ class CausalFrame(pd.DataFrame):
     def __init__(self, *args, **kwargs):
         covariates = kwargs.pop("covariates", [])
         treatment = kwargs.pop("treatment", "t")
+        outcome = kwargs.pop("outcome", "y")
         super().__init__(*args, **kwargs)
-        self._names = dict(covariates=covariates, treatment=treatment)
+        self._names = dict(covariates=covariates, treatment=treatment, outcome=outcome)
 
     @property
     def _constructor(self):
@@ -41,13 +42,18 @@ class NamesAccessor:
 
     @property
     def covariates(self):
-        # return the geographic center point of this DataFrame
+        """ Returns covariate names of a CausalFrame"""
         return self._obj._names["covariates"]
 
     @property
     def treatment(self):
-        # return the geographic center point of this DataFrame
+        """ Returns treatment indicator name of a CausalFrame"""
         return self._obj._names["treatment"]
+
+    @property
+    def outcome(self):
+        """ Returns outcome name of a CausalFrame"""
+        return self._obj._names["outcome"]
 
 
 @pd.api.extensions.register_dataframe_accessor("np")
@@ -62,6 +68,7 @@ class NumpyAccessor:
 
     @property
     def X(self):
+        """ Returns covariates as a numpy array"""
         cols = [col for col in self._obj.names.covariates if col in self._obj.columns]
         if not cols:
             raise IndexError("No known covariates in CausalFrame")
@@ -69,7 +76,16 @@ class NumpyAccessor:
 
     @property
     def t(self):
+        """ Returns treatment as a numpy array"""
         if self._obj.names.treatment not in self._obj.columns:
             raise IndexError("No treatment variable in CausalFrame")
         else:
             return self._obj[self._obj.names.treatment]
+
+    @property
+    def y(self):
+        """ Returns outcome as a numpy array"""
+        if self._obj.names.outcome not in self._obj.columns:
+            raise IndexError("No outcome variable in CausalFrame")
+        else:
+            return self._obj[self._obj.names.outcome]
