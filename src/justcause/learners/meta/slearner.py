@@ -1,87 +1,100 @@
 import numpy as np
-from learners.causal_method import CausalMethod
 
-from justcause.utils import get_regressor_name
+from ..utils import replace_factual_outcomes
 
 
-class SLearner(CausalMethod):
+class BaseSLearner(object):
+    """ Base class for all S-Learners; bundles duplicate code"""
+
+    def __init__(self, regressor):
+        """
+
+        :param regressor: a sklearn regressor with learners `fit` and `predict`
+        """
+        self.regressor = regressor
+
+    def __repr__(self):
+        return self.__str__()
+
+    def predict_ite(
+        self, x, t=None, y=None, return_components=False, replace_factuals=False
+    ):
+        """
+
+        Args:
+            x: covariates in shape (num_instances, num_features)
+            t: treatment indicator, binary in shape (num_instances)
+            y: factual outcomes in shape (num_instances)
+            return_components: whether to return Y(0) and Y(1) predictions separately
+            replace_factuals: Whether to use the given factuals in the prediction
+        Returns:
+
+        """
+        y_0 = self.regressor.predict(np.c_[x, np.zeros(x.shape[0])])
+        y_1 = self.regressor.predict(np.c_[x, np.ones(x.shape[0])])
+
+        if t is not None and y is not None and replace_factuals:
+            # Use factuals outcomes where possible
+            assert len(t) == len(y), "outcome and treatment must be of same length"
+            assert len(t) == len(y_0), "treatment indicators must match covariates"
+            y_0, y_1 = replace_factual_outcomes(y_0, y_1, y, t)
+
+        if return_components:
+            return y_1 - y_0, y_0, y_1
+        else:
+            return y_1 - y_0
+
+    def predict_ate(self, x, t=None, y=None):
+        """ Predicts ATE as a mean of ITE predictions"""
+        return np.mean(self.predict_ite(x, t, y))
+
+
+class SLearner(BaseSLearner):
     """
-    Implements a generic S-Learner
+    Implements a generic S-Learner for the binary treatment case
 
     :ref:
     [S-Learner](﻿https://arxiv.org/pdf/1706.03461.pdf)
     """
 
-    def __init__(self, regressor, seed=0):
-        """
-
-        :param regressor: a sklearn regressor with learners `fit` and `predict`
-        """
-        super().__init__(seed)
-        self.regressor = regressor
-        self.is_trained = False
-
     def __str__(self):
-        return "S-Learner - " + get_regressor_name(self.regressor)
+        return ("{}(regressor={})").format(
+            self.__class__.__name__, self.regressor.__class__.__name__
+        )
 
-    @staticmethod
-    def union(x, t):
-        return np.c_[x, t]
-
-    def predict_ite(self, x, t=None, y=None):
-        return self.regressor.predict(
-            self.union(x, np.ones(x.shape[0]))
-        ) - self.regressor.predict(self.union(x, np.zeros(x.shape[0])))
-
-    def predict_ate(self, x, t=None, y=None):
-        return np.mean(self.predict_ite(x))
-
-    def fit(self, x, t, y, refit=False) -> None:
-        train = self.union(x, t)
+    def fit(self, x, t, y) -> None:
+        """ Fits the base learner on the outcome function"""
+        train = np.c_[x, t]
         self.regressor.fit(train, y)
-        self.is_trained = True
 
 
-class WeightedSLearner(CausalMethod):
+class WeightedSLearner(BaseSLearner):
     """
-    Implements a generic S-Learner
+    Implements a weighted generic S-Learner, where samples are weighted with the
+    inverse probability of treatment
 
-    :ref:
+    References
     [S-Learner](﻿https://arxiv.org/pdf/1706.03461.pdf)
     """
 
-    def __init__(self, propensity_regressor, regressor, dgp, seed=0):
+    def __init__(self, propensity_regressor, regressor):
         """
+        :param regressor: a sklearn regressor with methods `fit` and `predict`
+        """
+        super().__init__(regressor)
+        assert (
+            "predict_proba" in propensity_regressor
+        ), "propensity regressor must have predict_proba function"
 
-        :param regressor: a sklearn regressor with learners `fit` and `predict`
-        """
-        super().__init__(seed)
         self.propensity_regressor = propensity_regressor
-        self.regressor = regressor
-        self.dgp = dgp
-        self.is_trained = False
 
-    def __str__(self):
-        return "Weighted S-Learner - " + get_regressor_name(self.regressor)
+    def fit(self, x, t, y, propensity=None) -> None:
+        if propensity is not None:
+            assert len(propensity) == len(t)
+            ipt = 1 / propensity
+        else:
+            self.propensity_regressor.fit(x, t)
+            ipt = 1 / self.propensity_regressor.predict_proba(x)
 
-    @staticmethod
-    def union(x, t):
-        return np.c_[x, t]
-
-    def predict_ite(self, x, t=None, y=None):
-        return self.regressor.predict(
-            self.union(x, np.ones(x.shape[0]))
-        ) - self.regressor.predict(self.union(x, np.zeros(x.shape[0])))
-
-    def predict_ate(self, x, t=None, y=None):
-        return np.mean(self.predict_ite(x))
-
-    def fit(self, x, t, y, refit=False) -> None:
-        self.propensity_regressor.fit(x, t)
-        prob = self.propensity_regressor.predict_proba(x)
-        prob = self.dgp.get_train_propensity()
-
-        weights = 1 / prob
-        train = self.union(x, t)
-        self.regressor.fit(train, y, sample_weight=weights)
-        self.is_trained = True
+        train = np.c_[x, t]
+        self.regressor.fit(train, y, sample_weight=ipt)

@@ -64,7 +64,3 @@ class DoubleRobust(CausalMethod):
             + " O: "
             + get_regressor_name(self.outcome_regressor)
         )
-
-    def predict_ite(self, x, t=None, y=None):
-        # Broadcast ATE to all instances
-        return np.full(x.shape[0], self.predict_ate(x, t, y))
