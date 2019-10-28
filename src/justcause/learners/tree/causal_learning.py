@@ -7,11 +7,10 @@ import os
 import numpy as np
 import rpy2.robjects as robjects
 import rpy2.robjects.packages as rpackages
+from learners.causal_method import CausalMethod
 from rpy2.robjects import numpy2ri
 from rpy2.robjects.packages import importr
 from rpy2.robjects.vectors import FloatVector, IntVector, StrVector
-
-from justcause.learners.tree.causal_method import CausalMethod
 
 # Todo: get rid of setting environment variables here
 os.environ["L_ALL"] = "en_US.UTF-8"

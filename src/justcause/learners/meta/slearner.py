@@ -1,6 +1,6 @@
 import numpy as np
+from learners.causal_method import CausalMethod
 
-from justcause.learners.tree.causal_method import CausalMethod
 from justcause.utils import get_regressor_name
 
 

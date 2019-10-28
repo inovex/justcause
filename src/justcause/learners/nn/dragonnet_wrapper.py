@@ -1,5 +1,6 @@
+from learners.causal_method import CausalMethod
+
 from justcause.contrib.dragonnet import dragonnet
-from justcause.learners.tree.causal_method import CausalMethod
 
 
 class DragonNetWrapper(CausalMethod):
