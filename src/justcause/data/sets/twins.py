@@ -1,13 +1,15 @@
+from typing import Iterable
+
 import numpy as np
 import pandas as pd
-from sklearn.datasets.base import Bunch
 
-from ..utils import get_covariates_df, get_outcomes_df
+from ..frames import CausalFrame
+from ..utils import get_covariates_df, get_outcomes_df, iter_rep
 
 DATASET_NAME = "twins"
 
 
-def load_twins() -> Bunch:
+def load_twins() -> Iterable[CausalFrame]:
     covariates = get_covariates_df(DATASET_NAME)
     outcomes = get_outcomes_df(DATASET_NAME)
 
@@ -16,8 +18,8 @@ def load_twins() -> Bunch:
     full["rep"] = np.repeat(0, len(full))
 
     cov_names = [col for col in covariates.columns if col != "sample_id"]
-    bunch = Bunch(data=full, covariate_names=cov_names)
-    return bunch
+    df = CausalFrame(full, covariates=cov_names)
+    return iter_rep(df)
 
 
 def get_twins_covariates() -> pd.DataFrame:
