@@ -137,8 +137,8 @@ class GANITEBuilder(object):
 
         y_f_i = y_f  # tf.Print(y_f, [y_f[:, 0]], message="y_f=", summarize=8)
         y_f_pred_i = (
-            y_f_pred
-        )  # tf.Print(y_f_pred, [y_f_pred], message="y_f_pred=", summarize=8)
+            y_f_pred  # tf.Print(y_f_pred, [y_f_pred], message="y_f_pred=", summarize=8)
+        )
 
         supervised_loss_cf = tf.sqrt(
             tf.reduce_mean(tf.squared_difference(y_f_i[:, 0], y_f_pred_i))
@@ -152,10 +152,10 @@ class GANITEBuilder(object):
             tf.log(1 - d_ite_pred)
         )
 
-        y_full_i = y_full  # tf.Print(y_full, [y_full], message="y_full=", summarize=8)
-        y_pred_ite_i = (
-            y_pred_ite
-        )  # tf.Print(y_pred_ite, [y_pred_ite], message="y_pred_ite=", summarize=8)
+        # tf.Print(y_full, [y_full], message="y_full=", summarize=8)
+        y_full_i = y_full
+        # tf.Print(y_pred_ite, [y_pred_ite], message="y_pred_ite=", summarize=8)
+        y_pred_ite_i = y_pred_ite
         supervised_loss_ite = tf.sqrt(
             tf.reduce_mean(tf.squared_difference(y_full_i, y_pred_ite_i))
         )
