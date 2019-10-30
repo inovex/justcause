@@ -2,7 +2,9 @@
 [run]
 branch = True
 source = justcause
-# omit = bad_file.py
+omit =
+    */JustCause*.egg/*
+    */justcause/contrib/*
 
 [paths]
 source =

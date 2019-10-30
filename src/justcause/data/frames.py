@@ -1,5 +1,8 @@
 """
 Specialised DataFrame which differentiates between covariates, treatment, outcome, etc.
+
+More information under:
+https://pandas.pydata.org/pandas-docs/stable/development/extending.html
 """
 from __future__ import annotations
 
