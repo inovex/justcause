@@ -20,20 +20,28 @@ class CausalFrame(pd.DataFrame):
         covariates = kwargs.pop("covariates", None)
         treatment = kwargs.pop("treatment", "t")
         outcome = kwargs.pop("outcome", "y")
-
-        super().__init__(*args, **kwargs)
+        internal_op = kwargs.pop("_internal_operation", False)
 
         assert covariates is not None, "Parameter `covariates` missing"
-        assert set(covariates).issubset(
-            set(self.columns)
-        ), "Covariates must be a subset of columns"
+        super().__init__(*args, **kwargs)
+
+        if not internal_op:
+            assert isinstance(covariates, (list, tuple)), "List of covariates needed"
+            assert len(covariates) > 0, "At least one covariate column needed"
+            assert set(covariates).issubset(
+                set(self.columns)
+            ), "Covariates must be a subset of columns"
+            assert treatment in self.columns, "Treatment must be a column name"
+            assert outcome in self.columns, "Outcome must be a column name"
+
         self._names = dict(covariates=covariates, treatment=treatment, outcome=outcome)
 
     @property
     def _constructor(self) -> partial[CausalFrame]:
         # This is called during operations with CausalFrames
-        # We keep all `_names` currently, even when slicing columns
-        return partial(CausalFrame, **self._names)
+        # We pass a marker to handle cases when columns are lost
+        kwargs = {"_internal_operation": True, **self._names}
+        return partial(CausalFrame, **kwargs)
 
     @property
     def _constructor_sliced(self) -> Type[pd.Series]:
@@ -78,7 +86,7 @@ class NumpyAccessor:
         assert isinstance(obj, CausalFrame), "CausalFrame is needed for this accessor"
 
     @property
-    def X(self) -> np.array:
+    def X(self) -> np.ndarray:
         """Return covariates as a numpy array"""
         cols = [col for col in self._obj.names.covariates if col in self._obj.columns]
         if not cols:
@@ -86,17 +94,17 @@ class NumpyAccessor:
         return self._obj[cols].to_numpy()
 
     @property
-    def t(self) -> np.array:
+    def t(self) -> np.ndarray:
         """Return treatment as a numpy array"""
         if self._obj.names.treatment not in self._obj.columns:
             raise IndexError("No treatment variable in CausalFrame")
         else:
-            return self._obj[self._obj.names.treatment]
+            return self._obj[self._obj.names.treatment].to_numpy()
 
     @property
-    def y(self) -> np.array:
+    def y(self) -> np.ndarray:
         """Return outcome as a numpy array"""
         if self._obj.names.outcome not in self._obj.columns:
             raise IndexError("No outcome variable in CausalFrame")
         else:
-            return self._obj[self._obj.names.outcome]
+            return self._obj[self._obj.names.outcome].to_numpy()
