@@ -22,10 +22,11 @@ class CausalFrame(pd.DataFrame):
         outcome = kwargs.pop("outcome", "y")
         internal_op = kwargs.pop("_internal_operation", False)
 
-        assert covariates is not None, "Parameter `covariates` missing"
         super().__init__(*args, **kwargs)
 
         if not internal_op:
+            # constructor called explicitly thus check parameters
+            assert covariates is not None, "Parameter `covariates` missing"
             assert isinstance(covariates, (list, tuple)), "List of covariates needed"
             assert len(covariates) > 0, "At least one covariate column needed"
             assert set(covariates).issubset(
@@ -39,7 +40,7 @@ class CausalFrame(pd.DataFrame):
     @property
     def _constructor(self) -> partial[CausalFrame]:
         # This is called during operations with CausalFrames
-        # We pass a marker to handle cases when columns are lost
+        # We pass a marker to differentiate between explicit and implicit invocation
         kwargs = {"_internal_operation": True, **self._names}
         return partial(CausalFrame, **kwargs)
 
