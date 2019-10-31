@@ -1,4 +1,7 @@
+import numpy as np
+
 from justcause.data.utils import iter_rep
+from justcause.learners.utils import replace_factual_outcomes
 
 
 def test_iter_rep(dummy_df):
@@ -6,3 +9,15 @@ def test_iter_rep(dummy_df):
     single_rep = next(iter_rep(dummy_df))
     assert "rep" not in single_rep.columns
     assert single_rep.shape[0] == 5
+
+
+def test_replace_factuals():
+    y_0 = np.zeros(10)
+    y_1 = np.ones(10)
+    y = np.repeat(0.5, 10)
+    t = np.zeros(10)
+    t[5] = 1
+    y_0, y_1 = replace_factual_outcomes(y_0, y_1, y, t)
+    assert y_1[5] == y[5]
+    assert y_1[0] != y[0]
+    assert y_0[0] == y[0]

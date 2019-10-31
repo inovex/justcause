@@ -62,10 +62,3 @@ def dummy_df():
 @pytest.fixture
 def dummy_cf(dummy_df):
     return CausalFrame(dummy_df, covariates=["a", "b"])
-
-
-def toy_data():
-    X = [[0, 0, 0], [0, 0, 1], [0, 0, 1], [0, 0, 0]]
-    Y = [0, 1, 0, 0.5]
-    T = [0, 1, 0, 1]
-    return X, T, Y

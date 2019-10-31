@@ -1,62 +1,67 @@
 import numpy as np
-import rpy2.robjects as robjects
-import rpy2.robjects.packages as rpackages
-from learners.causal_method import CausalMethod
-from rpy2.robjects import numpy2ri
-from rpy2.robjects.packages import importr
-from rpy2.robjects.vectors import FloatVector, IntVector, StrVector
+from causalml.inference.meta import BaseRRegressor
+from causalml.propensity import ElasticNetPropensityModel
+from sklearn.linear_model import LassoLars
 
 
-class RLearner(CausalMethod):
+class RLearner:
+    """ An adapter to the BaseRRegressor from causalml
+
+    Defaults to LassoLars regression as a base learner if not specified otherwise.
+    Allows to either specify one learner for both tasks or two distinct learners
+    for the task outcome and effect learning.
+
+    References:
+        CausalML Framework `on Github <https://github.com/uber/causalml/>'_.
+
+        [1] X. Nie and S. Wager,
+            “Quasi-Oracle Estimation of Heterogeneous Treatment Effects.”
     """
-    Uses the R package provided by X.Nie and S. Wager in
-    ﻿https://arxiv.org/pdf/1712.04912.pdf
-    """
 
-    def __init__(self, seed=0, method="lasso"):
-        super().__init__()
-        self.rleaner = self.install_rlearner()
-        self.model = None
-        self.method_name = method
+    def __init__(self, learner=None, outcome_learner=None, effect_learner=None):
+        if learner is None and (outcome_learner is None and effect_learner is None):
+            learner = LassoLars()
+
+        self.model = BaseRRegressor(learner, outcome_learner, effect_learner)
 
     def __str__(self):
-        return "R-Learner-" + self.method_name.capitalize()
+        """ Simple string representation for logs and outputs"""
+        return "{}(outcome={}, effect={})".format(
+            self.__class__.__name__,
+            self.model.model_mu.__class__.__name__,
+            self.model.model_tau.__class__.__name__,
+        )
 
-    @staticmethod
-    def install_rlearner():
-        """Load the `rlearner` R package and activate necessary conversion
+    def __repr__(self):
+        return self.__str__()
 
-        :return: The robject for `rlearner`
+    def fit(self, x: np.array, t: np.array, y: np.array, p: np.array = None) -> None:
+        """ Fits the RLearner on given samples
+
+        Defaults to LogisticRegression for propensity if not given expclicitly
+
+        Args:
+            x: covariate matrix of shape (num_instances, num_features)
+            t: treatment indicator vector, shape (num_instances)
+            y: factual outcomes, (num_instances)
+            p: propensities, shape (num_instances)
+
+        Returns: None
         """
+        if p is None:
+            p_learner = ElasticNetPropensityModel()
+            p_learner.fit(x, t)
+            p = p_learner.predict_proba(x)[:, 1]
 
-        # robjects.r is a singleton
-        robjects.r.options(download_file_method="curl")
-        numpy2ri.activate()
-        package_names = ["devtools"]
-        utils = rpackages.importr("utils")
-        utils.chooseCRANmirror(ind=0)
+        self.model.fit(x, p, t, y)
 
-        names_to_install = [x for x in package_names if not rpackages.isinstalled(x)]
-        if len(names_to_install) > 0:
-            utils.install_packages(StrVector(names_to_install))
+    def predict_ite(
+        self, x: np.array, t: np.array = None, y: np.array = None
+    ) -> np.array:
+        """ Predicts ITE for given samples; ignores the factual outcome and treatment"""
+        assert t is None and y is None, "The R-Learner does not use factual outcomes"
+        return self.model.predict(x)
 
-        return importr("rlearner")
-
-    def predict_ate(self, x, t=None, y=None):
-        predictions = self.predict_ite(x)
-        return np.mean(predictions)
-
-    def predict_ite(self, x, t=None, y=None):
-        if self.model is None:
-            raise AssertionError("Must fit the forest before prediction")
-
-        return np.array(robjects.r.predict(self.model, x)).reshape(1, -1)[0]
-
-    def fit(self, x, t, y, refit=False):
-        if self.method_name == "lasso":
-            print("fit lasso")
-            self.model = self.rleaner.rlasso(x, IntVector(t), FloatVector(y))
-        else:
-            # Takes much longer to fit
-            print("fit boost")
-            self.model = self.rleaner.rboost(x, IntVector(t), FloatVector(y))
+    def predict_ate(self, x: np.array, t: np.array, y: np.array) -> float:
+        """ Predicts ATE for given samples; ignores the factual outcome and treatment"""
+        return float(np.mean(self.predict_ite(x, t, y)))

@@ -1,93 +1,182 @@
 import copy
+from typing import Optional, Tuple, Union
 
 import numpy as np
-from learners.causal_method import CausalMethod
+from causalml.propensity import ElasticNetPropensityModel
+from sklearn.linear_model import LassoLars
 
-from justcause.utils import get_regressor_name
+from ..utils import replace_factual_outcomes
+
+#: Type alias for predict_ite return type
+SingleComp = Union[Tuple[np.array, np.array, np.array], np.array]
 
 
-class TLearner(CausalMethod):
+class BaseTLearner:
+    """ Base class for all T-Learners; bundles duplicate code
+
+    Defaults to a LassoLars learner for both treated and control
+
     """
-    Implements a generic T-learner :py:meth:`.fit()`
 
-    :references:
-    [T-Learner](﻿https://arxiv.org/pdf/1706.03461.pdf)
-    """
-
-    def __init__(self, regressor, regressor_two=None, seed=0):
+    def __init__(self, learner=None, learner_c=None, learner_t=None, random_state=None):
         """
+        Takes either one base learner for both or two specific base learners
 
-        :param seed: Random seed
-        :param regressor: a sklearn regressor with learners `fit` and `predict`
-        :param regressor_two: a sklearn regressor with learners `fit` and `predict`
+        Args:
+            learner: base learner for treatment and control outcomes
+            learner_c: base learner for control outcome
+            learner_t: base learner for treatment  outcome
+            random_state: random state; currently unused
         """
-        super().__init__(seed)
-        self.regressor_one = regressor
-        self.is_trained = False
+        if learner is None:
+            if learner_c is None and learner_t is None:
+                self.learner_c = LassoLars()
+                self.learner_t = LassoLars()
+            else:
+                self.learner_c = learner_c
+                self.learner_t = learner_t
 
-        if regressor_two is None:
-            # Create a full, independent copy of the first regressor
-            self.regressor_two = copy.deepcopy(regressor)
         else:
-            self.regressor_two = regressor_two
+            self.learner_c = copy.deepcopy(learner)
+            self.learner_t = copy.deepcopy(learner)
+
+        self.random_state = random_state
+
+    def __repr__(self):
+        return self.__str__()
 
     def __str__(self):
-        return (
-            "T-Learner - "
-            + get_regressor_name(self.regressor_one)
-            + " & "
-            + get_regressor_name(self.regressor_two)
+        """ Simple string representation for logs and outputs"""
+        return "{}(control={}, treated={})".format(
+            self.__class__.__name__,
+            self.learner_c.__class__.__name__,
+            self.learner_t.__class__.__name__,
         )
 
-    def predict_ate(self, x, t=None, y=None):
-        return np.mean(self.predict_ite(x))
+    def predict_ite(
+        self,
+        x: np.array,
+        t: np.array = None,
+        y: np.array = None,
+        return_components: bool = False,
+    ) -> SingleComp:
+        """ Predicts ITE for the given samples
 
-    def fit(self, x, t, y, refit=False) -> None:
-        x_treatment = x[t == 1]
-        x_control = x[t == 0]
-        self.regressor_one.fit(x_treatment, y[t == 1])
-        self.regressor_two.fit(x_control, y[t == 0])
+        Args:
+            x: covariates in shape (num_instances, num_features)
+            t: treatment indicator, binary in shape (num_instances)
+            y: factual outcomes in shape (num_instances)
+            return_components: whether to return Y(0) and Y(1) predictions separately
 
-    def predict_ite(self, x, t=None, y=None):
-        return self.regressor_one.predict(x) - self.regressor_two.predict(x)
-
-
-class WeightedTLearner(CausalMethod):
-    """
-    Implements a generic S-Learner
-
-    :ref:
-    [S-Learner](﻿https://arxiv.org/pdf/1706.03461.pdf)
-    """
-
-    def __init__(self, propensity_regressor, regressor, dgp, seed=0):
+        Returns: a vector of ITEs for the inputs;
+            also returns Y(0) and Y(1) for all inputs if return_components is True
         """
+        y_0 = self.learner_c.predict(x)
+        y_1 = self.learner_t.predict(x)
+        if return_components:
+            if t is not None and y is not None:
+                y_0, y_1 = replace_factual_outcomes(y_0, y_1, y, t)
+            return y_1 - y_0, y_0, y_1
+        else:
+            return y_1 - y_0
 
-        :param regressor: a sklearn regressor with learners `fit` and `predict`
+    def predict_ate(self, x: np.array, t: np.array = None, y: np.array = None) -> float:
+        return float(np.mean(self.predict_ite(x, t, y)))
+
+
+class TLearner(BaseTLearner):
+    """
+    Implements a generic T-learner
+
+    References:
+        [1] S. R. Künzel, J. S. Sekhon, P. J. Bickel, and B. Yu,
+        “Meta-learners for Estimating Heterogeneous Treatment Effects
+            using Machine Learning,” 2019.
+    """
+
+    def fit(self, x: np.array, t: np.array, y: np.array) -> None:
+        self.learner_c.fit(x[t == 0], y[t == 0])
+        self.learner_t.fit(x[t == 1], y[t == 1])
+
+
+class WeightedTLearner(BaseTLearner):
+    """
+    Implements a weighted generic T-Learner
+
+    Propensity learner defaults to the ElasticNetPropensityModel proposed
+    in CausalML. Otherwise requires the propensity learner to have a
+    predict_proba method
+
+    References:
+        CausalML Framework `on Github <https://github.com/uber/causalml/>'_.
+
+        [1] S. R. Künzel, J. S. Sekhon, P. J. Bickel, and B. Yu,
+        “Meta-learners for Estimating Heterogeneous Treatment Effects
+            using Machine Learning,” 2019.
+
+    """
+
+    def __init__(
+        self,
+        learner=None,
+        learner_c=None,
+        learner_t=None,
+        propensity_learner=None,
+        random_state=None,
+    ):
         """
-        super().__init__(seed)
-        self.propensity_regressor = propensity_regressor
-        self.regressor_one = regressor
-        self.regressor_two = copy.deepcopy(regressor)
-        self.dgp = dgp
-        self.is_trained = False
+        Args:
+            learner: base learner with parameter 'sample_weight' in fit()
+            learner_c: specific learner for control outcome
+            learner_t: specific learner for control outcome
+            propensity_learner: calibrated classifier for propensity estimation
+                must have 'predict_proba'
+            random_state:
+        """
+        super().__init__(learner, learner_c, learner_t, random_state)
+        if propensity_learner is None:
+            self.propensity_learner = ElasticNetPropensityModel()
+        else:
+            assert hasattr(
+                propensity_learner, "predict_proba"
+            ), "propensity learner must have predict_proba method"
+
+            self.propensity_learner = propensity_learner
 
     def __str__(self):
-        return "Weighted T-Learner - " + get_regressor_name(self.regressor_one)
+        """ Simple string representation for logs and outputs"""
+        return "{}(control={}, treated={}, propensity={})".format(
+            self.__class__.__name__,
+            self.learner_c.__class__.__name__,
+            self.learner_t.__class__.__name__,
+            self.propensity_learner.__class__.__name__,
+        )
 
-    @staticmethod
-    def union(x, t):
-        return np.c_[x, t]
+    def fit(
+        self,
+        x: np.array,
+        t: np.array,
+        y: np.array,
+        propensity: Optional[np.array] = None,
+    ) -> None:
+        """ Fits the T-learner with weighted samples
 
-    def predict_ite(self, x, t=None, y=None):
-        return self.regressor_one.predict(x) - self.regressor_two.predict(x)
+        If propensity scores are not given explicitly, the propensity learner
+        of the module is used
 
-    def fit(self, x, t, y, refit=False) -> None:
-        self.propensity_regressor.fit(x, t)
-        prob = self.propensity_regressor.predict_proba(x)
-        prob = self.dgp.get_train_propensity()
-        weights = 1 / prob
-        x_treatment = x[t == 1]
-        x_control = x[t == 0]
-        self.regressor_one.fit(x_treatment, y[t == 1], sample_weight=weights[t == 1])
-        self.regressor_two.fit(x_control, y[t == 0], sample_weight=weights[t == 0])
+        Args:
+            x: covariates
+            t: treatment indicator
+            y: factual outcomes
+            propensity: propensity scores to be used
+        """
+        if propensity is None:
+            if isinstance(self.propensity_learner, ElasticNetPropensityModel):
+                propensity = self.propensity_learner.fit_predict(x, t)
+            else:
+                self.propensity_learner.fit(x, t)
+                propensity = self.propensity_learner.predict_proba(x)[:, 1]
+
+        ipt = 1 / propensity
+        self.learner_c.fit(x[t == 0], y[t == 0], sample_weight=ipt[t == 0])
+        self.learner_t.fit(x[t == 1], y[t == 1], sample_weight=ipt[t == 1])
