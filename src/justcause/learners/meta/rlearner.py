@@ -38,7 +38,8 @@ class RLearner:
     def fit(self, x: np.array, t: np.array, y: np.array, p: np.array = None) -> None:
         """ Fits the RLearner on given samples
 
-        Defaults to LogisticRegression for propensity if not given expclicitly
+        Defaults to ElasticNetPropensityModel for propensity if not given expclicitly,
+        in order to allow a generic call to fit()
 
         Args:
             x: covariate matrix of shape (num_instances, num_features)
@@ -48,10 +49,11 @@ class RLearner:
 
         Returns: None
         """
+        # TODO: Allow to pass a specific propensity learner to the class,
+        #       see WeightedTLearner
         if p is None:
             p_learner = ElasticNetPropensityModel()
-            p_learner.fit(x, t)
-            p = p_learner.predict_proba(x)[:, 1]
+            p = p_learner.fit_predict(x, t)
 
         self.model.fit(x, p, t, y)
 
@@ -59,6 +61,7 @@ class RLearner:
         self, x: np.array, t: np.array = None, y: np.array = None
     ) -> np.array:
         """ Predicts ITE for given samples; ignores the factual outcome and treatment"""
+
         assert t is None and y is None, "The R-Learner does not use factual outcomes"
         return self.model.predict(x)
 

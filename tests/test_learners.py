@@ -10,6 +10,7 @@ from justcause.learners import (
     TLearner,
     WeightedSLearner,
     WeightedTLearner,
+    XLearner,
 )
 
 
@@ -116,10 +117,16 @@ def test_weighted_tlearner(ihdp_data):
         "propensity=ElasticNetPropensityModel)"
     )
 
+    # With propensity = 1, the weighted TLearner should equal the normal TLearner
     prop = np.full(len(t), 1)
     tlearner.fit(x, t, y, propensity=prop)
     pred = tlearner.predict_ite(x, t, y)
     assert len(pred) == len(t)
+
+    compare_tlearner = TLearner(LinearRegression())
+    compare_tlearner.fit(x, t, y)
+    pred_compare = compare_tlearner.predict_ite(x, t, y)
+    assert np.mean(np.abs(pred - pred_compare)) < 0.01
 
 
 def test_rlearner(ihdp_data):
@@ -132,3 +139,17 @@ def test_rlearner(ihdp_data):
     assert (
         str(rlearner) == "RLearner(outcome=LinearRegression, effect=LinearRegression)"
     )
+
+
+def test_xlearner(ihdp_data):
+    rep = next(ihdp_data)
+    x, t, y = rep.np.X, rep.np.t, rep.np.y
+    xlearner = XLearner(LinearRegression())
+    xlearner.fit(x, t, y)
+
+    pred = xlearner.predict_ite(x, t, y)
+    assert len(pred) == len(t)
+
+    pred_ate = xlearner.predict_ate(x, t, y)
+    true_ate = np.mean(rep["ite"].values)
+    assert abs(pred_ate - true_ate) < 0.2
