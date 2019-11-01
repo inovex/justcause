@@ -11,7 +11,6 @@ from justcause.learners import (
     WeightedSLearner,
     WeightedTLearner,
 )
-from justcause.learners.utils import replace_factual_outcomes
 
 
 def test_slearner(ihdp_data):
@@ -76,8 +75,10 @@ def test_tlearner(ihdp_data):
         "treated=LinearRegression)"
     )
 
+    true_ate = np.mean(rep["ite"].values)
+
     ate = tlearner.predict_ate(x, t, y)
-    assert abs(ate - 4.0) < 0.1
+    assert abs(ate - true_ate) < 0.2
 
     tlearner = TLearner(learner_c=LinearRegression(), learner_t=RandomForestRegressor())
     tlearner.fit(x, t, y)
@@ -86,11 +87,11 @@ def test_tlearner(ihdp_data):
     assert len(pred) == len(t)
     assert (
         str(tlearner) == "TLearner(control=LinearRegression, "
-        "treated=LinearRegression)"
+        "treated=RandomForestRegressor)"
     )
 
     ate = tlearner.predict_ate(x, t, y)
-    assert abs(ate - 4.0) < 0.1
+    assert abs(ate - true_ate) < 0.2
 
     tlearner = TLearner(LinearRegression())
     tlearner.fit(x, t, y)
