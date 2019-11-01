@@ -59,6 +59,7 @@ class BaseTLearner:
         t: np.array = None,
         y: np.array = None,
         return_components: bool = False,
+        replace_factuals: bool = False,
     ) -> SingleComp:
         """ Predicts ITE for the given samples
 
@@ -67,6 +68,7 @@ class BaseTLearner:
             t: treatment indicator, binary in shape (num_instances)
             y: factual outcomes in shape (num_instances)
             return_components: whether to return Y(0) and Y(1) predictions separately
+            replace_factuals
 
         Returns: a vector of ITEs for the inputs;
             also returns Y(0) and Y(1) for all inputs if return_components is True
@@ -74,7 +76,7 @@ class BaseTLearner:
         y_0 = self.learner_c.predict(x)
         y_1 = self.learner_t.predict(x)
         if return_components:
-            if t is not None and y is not None:
+            if t is not None and y is not None and replace_factuals:
                 y_0, y_1 = replace_factual_outcomes(y_0, y_1, y, t)
             return y_1 - y_0, y_0, y_1
         else:
