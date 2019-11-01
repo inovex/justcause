@@ -1,3 +1,10 @@
+from typing import List
+
+import rpy2.robjects.packages as rpackages
+from rpy2 import robjects
+from rpy2.robjects import StrVector
+
+
 def replace_factual_outcomes(y_0, y_1, y, t):
     """ Replaces the predicted components with factual observations where possible
 
@@ -15,3 +22,14 @@ def replace_factual_outcomes(y_0, y_1, y, t):
         else:
             y_0[i] = y[i]
     return y_0, y_1
+
+
+def install_r_packages(package_names: List[str]):
+
+    robjects.r.options(download_file_method="curl")
+    utils = rpackages.importr("utils")
+    utils.chooseCRANmirror(ind=0)
+
+    names_to_install = [x for x in package_names if not rpackages.isinstalled(x)]
+    if len(names_to_install) > 0:
+        utils.install_packages(StrVector(names_to_install))

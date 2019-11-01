@@ -5,6 +5,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression, LogisticRegression
 
 from justcause.learners import (
+    CausalForest,
     RLearner,
     SLearner,
     TLearner,
@@ -151,5 +152,16 @@ def test_xlearner(ihdp_data):
     assert len(pred) == len(t)
 
     pred_ate = xlearner.predict_ate(x, t, y)
+    true_ate = np.mean(rep["ite"].values)
+    assert abs(pred_ate - true_ate) < 0.2
+
+
+@pytest.skip
+def test_causalforest(ihdp_data):
+    rep = next(ihdp_data)
+    x, t, y = rep.np.X, rep.np.t, rep.np.y
+    cf = CausalForest()
+    cf.fit(x, t, y)
+    pred_ate = cf.predict_ate(x, t, y)
     true_ate = np.mean(rep["ite"].values)
     assert abs(pred_ate - true_ate) < 0.2

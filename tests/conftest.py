@@ -13,6 +13,9 @@ import pytest
 
 import numpy as np
 import pandas as pd
+import rpy2.robjects.packages as rpackages
+from rpy2 import robjects
+from rpy2.robjects import StrVector
 
 from justcause.data.frames import CausalFrame
 from justcause.data.sets.ibm_acic import load_ibm_acic
@@ -62,3 +65,13 @@ def dummy_df():
 @pytest.fixture
 def dummy_cf(dummy_df):
     return CausalFrame(dummy_df, covariates=["a", "b"])
+
+
+@pytest.fixture
+def uninstall_grf():
+    if rpackages.isinstalled("grf"):
+        robjects.r.options(download_file_method="curl")
+        utils = rpackages.importr("utils")
+        utils.chooseCRANmirror(ind=0)
+
+        utils.remove_packages(StrVector(["grf"]))
