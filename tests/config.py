@@ -1,3 +1,4 @@
+# TODO: DELETE THIS FILE WHEN NO LONGER NEEDED
 import os
 
 ROOT_DIR = os.path.dirname(

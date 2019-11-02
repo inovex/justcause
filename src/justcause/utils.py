@@ -5,6 +5,8 @@ import seaborn as sns
 from sklearn.linear_model import LogisticRegression
 from sklearn.manifold import TSNE
 
+# Todo: either remove plotting functions here or move to plots.py and rework
+
 plt.style.use("seaborn")
 plt.rcParams["axes.labelsize"] = 10
 plt.rcParams["figure.facecolor"] = "1"

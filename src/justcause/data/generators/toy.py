@@ -88,9 +88,11 @@ def toy_example_emcs(setting="simple", n_samples=1000, n_replications=1):
     if setting == "simple":
         treatment = simple_treatment
         outcome = simple_outcomes
-    else:
+    elif setting == "hard":
         treatment = hard_treatment
         outcome = hard_outcomes
+    else:
+        raise RuntimeError(f"Undefined setting {setting}")
 
     return generate_data(
         covariates,

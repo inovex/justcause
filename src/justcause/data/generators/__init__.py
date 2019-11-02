@@ -24,9 +24,10 @@ def _add_outcomes(df: pd.DataFrame, y_0: np.ndarray, y_1: np.ndarray) -> pd.Data
 
     """
     df = df.copy()  # avoid side-effects
-    union = np.c_[y_0, y_1]
-    y = [row[id] for row, id in zip(union, df["t"].values)]
-    y_cf = [row[1 - id] for row, id in zip(union, df["t"].values)]
+    y_01 = np.c_[y_0, y_1]
+    # Todo: find a smarter way to do this here!
+    y = [row[id] for row, id in zip(y_01, df["t"].values)]
+    y_cf = [row[1 - id] for row, id in zip(y_01, df["t"].values)]
     df["y"], df["y_cf"] = y, y_cf
     df["y_0"], df["y_1"] = y_0, y_1
     df["ite"] = y_1 - y_0  # add explicitly
@@ -34,10 +35,10 @@ def _add_outcomes(df: pd.DataFrame, y_0: np.ndarray, y_1: np.ndarray) -> pd.Data
 
 
 def generate_data(
-    covariates: Union[Callable, np.ndarray],
+    covariates: Union[Callable, np.ndarray, pd.DataFrame],
     treatment: Callable,
-    outcome: Callable,
-    n_samples: Optional[int],
+    outcomes: Callable,
+    n_samples: Optional[int] = None,
     n_replications: int = 1,
     covariate_names: Optional[List[str]] = None,
     random_state: OptRandState = None,
@@ -61,7 +62,10 @@ def generate_data(
         covariates = covariates[indices, :]
 
     if covariate_names is None:
-        covariate_names = ["x" + str(i) for i in range(covariates.shape[1])]
+        if isinstance(covariates, pd.DataFrame):
+            covariate_names = list(covariates.columns)
+        else:
+            covariate_names = [f"x{i}" for i in range(covariates.shape[1])]
 
     # No need to check `covariate_names` since Pandas does it
     cov_df = pd.DataFrame(data=covariates, columns=covariate_names)
@@ -75,7 +79,7 @@ def generate_data(
             rep_df.shape[0] == n_samples
         ), "Treatment function must return vector with dimension `n_samples`"
 
-        y_0, y_1 = outcome(covariates)
+        y_0, y_1 = outcomes(covariates)
         assert (
             y_0.shape[0] == y_1.shape[0] == n_samples
         ), "Outcome function must return vectors with dimension `n_samples"

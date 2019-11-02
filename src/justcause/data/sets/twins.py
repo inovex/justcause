@@ -23,4 +23,4 @@ def load_twins() -> Iterable[CausalFrame]:
 
 
 def get_twins_covariates() -> pd.DataFrame:
-    return get_covariates_df(DATASET_NAME)
+    return get_covariates_df(DATASET_NAME).drop("sample_id", axis=1)

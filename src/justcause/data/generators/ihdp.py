@@ -17,7 +17,6 @@ def exponential_effect(covariates):
 def multi_outcome(covariates):
     Y_0 = np.random.normal(0, 0.2, size=len(covariates))
     Y_1 = Y_0 + multi_modal_effect(covariates)
-
     return Y_0, Y_1
 
 
@@ -56,7 +55,7 @@ def multi_expo_on_ihdp(setting="multi-modal", n_samples=None, n_replications=1):
 
     """
     # Use covariates as nd.array
-    covariates = get_ihdp_covariates().drop("sample_id", axis="columns").values
+    covariates = get_ihdp_covariates().values
 
     if setting == "multi-modal":
         outcome = multi_outcome
