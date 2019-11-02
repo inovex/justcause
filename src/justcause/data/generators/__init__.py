@@ -24,10 +24,10 @@ def _add_outcomes(df: pd.DataFrame, y_0: np.ndarray, y_1: np.ndarray) -> pd.Data
 
     """
     df = df.copy()  # avoid side-effects
-    y_01 = np.c_[y_0, y_1]
-    # Todo: find a smarter way to do this here!
-    y = [row[id] for row, id in zip(y_01, df["t"].values)]
-    y_cf = [row[1 - id] for row, id in zip(y_01, df["t"].values)]
+    t = df["t"].to_numpy().astype(np.bool)
+    y = np.where(t, y_1, y_0)
+    y_cf = np.where(t, y_0, y_1)
+
     df["y"], df["y_cf"] = y, y_cf
     df["y_0"], df["y_1"] = y_0, y_1
     df["ite"] = y_1 - y_0  # add explicitly
