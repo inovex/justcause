@@ -39,7 +39,9 @@ def hard_outcomes(covariates):
     return Y_0, Y_1
 
 
-def toy_data_synthetic(setting="simple", size=1000, num_features=10, replications=1):
+def toy_data_synthetic(
+    setting="simple", n_samples=1000, num_features=10, n_replications=1
+):
     """
     Generates a toy example proposed by Stefan Wager.
 
@@ -48,14 +50,14 @@ def toy_data_synthetic(setting="simple", size=1000, num_features=10, replication
 
     Args:
         setting: 'simple' or 'hard'
-        size: number of instances
+        n_samples: number of instances
         num_features: number of covariates per instance
-        replications: number of replications of the process
+        n_replications: number of replications of the process
 
     Returns: the data Bunch containin the requested DGP
 
     """
-    covariates = generate_covariates(size, num_covariates=num_features)
+    covariates = generate_covariates(n_samples, num_covariates=num_features)
 
     if setting == "simple":
         treatment = simple_treatment
@@ -65,17 +67,21 @@ def toy_data_synthetic(setting="simple", size=1000, num_features=10, replication
         outcome = hard_outcomes
 
     return generate_data(
-        covariates, treatment, outcome, size=size, replications=replications
+        covariates,
+        treatment,
+        outcome,
+        n_samples=n_samples,
+        n_replications=n_replications,
     )
 
 
-def toy_example_emcs(setting="simple", size=1000, replications=1):
+def toy_example_emcs(setting="simple", n_samples=1000, n_replications=1):
     """Generates the same toy example but on real covariates"""
     covariates = get_ibm_acic_covariates().values
-    if size > len(covariates):
+    if n_samples > len(covariates):
         raise AssertionError(
             "requested size {} is bigger than available covariates {}".format(
-                size, len(covariates)
+                n_samples, len(covariates)
             )
         )
 
@@ -87,5 +93,9 @@ def toy_example_emcs(setting="simple", size=1000, replications=1):
         outcome = hard_outcomes
 
     return generate_data(
-        covariates, treatment, outcome, size=size, replications=replications
+        covariates,
+        treatment,
+        outcome,
+        n_samples=n_samples,
+        n_replications=n_replications,
     )

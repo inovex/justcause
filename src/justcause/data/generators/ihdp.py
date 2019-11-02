@@ -32,7 +32,7 @@ def treatment_assignment(covariates):
     return np.random.binomial(1, p=expit(covariates[:, 7]))
 
 
-def multi_expo_on_ihdp(setting="multi-modal", size=None, replications=1):
+def multi_expo_on_ihdp(setting="multi-modal", n_samples=None, n_replications=1):
     """
     Reproduces a specific DGP based on IHDP covariates.
 
@@ -49,8 +49,8 @@ def multi_expo_on_ihdp(setting="multi-modal", size=None, replications=1):
 
     Args:
         setting: either 'multi-modal' or 'exponential'
-        size: number of instances
-        replications: number of replications
+        n_samples: number of instances
+        n_replications: number of replications
 
     Returns: the Bunch containing data and information
 
@@ -64,5 +64,9 @@ def multi_expo_on_ihdp(setting="multi-modal", size=None, replications=1):
         outcome = expo_outcome
 
     return generate_data(
-        covariates, treatment_assignment, outcome, size=size, replications=replications
+        covariates,
+        treatment_assignment,
+        outcome,
+        n_samples=n_samples,
+        n_replications=n_replications,
     )
