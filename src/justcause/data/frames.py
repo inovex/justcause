@@ -13,6 +13,37 @@ import numpy as np
 import pandas as pd
 
 
+class Col:
+    """Column names of a CausalFrame
+
+    Example:
+        # Todo: Add example
+    """
+
+    t = "t"
+    y = "y"
+    y_cf = "y_cf"
+    # Todo: make these `mu_0` and `mu_1` after the changes in generators.py
+    mu_0 = "y_0"
+    mu_1 = "y_1"
+    ite = "ite"
+    rep = "rep"
+    sample_id = "sample_id"
+
+
+#: Default columns besides the covariates in each dataframe
+DATA_COLS = [
+    Col.t,
+    Col.y,
+    Col.y_cf,
+    Col.mu_0,
+    Col.mu_1,
+    Col.ite,
+    Col.rep,
+    Col.sample_id,
+]
+
+
 class CausalFrame(pd.DataFrame):
     _metadata = ["_names"]
 
