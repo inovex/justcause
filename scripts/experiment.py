@@ -1,3 +1,4 @@
+# TODO: Completely rework or better delete, use an example in the notebook instead
 # Dynamically set the environment variable for R_HOME as
 # found by running python -m rpy2.situation from the terminal
 import time

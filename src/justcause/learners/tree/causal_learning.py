@@ -4,7 +4,6 @@ introduced in the paper: ﻿https://arxiv.org/pdf/1707.00102.pdf
 """
 import os
 
-import config
 import numpy as np
 import rpy2.robjects as robjects
 import rpy2.robjects.packages as rpackages
@@ -14,8 +13,8 @@ from rpy2.robjects.vectors import FloatVector, IntVector, StrVector
 
 from justcause.learners.tree.causal_method import CausalMethod
 
+# Todo: get rid of setting environment variables here
 os.environ["L_ALL"] = "en_US.UTF-8"
-os.environ["R_HOME"] = config.R_HOME
 
 
 def install_cl():
@@ -103,7 +102,7 @@ class CausalMars(CausalLearningMethod):
 
 if __name__ == "__main__":
 
-    from data.sets.ihdp import IHDPCfrProvider
+    from ...data.sets.ihdp import IHDPCfrProvider
 
     ihdp = IHDPCfrProvider()
     cb = CausalBoosting()

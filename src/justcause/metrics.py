@@ -1,20 +1,25 @@
 """
 TODO: What does this do? It looks like calculating some metrics, running everything etc,
       and writing/saving logs.
-This needs to be split up
+This needs to be split up into metrics and evaluations at least
 
 
 """
 import os
 import time
 
-import config
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import seaborn as sns
 
 sns.set(style="darkgrid")
+
+
+# Todo: Get rid of this hard-coded paths, use parameters
+ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+LOG_FILE_PATH = os.path.join(ROOT_DIR, "results/plotlog")
+SERVER = False
 
 
 class EvaluationMetric:
@@ -221,16 +226,16 @@ class StandardEvaluation(EvaluationMetric):
 
         # Work here with the accumulated ITE predictions for multi-run behaviour
         # e.g. log variance as a measure of robustness
-        if config.SERVER and num_runs > 50:
+        if SERVER and num_runs > 50:
             # write out files for plots, if number of runs is large on the server
             df_true = pd.DataFrame(data=train_true_ites)
             path = os.path.join(
-                config.LOG_FILE_PATH,
+                LOG_FILE_PATH,
                 str(method) + "-" + str(data_provider) + "-" + str(num_runs) - "true",
             )
             df_true.to_csv(path)
             path = os.path.join(
-                config.LOG_FILE_PATH,
+                LOG_FILE_PATH,
                 str(method) + "-" + str(data_provider) + "-" + str(num_runs) - "train",
             )
             df_pred = pd.DataFrame(data=train_true_ites)
