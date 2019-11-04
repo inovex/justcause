@@ -1,14 +1,14 @@
 name: justcause
 channels:
-  - conda-forge
   - r
+  - pkgs/main
+  - conda-forge
   - defaults
 dependencies:
   - _r-mutex
   - _tflow_select
   - absl-py
   - apipkg
-  - appnope
   - arrow-cpp
   - asn1crypto
   - astor
@@ -26,14 +26,11 @@ dependencies:
   - c-ares
   - ca-certificates
   - cairo
-  - cctools
   - certifi
   - cffi
   - chardet
   - clang
-  - clang_osx-64
   - clangxx
-  - clangxx_osx-64
   - compiler-rt
   - contextlib2
   - coverage
@@ -55,7 +52,6 @@ dependencies:
   - gast
   - gettext
   - gflags
-  - gfortran_osx-64
   - glib
   - glog
   - graphite2
@@ -88,7 +84,6 @@ dependencies:
   - keras-preprocessing
   - kiwisolver
   - krb5
-  - ld64
   - libcurl
   - libcxx
   - libcxxabi
@@ -96,10 +91,7 @@ dependencies:
   - libevent
   - libffi
   - libgfortran
-  - libgpuarray
   - libiconv
-  - libllvm9
-  - libopenblas
   - libpng
   - libprotobuf
   - libsodium
@@ -107,13 +99,13 @@ dependencies:
   - libtiff
   - libxml2
   - llvm
-  - llvm-lto-tapi
   - llvm-openmp
   - lz4-c
   - make
-  - mako
   - markdown
   - markupsafe
+    # Required for causaml to work instantly
+  - matplotlib==2.2.4
   - mccabe
   - mistune
   - mkl
@@ -125,10 +117,8 @@ dependencies:
   - nbconvert
   - nbformat
   - ncurses
-  - nomkl
   - notebook
-  - openblas
-  - openblas-devel
+  - numpy
   - openssl
   - packaging
   - pandas
@@ -150,12 +140,12 @@ dependencies:
   - protobuf
   - ptyprocess
   - py
-  - pyarrow
+    # Required in order to read the parquet files properly
+  - pyarrow>=0.15
   - pycodestyle
   - pycparser
   - pyflakes
   - pygments
-  - pygpu
   - pymongo
   - pyopenssl
   - pyparsing
@@ -203,6 +193,9 @@ dependencies:
   - readline
   - requests
   - rpy2
+    # Currently required to downgrade scikit-learn in order for causaml to compile
+  - scikit-learn==0.20.3
+  - scipy
   - seaborn
   - send2trash
   - setuptools
@@ -210,7 +203,6 @@ dependencies:
   - snappy
   - sqlite
   - statsmodels
-  - tapi
   - tensorboard
   - tensorflow
   - tensorflow-base
@@ -218,7 +210,6 @@ dependencies:
   - termcolor
   - terminado
   - testpath
-  - theano
   - thrift-cpp
   - tk
   - tktable
@@ -239,33 +230,18 @@ dependencies:
   - zstd
   - pip:
     - aspy-yaml
-    - causalml
     - cfgv
     - colorama
-    - dill
-    - eli5
-    - future
     - gitdb2
     - gitpython
     - identify
     - jsonpickle
-    - lightgbm
-    - matplotlib
     - munch
     - nodeenv
-    - numpy
+    - causalml
     - pre-commit
     - py-cpuinfo
-    - pydotplus
-    - python-graphviz
     - sacred
-    - scikit-learn
-    - scipy
-    - shap
     - smmap2
-    - tabulate
     - toml
-    - tqdm
     - virtualenv
-    - xgboost
-prefix: /Users/MaximilianFranz/anaconda3/envs/justcause
