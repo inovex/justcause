@@ -125,7 +125,7 @@ def generate_data(
         mu_0, mu_1, y_0, y_1 = outcomes(covariates)
         assert (
             y_0.shape[0] == y_1.shape[0] == n_samples
-        ), "Outcome function must return vectors with dimension `n_samples"
+        ), "Outcome function must return vectors, each with dimension `n_samples`"
 
         rep_df = _add_outcomes(rep_df, mu_0, mu_1, y_0, y_1)
         rep_df[Col.sample_id] = np.arange(n_samples)

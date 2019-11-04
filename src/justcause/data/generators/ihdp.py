@@ -17,7 +17,7 @@ def exponential_effect(covariates):
 def multi_outcome(covariates):
     y_0 = np.random.normal(0, 0.2, size=len(covariates))
     y_1 = y_0 + multi_modal_effect(covariates)
-    # ToDo: Check if we should add a nice here
+    # ToDo: Check if we should add a noise term here
     mu_0, mu_1 = y_0, y_1
     return mu_0, mu_1, y_0, y_1
 
@@ -25,7 +25,7 @@ def multi_outcome(covariates):
 def expo_outcome(covariates):
     y_0 = np.random.normal(0, 0.2, size=len(covariates))
     y_1 = y_0 + exponential_effect(covariates)
-    # ToDo: Check if we should add a nice here
+    # ToDo: Check if we should add a noise term here
     mu_0, mu_1 = y_0, y_1
     return mu_0, mu_1, y_0, y_1
 

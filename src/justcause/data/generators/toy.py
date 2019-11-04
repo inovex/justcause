@@ -30,7 +30,7 @@ def simple_outcomes(covariates):
     )  # make effect large, but all positive
     y_0 = expit(covariates[:, 1])
     y_1 = y_0 + ite
-    # ToDo: Check if we should add a nice here
+    # ToDo: Check if we should add a noise term here
     mu_0, mu_1 = y_0, y_1
     return mu_0, mu_1, y_0, y_1
 
@@ -38,7 +38,7 @@ def simple_outcomes(covariates):
 def hard_outcomes(covariates):
     y_0 = expit(covariates[:, 1])
     y_1 = y_0 + expit(covariates[:, 2] + covariates[:, 3]) / 2
-    # ToDo: Check if we should add a nice here
+    # ToDo: Check if we should add a noise term here
     mu_0, mu_1 = y_0, y_1
     return mu_0, mu_1, y_0, y_1
 
