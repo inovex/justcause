@@ -1,7 +1,7 @@
 import numpy as np
 import rpy2.robjects as robjects
 from rpy2.robjects import numpy2ri
-from rpy2.robjects.packages import importr
+from rpy2.robjects.packages import LibraryError, importr
 from rpy2.robjects.vectors import FloatVector, IntVector
 
 # Activate parsing once CausalForest module is accessed
@@ -9,33 +9,46 @@ numpy2ri.activate()
 
 
 class CausalForest:
-    def __init__(self, seed=0):
+    """ Port for the R implementation of CausalForests using rpy2
+
+    References:
+        [1] “Generalized random forests”
+            S. Athey, J. Tibshirani, and S. Wager,
+            Ann. Stat., vol. 47, no. 2, pp. 1179–1203, 2019.
+
+    """
+
+    def __init__(self, random_state: int = 0):
         try:
             self.grf = importr("grf")
-        except:
-            raise ModuleNotFoundError(
-                "R package grf is not installed yet, "
-                "install it with utils.install_r_packages"
+        except LibraryError:
+            raise LibraryError(
+                "R package 'grf' is not installed yet, "
+                "install it with justcause.learners.utils.install_r_packages('grf')"
             )
 
+        assert type(random_state) is int, (
+            "Only integer type random state " "can be passed to rpy2"
+        )
+
+        """ Holds the rpy2 object for the trained model"""
         self.forest = None
-        self.seed = seed
+        self.random_state = random_state
 
     def __str__(self):
         return "CausalForest"
 
     def predict_ate(self, x, t=None, y=None):
+        """ Predict ATE for the given samples"""
         return np.mean(self.predict_ite(x))
 
     def predict_ite(self, x, t=None, y=None):
-        if self.forest is None:
-            raise AssertionError("Must fit the forest before prediction")
-
-        pred = robjects.r.predict(self.forest, x, estimate_variance=False)
-        return np.array(list(map(lambda element: element[0], pred)))
+        """ Predicts ITEs for given samples"""
+        pred = robjects.r.predict(self.forest, x, estimate_variance=False)[0]
+        return np.array(pred).flatten()
 
     def fit(self, x, t, y):
-        print("fit forest anew")
+        """ Fits the forest using factual data"""
         self.forest = self.grf.causal_forest(
-            x, FloatVector(y), IntVector(t), seed=self.seed
+            x, FloatVector(y), IntVector(t), seed=self.random_state
         )
