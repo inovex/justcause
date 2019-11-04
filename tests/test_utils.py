@@ -1,6 +1,5 @@
-import pytest
-
 import numpy as np
+import rpy2.robjects.packages as rpackages
 
 from justcause.data.utils import iter_rep
 from justcause.learners.utils import install_r_packages, replace_factual_outcomes
@@ -25,8 +24,7 @@ def test_replace_factuals():
     assert y_0[0] == y[0]
 
 
-@pytest.skip
 def test_install_r_packages(uninstall_grf):
-    # Currently gets stuck in the install as .h files are missing for the build process
     package_names = ["grf"]
-    install_r_packages(package_names)
+    install_r_packages(package_names, verbose=True)
+    assert rpackages.isinstalled(package_names[0])

@@ -69,6 +69,7 @@ def dummy_cf(dummy_df):
 
 @pytest.fixture
 def uninstall_grf():
+    """ Ensures the grf packages is not installed before the test runs"""
     if rpackages.isinstalled("grf"):
         robjects.r.options(download_file_method="curl")
         utils = rpackages.importr("utils")
