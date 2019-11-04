@@ -11,6 +11,7 @@ from typing import List, Type
 
 import numpy as np
 import pandas as pd
+from pandas.core.internals import BlockManager
 
 
 class Col:
@@ -48,6 +49,7 @@ class CausalFrame(pd.DataFrame):
     _metadata = ["_names"]
 
     def __init__(self, *args, **kwargs):
+        data = args[0]
         covariates = kwargs.pop("covariates", None)
         treatment = kwargs.pop("treatment", "t")
         outcome = kwargs.pop("outcome", "y")
@@ -55,7 +57,7 @@ class CausalFrame(pd.DataFrame):
 
         super().__init__(*args, **kwargs)
 
-        if not internal_op:
+        if not internal_op and not isinstance(data, BlockManager):
             # constructor called explicitly thus check parameters
             assert covariates is not None, "Parameter `covariates` missing"
             assert isinstance(covariates, (list, tuple)), "List of covariates needed"

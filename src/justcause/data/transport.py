@@ -7,9 +7,12 @@ from urllib.parse import urljoin
 
 import requests
 
-from . import DATA_DIR, DATA_URL
-
 _logger = logging.getLogger(__name__)
+
+#: URL for retrieving the datasets
+DATA_URL = "https://raw.github.com/inovex/justcause-data/master/"
+#: Directory for storing the datasets locally
+DATA_DIR = Path("~/.justcause_data").expanduser()
 
 
 def create_data_dir(path: Path):
@@ -45,7 +48,10 @@ def download(url: str, dest_path: PathLike, chunk_size: int = 2 ** 20):
 
 
 def get_local_data_path(
-    path: PathLike, download_if_missing: bool = True, base_url: str = DATA_URL
+    path: PathLike,
+    download_if_missing: bool = True,
+    base_url: str = DATA_URL,
+    base_path: PathLike = DATA_DIR,
 ) -> PathLike:
     """Downloads the file from url if necessary; returns local file path
 
@@ -56,13 +62,14 @@ def get_local_data_path(
         path: name of the subdirectory
         download_if_missing: download the
         base_url: base url of repository
+        base_path: base path where the caches for the datasets are kept
 
     Returns: path to the file
     Raises: IOError if file does not exist and download is set to False
 
     """
     url = urljoin(str(base_url), str(path))
-    path = DATA_DIR / path
+    path = Path(base_path) / path
     create_data_dir(path.parent)
 
     if not path.is_file():

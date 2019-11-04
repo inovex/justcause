@@ -2,10 +2,10 @@ import pytest
 
 import numpy as np
 
-from justcause.data.generators import generate_data
 from justcause.data.generators.ihdp import multi_expo_on_ihdp
 from justcause.data.generators.toy import toy_data_synthetic, toy_example_emcs
 from justcause.data.sets.ihdp import get_ihdp_covariates
+from justcause.data.utils import generate_data
 
 
 def test_generator():

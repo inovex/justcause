@@ -1,8 +1,8 @@
 import numpy as np
 from scipy.special import expit
 
-from . import generate_data
 from ..sets.ibm_acic import get_ibm_acic_covariates
+from ..utils import generate_data
 
 # Todo: pass RandomState to all functions using randomness
 # Use sklearn.utils.check_random_state for this

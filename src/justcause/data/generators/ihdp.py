@@ -1,8 +1,8 @@
 import numpy as np
 from scipy.special import expit
 
-from . import generate_data
 from ..sets.ihdp import get_ihdp_covariates
+from ..utils import generate_data
 
 
 def multi_modal_effect(covariates):
