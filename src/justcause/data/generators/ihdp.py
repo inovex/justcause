@@ -15,15 +15,19 @@ def exponential_effect(covariates):
 
 
 def multi_outcome(covariates):
-    Y_0 = np.random.normal(0, 0.2, size=len(covariates))
-    Y_1 = Y_0 + multi_modal_effect(covariates)
-    return Y_0, Y_1
+    y_0 = np.random.normal(0, 0.2, size=len(covariates))
+    y_1 = y_0 + multi_modal_effect(covariates)
+    # ToDo: Check if we should add a nice here
+    mu_0, mu_1 = y_0, y_1
+    return mu_0, mu_1, y_0, y_1
 
 
 def expo_outcome(covariates):
-    Y_0 = np.random.normal(0, 0.2, size=len(covariates))
-    Y_1 = Y_0 + exponential_effect(covariates)
-    return Y_0, Y_1
+    y_0 = np.random.normal(0, 0.2, size=len(covariates))
+    y_1 = y_0 + exponential_effect(covariates)
+    # ToDo: Check if we should add a nice here
+    mu_0, mu_1 = y_0, y_1
+    return mu_0, mu_1, y_0, y_1
 
 
 def treatment_assignment(covariates):
@@ -35,8 +39,8 @@ def multi_expo_on_ihdp(setting="multi-modal", n_samples=None, n_replications=1):
     """
     Reproduces a specific DGP based on IHDP covariates.
 
-    Y_0 = N(0, 0.2)
-    Y_1 = Y_0 + \tau
+    y_0 = N(0, 0.2)
+    y_1 = y_0 + \tau
     T = BERN[sigmoid(X_8)]
 
     and \tau is either

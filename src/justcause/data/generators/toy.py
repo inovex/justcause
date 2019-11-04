@@ -28,15 +28,19 @@ def simple_outcomes(covariates):
     ite = (
         expit(covariates[:, 2] + covariates[:, 3]) * 3
     )  # make effect large, but all positive
-    Y_0 = expit(covariates[:, 1])
-    Y_1 = Y_0 + ite
-    return Y_0, Y_1
+    y_0 = expit(covariates[:, 1])
+    y_1 = y_0 + ite
+    # ToDo: Check if we should add a nice here
+    mu_0, mu_1 = y_0, y_1
+    return mu_0, mu_1, y_0, y_1
 
 
 def hard_outcomes(covariates):
-    Y_0 = expit(covariates[:, 1])
-    Y_1 = Y_0 + expit(covariates[:, 2] + covariates[:, 3]) / 2
-    return Y_0, Y_1
+    y_0 = expit(covariates[:, 1])
+    y_1 = y_0 + expit(covariates[:, 2] + covariates[:, 3]) / 2
+    # ToDo: Check if we should add a nice here
+    mu_0, mu_1 = y_0, y_1
+    return mu_0, mu_1, y_0, y_1
 
 
 def toy_data_synthetic(

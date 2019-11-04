@@ -15,10 +15,10 @@ def test_generator():
         return np.ones(len(covariates), dtype=np.int)
 
     def outcomes(covariates):
-        return (
-            np.zeros(len(covariates), dtype=np.int),
-            np.ones(len(covariates), dtype=np.int),
-        )
+        y_0 = np.zeros(len(covariates), dtype=np.int)
+        y_1 = np.ones(len(covariates), dtype=np.int)
+        mu_0, mu_1 = y_1, y_0
+        return mu_0, mu_1, y_0, y_1
 
     def covariates(_):
         return ihdp_cov

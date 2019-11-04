@@ -50,7 +50,9 @@ def iter_rep(df: Frame) -> Iterator[Frame]:
         yield df[df[Col.rep] == rep].drop(Col.rep, axis=1)
 
 
-def _add_outcomes(df: pd.DataFrame, y_0: np.ndarray, y_1: np.ndarray) -> pd.DataFrame:
+def _add_outcomes(
+    df: pd.DataFrame, m_0: np.ndarray, m_1: np.ndarray, y_0: np.ndarray, y_1: np.ndarray
+) -> pd.DataFrame:
     """Adds outcomes and derivatives of them to the DataFrame
 
     Calculates the factual and counterfactual distributions from potential outcomes
@@ -70,7 +72,7 @@ def _add_outcomes(df: pd.DataFrame, y_0: np.ndarray, y_1: np.ndarray) -> pd.Data
     y_cf = np.where(t, y_0, y_1)
 
     df[Col.y], df[Col.y_cf] = y, y_cf
-    df[Col.mu_0], df[Col.mu_1] = y_0, y_1
+    df[Col.mu_0], df[Col.mu_1] = m_0, m_1
     df[Col.ite] = y_1 - y_0  # add explicitly
     return df
 
@@ -120,12 +122,12 @@ def generate_data(
             rep_df.shape[0] == n_samples
         ), "Treatment function must return vector with dimension `n_samples`"
 
-        y_0, y_1 = outcomes(covariates)
+        mu_0, mu_1, y_0, y_1 = outcomes(covariates)
         assert (
             y_0.shape[0] == y_1.shape[0] == n_samples
         ), "Outcome function must return vectors with dimension `n_samples"
 
-        rep_df = _add_outcomes(rep_df, y_0, y_1)
+        rep_df = _add_outcomes(rep_df, mu_0, mu_1, y_0, y_1)
         rep_df[Col.sample_id] = np.arange(n_samples)
         rep_df[Col.rep] = i
         rep_dfs.append(rep_df)

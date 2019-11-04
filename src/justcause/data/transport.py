@@ -62,7 +62,7 @@ def get_local_data_path(
         path: name of the subdirectory
         download_if_missing: download the
         base_url: base url of repository
-        base_path: base path where the caches for the datasets are kept
+        base_path: base path where the datasets are cached
 
     Returns: path to the file
     Raises: IOError if file does not exist and download is set to False
