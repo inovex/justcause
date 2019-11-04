@@ -24,12 +24,13 @@ def replace_factual_outcomes(y_0, y_1, y, t):
     return y_0, y_1
 
 
-def install_r_packages(package_names: List[str]):
+def install_r_packages(package_names: List[str], verbose=False):
+    """ Installs the packages if needed using rpy2 utility functions"""
 
     robjects.r.options(download_file_method="curl")
     utils = rpackages.importr("utils")
-    utils.chooseCRANmirror(ind=0)
+    utils.chooseCRANmirror(ind=1)
 
     names_to_install = [x for x in package_names if not rpackages.isinstalled(x)]
     if len(names_to_install) > 0:
-        utils.install_packages(StrVector(names_to_install))
+        utils.install_packages(StrVector(names_to_install), verbose=verbose)
