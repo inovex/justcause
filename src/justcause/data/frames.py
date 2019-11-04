@@ -51,8 +51,8 @@ class CausalFrame(pd.DataFrame):
     def __init__(self, *args, **kwargs):
         data = args[0]
         covariates = kwargs.pop("covariates", None)
-        treatment = kwargs.pop("treatment", "t")
-        outcome = kwargs.pop("outcome", "y")
+        treatment = kwargs.pop("treatment", Col.t)
+        outcome = kwargs.pop("outcome", Col.y)
         internal_op = kwargs.pop("_internal_operation", False)
 
         super().__init__(*args, **kwargs)

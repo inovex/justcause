@@ -8,7 +8,7 @@ import pandas as pd
 from numpy.random import RandomState
 from sklearn.utils import check_random_state
 
-from .frames import DATA_COLS, CausalFrame
+from .frames import DATA_COLS, CausalFrame, Col
 from .transport import get_local_data_path
 
 COVARIATES_FILE = Path("covariates.parquet")
@@ -38,16 +38,16 @@ def get_dataframe(data_path: PathLike) -> pd.DataFrame:
 
 def select_replication(df: pd.DataFrame, indices: Indices):
     if isinstance(indices, Number):
-        return df.loc[df["rep"] == indices]
+        return df.loc[df[Col.rep] == indices]
     else:
-        return df.loc[df["rep"].isin(indices)]
+        return df.loc[df[Col.rep].isin(indices)]
 
 
 def iter_rep(df: Frame) -> Iterator[Frame]:
     """Iterate over all replications in dataset
     """
-    for rep in df["rep"].unique():
-        yield df[df["rep"] == rep].drop("rep", axis=1)
+    for rep in df[Col.rep].unique():
+        yield df[df[Col.rep] == rep].drop(Col.rep, axis=1)
 
 
 def _add_outcomes(df: pd.DataFrame, y_0: np.ndarray, y_1: np.ndarray) -> pd.DataFrame:
@@ -65,13 +65,13 @@ def _add_outcomes(df: pd.DataFrame, y_0: np.ndarray, y_1: np.ndarray) -> pd.Data
 
     """
     df = df.copy()  # avoid side-effects
-    t = df["t"].to_numpy().astype(np.bool)
+    t = df[Col.t].to_numpy().astype(np.bool)
     y = np.where(t, y_1, y_0)
     y_cf = np.where(t, y_0, y_1)
 
-    df["y"], df["y_cf"] = y, y_cf
-    df["y_0"], df["y_1"] = y_0, y_1
-    df["ite"] = y_1 - y_0  # add explicitly
+    df[Col.y], df[Col.y_cf] = y, y_cf
+    df[Col.mu_0], df[Col.mu_1] = y_0, y_1
+    df[Col.ite] = y_1 - y_0  # add explicitly
     return df
 
 
@@ -110,12 +110,12 @@ def generate_data(
 
     # No need to check `covariate_names` since Pandas does it
     cov_df = pd.DataFrame(data=covariates, columns=covariate_names)
-    cov_df["sample_id"] = np.arange(n_samples)
+    cov_df[Col.sample_id] = np.arange(n_samples)
 
     rep_dfs = list()
     for i in range(n_replications):
         rep_df = pd.DataFrame(columns=DATA_COLS)
-        rep_df["t"] = treatment(covariates)
+        rep_df[Col.t] = treatment(covariates)
         assert (
             rep_df.shape[0] == n_samples
         ), "Treatment function must return vector with dimension `n_samples`"
@@ -126,10 +126,10 @@ def generate_data(
         ), "Outcome function must return vectors with dimension `n_samples"
 
         rep_df = _add_outcomes(rep_df, y_0, y_1)
-        rep_df["sample_id"] = np.arange(n_samples)
-        rep_df["rep"] = i
+        rep_df[Col.sample_id] = np.arange(n_samples)
+        rep_df[Col.rep] = i
         rep_dfs.append(rep_df)
 
     rep_df = pd.concat(rep_dfs)
-    df = pd.merge(cov_df, rep_df, how="inner", on="sample_id")
+    df = pd.merge(cov_df, rep_df, how="inner", on=Col.sample_id)
     return CausalFrame(df, covariates=covariate_names)
