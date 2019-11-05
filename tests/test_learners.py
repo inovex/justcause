@@ -156,7 +156,7 @@ def test_xlearner(ihdp_data):
     assert abs(pred_ate - true_ate) < 0.2
 
 
-def test_causalforest(ihdp_data):
+def test_causalforest(ihdp_data, grf):
     rep = next(ihdp_data)
     x, t, y = rep.np.X, rep.np.t, rep.np.y
     cf = CausalForest()

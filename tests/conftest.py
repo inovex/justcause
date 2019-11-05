@@ -21,16 +21,9 @@ from justcause.data.frames import CausalFrame
 from justcause.data.sets.ibm_acic import load_ibm_acic
 from justcause.data.sets.ihdp import load_ihdp
 from justcause.data.sets.twins import load_twins
+from justcause.learners.utils import install_r_packages
 
 RUNS_ON_CIRRUS = bool(strtobool(os.environ.get("CIRRUS_CI", "false")))
-
-
-@pytest.fixture
-def grf():
-    """Assure the installation of Generalized Random Forests"""
-    from justcause.learners.tree.causal_forest import CausalForest
-
-    CausalForest.install_grf()
 
 
 @pytest.fixture
@@ -76,3 +69,17 @@ def uninstall_grf():
         utils.chooseCRANmirror(ind=0)
 
         utils.remove_packages(StrVector(["grf"]))
+
+
+@pytest.fixture
+def grf():
+    """ Ensures grf is installed before running tests with it
+
+    This is required as usually the user is requested to install the package manually
+
+    """
+    if not rpackages.isinstalled("grf"):
+        install_r_packages(["grf"])
+        return 0
+
+    return 1
