@@ -1,5 +1,7 @@
 # Readthedocs requirements
 cython
+numpy
+pandas
 keras
 matplotlib==2.2.4
 pyarrow>=0.15  # Mac problems with 0.13
