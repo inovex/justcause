@@ -22,6 +22,7 @@ python:
   system_packages: true
   install:
     - requirements: docs/requirements.txt
+    - requirements: docs/requirements_causalml.txt
 
 build:
   image: latest

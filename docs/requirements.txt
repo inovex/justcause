@@ -1,11 +1,10 @@
-causalml
+# Readthedocs requirements
+cython
 keras
 matplotlib==2.2.4
-# Readthedocs requirements
-numpy
-pandas
 pyarrow>=0.15  # Mac problems with 0.13
 scikit-learn==0.20.3  # Currently required to downgrade scikit-learn in order for CausalML to compile
 scipy
 seaborn
 tensorflow
+rpy2

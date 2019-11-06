@@ -15,6 +15,7 @@ dependencies:
   - seaborn
   - tensorflow
   - keras
+  - cython # needed by CausalML
   - arrow-cpp # check if needed
   - pyarrow>=0.15  # Mac problems with 0.13
   - scikit-learn==0.20.3  # Currently required to downgrade scikit-learn in order for CausalML to compile
@@ -30,3 +31,4 @@ dependencies:
   - flake8
   - pip:
       - pre-commit
+      - causalml

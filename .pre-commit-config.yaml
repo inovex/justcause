@@ -1,4 +1,4 @@
-exclude: '^docs/conf.py|.*/contrib/.*'
+exclude: '^docs/.*|.*/contrib/.*'
 
 repos:
 - repo: https://github.com/ambv/black
