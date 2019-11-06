@@ -78,7 +78,6 @@ def setup(app):
     app.add_config_value('recommonmark_config', {
         'auto_toc_tree_section': 'Contents',
         'enable_eval_rst': True,
-        'enable_auto_doc_ref': True,
         'enable_math': True,
         'enable_inline_math': True
     }, True)

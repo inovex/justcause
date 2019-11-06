@@ -11,7 +11,7 @@ from ..utils import (
     select_replication,
 )
 
-DATASET_NAME = "ibm_acic"
+DATASET_NAME: str = "ibm_acic"
 
 
 def load_ibm_acic(select_rep: Optional[Indices] = None) -> Iterable[CausalFrame]:

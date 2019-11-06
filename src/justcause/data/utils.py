@@ -11,10 +11,11 @@ from sklearn.utils import check_random_state
 from .frames import DATA_COLS, CausalFrame, Col
 from .transport import get_local_data_path
 
-COVARIATES_FILE = Path("covariates.parquet")
-OUTCOMES_FILE = Path("outcomes.parquet")
+#: Name of the file holding the covariates
+COVARIATES_FILE: Path = Path("covariates.parquet")
+#: Name of the file holding the outcomes and replications
+OUTCOMES_FILE: Path = Path("outcomes.parquet")
 
-#: Type aliases
 Indices = Union[List[int], int]
 OptRandState = Optional[Union[int, RandomState]]
 Frame = Union[CausalFrame, pd.DataFrame]

@@ -6,7 +6,7 @@ import pandas as pd
 from ..frames import CausalFrame, Col
 from ..utils import get_covariates_df, get_outcomes_df, iter_rep
 
-DATASET_NAME = "twins"
+DATASET_NAME: str = "twins"
 
 
 def load_twins() -> Iterable[CausalFrame]:

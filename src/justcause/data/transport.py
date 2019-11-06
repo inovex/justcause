@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 from os import PathLike
 from pathlib import Path
+from typing import Optional
 from urllib.parse import urljoin
 
 import requests
@@ -10,9 +11,9 @@ import requests
 _logger = logging.getLogger(__name__)
 
 #: URL for retrieving the datasets
-DATA_URL = "https://raw.github.com/inovex/justcause-data/master/"
+DATA_URL: str = "https://raw.github.com/inovex/justcause-data/master/"
 #: Directory for storing the datasets locally
-DATA_DIR = Path("~/.justcause_data").expanduser()
+DATA_DIR: Path = Path("~/.justcause_data").expanduser()
 
 
 def create_data_dir(path: Path):
@@ -29,7 +30,7 @@ def create_data_dir(path: Path):
         path.mkdir(parents=True)
 
 
-def download(url: str, dest_path: PathLike, chunk_size: int = 2 ** 20):
+def download(url: str, dest_path: PathLike, chunk_size: Optional[int] = None):
     """ Download file at url to specified location
 
     Args:
@@ -38,6 +39,7 @@ def download(url: str, dest_path: PathLike, chunk_size: int = 2 ** 20):
         chunk_size:
 
     """
+    chunk_size = 2 ** 20 if chunk_size is None else chunk_size
     req = requests.get(url, stream=True)
     req.raise_for_status()
 

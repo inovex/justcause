@@ -11,7 +11,7 @@ from ..utils import (
     select_replication,
 )
 
-DATASET_NAME = "ihdp"
+DATASET_NAME: str = "ihdp"
 
 
 def load_ihdp(select_rep: Optional[Indices] = None) -> Iterable[CausalFrame]:

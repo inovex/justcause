@@ -7,7 +7,6 @@ from scipy.special import expit
 from ..sets.ihdp import get_ihdp_covariates
 from ..utils import generate_data
 
-#: Type aliases
 OptRandState = Optional[Union[int, RandomState]]
 
 
