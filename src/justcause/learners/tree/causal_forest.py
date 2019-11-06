@@ -11,17 +11,28 @@ class CausalForest:
     """
 
     def __init__(self, random_state: int = 0):
+        """ Checks if the required R package is available and instantiates it
+
+        We don't install the grf package automatically, because it takes to long with
+        the required compilation. It would interrupt application workflow and is not
+        the task of our library.
+        The needed method for installation can be found in `justcause.learners.utils`
+
+        Args:
+            random_state: random seed that is passed to the R implementation
+        """
         from rpy2.robjects import numpy2ri
-        from rpy2.robjects.packages import LibraryError, importr
+        from rpy2.robjects.packages import importr
+        from rpy2.rinterface import RRuntimeError
 
         numpy2ri.activate()
 
         try:
             self.grf = importr("grf")
-        except LibraryError:
-            raise LibraryError(
+        except RRuntimeError:
+            raise ImportError(
                 "R package 'grf' is not installed yet, "
-                "install it with justcause.learners.utils.install_r_packages('grf')"
+                "install it with justcause.learners.utils.install_r_packages(['grf'])"
             )
 
         assert type(random_state) is int, (

@@ -1,66 +1,89 @@
 import copy
 
 import numpy as np
-from learners.causal_method import CausalMethod
-from sklearn.calibration import CalibratedClassifierCV
+from sklearn.linear_model import LassoLars
 
-from justcause.utils import get_regressor_name
+from ..utils import fit_predict_propensity, set_propensity_learner
 
 
-class DoubleRobust(CausalMethod):
-    def __init__(self, propensity_regressor, outcome_regressor):
-        super().__init__()
-        self.given_regressor = propensity_regressor
-        self.propensity_regressor = propensity_regressor
-        self.outcome_regressor = outcome_regressor
-        self.outcome_regressor_ctrl = copy.deepcopy(outcome_regressor)
+class DoubleRobustEstimator:
+    """ Implements Double Robust Estmation with generic learners based on the
+        equations of M. Davidian
+
+
+    References:
+        [1] M. Davidian, “Double Robustness in Estimation of Causal Treatment Effects”
+                2007. Presentation
+                http://www.stat.ncsu.edu/∼davidian North
+
+    """
+
+    def __init__(
+        self, propensity_learner=None, learner=None, learner_c=None, learner_t=None
+    ):
+        """
+
+        Args:
+            propensity_learner: propensity regression model
+            learner: generic outcome learner for both outcomes
+            learner_c: specific control outcome learner
+            learner_t: specific treatment outcome learner
+        """
+        self.propensity_learner = set_propensity_learner(propensity_learner)
+
+        if learner is None:
+            if learner_c is None and learner_t is None:
+                self.learner_c = LassoLars()
+                self.learner_t = LassoLars()
+            else:
+                self.learner_c = learner_c
+                self.learner_t = learner_t
+
+        else:
+            self.learner_c = copy.deepcopy(learner)
+            self.learner_t = copy.deepcopy(learner)
+
+        # TODO: This is not very clean here
         self.delta = 0.0001
 
-    def requires_provider(self):
-        return False
+    def __str__(self):
+        """ Simple string representation for logs and outputs"""
+        return "{}(control={}, treated={}, propensity={})".format(
+            self.__class__.__name__,
+            self.learner_c.__class__.__name__,
+            self.learner_t.__class__.__name__,
+            self.propensity_learner.__class__.__name__,
+        )
 
-    def predict_ate(self, x, t=None, y=None):
-        # Predict ATE always for training set, thus test set evaluation is pretty bad
-        if t is not None and y is not None:
-            # Fit for requested set
-            self.fit(x, t, y)
-            self.x = x
-            self.t = t
-            self.y = y
+    def predict_ate(self, x, t, y, propensity=None):
+        """ **Fits** and Predicts average treatment effect of the given population"""
+        # TODO: Out-of-sample prediction makes little sense here
 
-        prop = self.propensity_regressor.predict_proba(x)[:, 1]
+        self.fit(x, t, y)
+
+        # predict propensity
+        if propensity is None:
+            propensity = fit_predict_propensity(self.propensity_learner, x, t)
+
         dr1 = (
             np.sum(
-                ((self.t * self.y) / (prop + self.delta))
-                - ((self.t - prop + self.delta) / (prop + self.delta))
-                * self.outcome_regressor.predict(x)
+                ((t * y) / (propensity + self.delta))
+                - ((t - propensity + self.delta) / (propensity + self.delta))
+                * self.learner_t.predict(x)
             )
             / x.shape[0]
         )
         dr0 = (
             np.sum(
-                ((1 - self.t) * self.y / (1 - prop + self.delta))
-                - ((self.t - prop + self.delta) / (1 - prop + self.delta))
-                * self.outcome_regressor_ctrl.predict(x)
+                ((1 - t) * y / (1 - propensity + self.delta))
+                - ((t - propensity + self.delta) / (1 - propensity + self.delta))
+                * self.learner_c.predict(x)
             )
             / x.shape[0]
         )
         return dr1 - dr0
 
-    def fit(self, x, t, y, refit=False) -> None:
-        # Fit propensity score model
-        self.t = t
-        self.y = y
-        self.propensity_regressor = CalibratedClassifierCV(self.given_regressor)
-        self.propensity_regressor.fit(x, t)
-        # Fit the two outcome models
-        self.outcome_regressor.fit(x[t == 1], y[t == 1])
-        self.outcome_regressor_ctrl.fit(x[t == 0], y[t == 0])
-
-    def __str__(self):
-        return (
-            "DoubleRobustEstimator - P: "
-            + get_regressor_name(self.given_regressor)
-            + " O: "
-            + get_regressor_name(self.outcome_regressor)
-        )
+    def fit(self, x, t, y) -> None:
+        """ Fits the outcome models on treated and control separately"""
+        self.learner_c.fit(x[t == 0], y[t == 0])
+        self.learner_t.fit(x[t == 1], y[t == 1])

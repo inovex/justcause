@@ -1,50 +1,36 @@
 import numpy as np
-from learners.causal_method import CausalMethod
-from sklearn.calibration import CalibratedClassifierCV
 
-from justcause.utils import get_regressor_name
+from ..utils import fit_predict_propensity, set_propensity_learner
 
 
-class PropensityScoreWeighting(CausalMethod):
-    def __init__(self, propensity_regressor):
-        super().__init__()
-        self.given_regressor = propensity_regressor
-        self.propensity_regressor = propensity_regressor
-        self.delta = 0.0001
+class PSWEstimator:
+    """ Implements the simple propensity score weighting estimator """
 
-    def requires_provider(self):
-        return False
+    def __init__(self, propensity_learner=None):
+        self.propensity_learner = set_propensity_learner(propensity_learner)
 
-    def predict_ate(self, x, t=None, y=None):
-        # Predict ATE always for training set, thus test set evaluation is pretty bad
-        if t is not None and y is not None:
-            # Fit for requested set
-            # self.fit(x, t, y)
-            self.x = x
-            self.t = t
-            self.y = y
-
-        prop = self.propensity_regressor.predict_proba(self.x)[:, 1]
-        m1 = np.sum(
-            ((self.t * self.y + self.delta) / (prop + self.delta)) / self.x.shape[0]
-        )
-        m0 = np.sum(
-            (((1 - self.t) * self.y + self.delta) / (1 - prop + self.delta))
-            / self.x.shape[0]
-        )
-        return m1 - m0
-
-    def fit(self, x, t, y, refit=False) -> None:
-        # Fit propensity score model
-        self.x = x
-        self.t = t
-        self.y = y
-        self.propensity_regressor = CalibratedClassifierCV(self.given_regressor)
-        self.propensity_regressor.fit(x, t)
+        # TODO: Not clean here
+        self.delta = 0.001
 
     def __str__(self):
-        return "PropensityScoreWeighting - " + get_regressor_name(self.given_regressor)
+        return "{}(p_learner={})".format(
+            self.__class__.__name__, self.propensity_learner.__class__.__name__
+        )
 
-    def predict_ite(self, x, t=None, y=None):
-        # Broadcast ATE to all instances
-        return np.full(x.shape[0], self.predict_ate(x, t, y))
+    def predict_ate(self, x, t, y, propensity=None):
+        """ Fits the models on given population and calculates the ATE"""
+        # TODO: Discuss: Out-of-sample prediction makes little sense here
+
+        num_samples = x.shape[0]
+
+        if propensity is None:
+            propensity = fit_predict_propensity(self.propensity_learner, x, t)
+
+        m1 = np.sum(((t * y + self.delta) / (propensity + self.delta)))
+        m0 = np.sum((((1 - t) * y + self.delta) / (1 - propensity + self.delta)))
+        return (m1 - m0) / num_samples
+
+    def fit(self, x, t, y) -> None:
+        """Shell method to avoid errors"""
+        # TODO: Discuss use and convention of ATE learners
+        pass

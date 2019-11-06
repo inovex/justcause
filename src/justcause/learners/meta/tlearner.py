@@ -2,10 +2,13 @@ import copy
 from typing import Optional, Tuple, Union
 
 import numpy as np
-from causalml.propensity import ElasticNetPropensityModel
 from sklearn.linear_model import LassoLars
 
-from ..utils import replace_factual_outcomes
+from ..utils import (
+    fit_predict_propensity,
+    replace_factual_outcomes,
+    set_propensity_learner,
+)
 
 #: Type alias for predict_ite return type
 SingleComp = Union[Tuple[np.array, np.array, np.array], np.array]
@@ -136,14 +139,7 @@ class WeightedTLearner(BaseTLearner):
             random_state:
         """
         super().__init__(learner, learner_c, learner_t, random_state)
-        if propensity_learner is None:
-            self.propensity_learner = ElasticNetPropensityModel()
-        else:
-            assert hasattr(
-                propensity_learner, "predict_proba"
-            ), "propensity learner must have predict_proba method"
-
-            self.propensity_learner = propensity_learner
+        self.propensity_learner = set_propensity_learner(propensity_learner)
 
     def __str__(self):
         """ Simple string representation for logs and outputs"""
@@ -173,11 +169,7 @@ class WeightedTLearner(BaseTLearner):
             propensity: propensity scores to be used
         """
         if propensity is None:
-            if isinstance(self.propensity_learner, ElasticNetPropensityModel):
-                propensity = self.propensity_learner.fit_predict(x, t)
-            else:
-                self.propensity_learner.fit(x, t)
-                propensity = self.propensity_learner.predict_proba(x)[:, 1]
+            propensity = fit_predict_propensity(self.propensity_learner, x, t)
 
         ipt = 1 / propensity
         self.learner_c.fit(x[t == 0], y[t == 0], sample_weight=ipt[t == 0])

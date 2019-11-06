@@ -6,6 +6,8 @@ from sklearn.linear_model import LinearRegression, LogisticRegression
 
 from justcause.learners import (
     CausalForest,
+    DoubleRobustEstimator,
+    PSWEstimator,
     RLearner,
     SLearner,
     TLearner,
@@ -164,3 +166,29 @@ def test_causalforest(ihdp_data, grf):
     pred_ate = cf.predict_ate(x, t, y)
     true_ate = np.mean(rep["ite"].values)
     assert abs(pred_ate - true_ate) < 0.2
+
+
+def test_dre(ihdp_data):
+    rep = next(ihdp_data)
+    x, t, y = rep.np.X, rep.np.t, rep.np.y
+    dre = DoubleRobustEstimator(LogisticRegression())
+    ate = dre.predict_ate(x, t, y)
+    true_ate = np.mean(rep["ite"].values)
+    assert abs(ate - true_ate) < 0.2
+
+    # With default learner
+    ate = dre.predict_ate(x, t, y)
+    assert abs(ate - true_ate) < 0.4
+
+
+def test_psw(ihdp_data):
+    rep = next(ihdp_data)
+    x, t, y = rep.np.X, rep.np.t, rep.np.y
+    psw = PSWEstimator(LogisticRegression())
+    ate = psw.predict_ate(x, t, y)
+    true_ate = np.mean(rep["ite"].values)
+    assert abs(ate - true_ate) < 1
+
+    psw = PSWEstimator()
+    ate = psw.predict_ate(x, t, y)
+    assert ate > 0

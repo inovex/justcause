@@ -1,9 +1,12 @@
 from typing import Optional
 
 import numpy as np
-from causalml.propensity import ElasticNetPropensityModel
 
-from ..utils import replace_factual_outcomes
+from ..utils import (
+    fit_predict_propensity,
+    replace_factual_outcomes,
+    set_propensity_learner,
+)
 
 
 class BaseSLearner(object):
@@ -96,7 +99,6 @@ class WeightedSLearner(BaseSLearner):
     [S-Learner](﻿https://arxiv.org/pdf/1706.03461.pdf)
     """
 
-    # TODO: Add CalibratedCV in order to ensure correct probabilites
     def __init__(self, learner, propensity_learner=None):
         """
         Checks if the given propenstiy_regressor has the predict_proba function
@@ -107,15 +109,7 @@ class WeightedSLearner(BaseSLearner):
             propensity_learner: the propensity learner fitting x -> p(T | X)
         """
         super().__init__(learner)
-
-        if propensity_learner is None:
-            self.propensity_learner = ElasticNetPropensityModel()
-        else:
-            assert hasattr(
-                propensity_learner, "predict_proba"
-            ), "propensity learner must have predict_proba method"
-
-            self.propensity_learner = propensity_learner
+        self.propensity_learner = set_propensity_learner(propensity_learner)
 
     def __str__(self):
         """ Simple String Representation for logs and outputs"""
@@ -143,17 +137,10 @@ class WeightedSLearner(BaseSLearner):
             y: factual outcomes
             propensity: propensity scores to be used
         """
-        if propensity is not None:
-            assert len(propensity) == len(t)
-            ipt = 1 / propensity
-        else:
-            if isinstance(self.propensity_learner, ElasticNetPropensityModel):
-                # Use special API of Elastic Net
-                ipt = self.propensity_learner.fit_predict(x, t)
-            else:
-                # Use predict_proba of sklearn classifier
-                self.propensity_learner.fit(x, t)
-                ipt = 1 / self.propensity_learner.predict_proba(x)[:, 1]
+        if propensity is None:
+            propensity = fit_predict_propensity(self.propensity_learner, x, t)
+
+        ipt = 1 / propensity
 
         train = np.c_[x, t]
         self.learner.fit(train, y, sample_weight=ipt)
