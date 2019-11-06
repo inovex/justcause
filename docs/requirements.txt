@@ -1,3 +1,5 @@
+causalml
+keras
 matplotlib==2.2.4
 # Readthedocs requirements
 numpy
