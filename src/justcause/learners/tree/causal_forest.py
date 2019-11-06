@@ -1,11 +1,4 @@
 import numpy as np
-import rpy2.robjects as robjects
-from rpy2.robjects import numpy2ri
-from rpy2.robjects.packages import LibraryError, importr
-from rpy2.robjects.vectors import FloatVector, IntVector
-
-# Activate parsing once CausalForest module is accessed
-numpy2ri.activate()
 
 
 class CausalForest:
@@ -15,10 +8,15 @@ class CausalForest:
         [1] “Generalized random forests”
             S. Athey, J. Tibshirani, and S. Wager,
             Ann. Stat., vol. 47, no. 2, pp. 1179–1203, 2019.
-
     """
 
     def __init__(self, random_state: int = 0):
+        from rpy2.robjects import numpy2ri
+        from rpy2.robjects.packages import LibraryError, importr
+
+        # Activate parsing once CausalForest module is accessed
+        numpy2ri.activate()
+
         try:
             self.grf = importr("grf")
         except LibraryError:
@@ -44,11 +42,15 @@ class CausalForest:
 
     def predict_ite(self, x, t=None, y=None):
         """ Predicts ITEs for given samples"""
+        import rpy2.robjects as robjects
+
         pred = robjects.r.predict(self.forest, x, estimate_variance=False)[0]
         return np.array(pred).flatten()
 
     def fit(self, x, t, y):
         """ Fits the forest using factual data"""
+        from rpy2.robjects.vectors import FloatVector, IntVector
+
         self.forest = self.grf.causal_forest(
             x, FloatVector(y), IntVector(t), seed=self.random_state
         )

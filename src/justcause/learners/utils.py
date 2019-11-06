@@ -1,9 +1,5 @@
 from typing import List
 
-import rpy2.robjects.packages as rpackages
-from rpy2 import robjects
-from rpy2.robjects import StrVector
-
 
 def replace_factual_outcomes(y_0, y_1, y, t):
     """ Replaces the predicted components with factual observations where possible
@@ -26,6 +22,9 @@ def replace_factual_outcomes(y_0, y_1, y, t):
 
 def install_r_packages(package_names: List[str], verbose=False):
     """ Installs the packages if needed using rpy2 utility functions"""
+    import rpy2.robjects.packages as rpackages
+    from rpy2 import robjects
+    from rpy2.robjects import StrVector
 
     robjects.r.options(download_file_method="curl")
     utils = rpackages.importr("utils")
