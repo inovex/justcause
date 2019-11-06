@@ -85,6 +85,7 @@ def generate_data(
     n_replications: int = 1,
     covariate_names: Optional[List[str]] = None,
     random_state: OptRandState = None,
+    **kwargs,
 ) -> CausalFrame:
     """Generate CausalFrame from covariates, treatment and outcome functions
     """
@@ -96,7 +97,7 @@ def generate_data(
         ), "Covariates must not be a callable if `n_samples` was not specified"
         n_samples = covariates.shape[0]
     elif callable(covariates):
-        covariates = covariates(n_samples)
+        covariates = covariates(n_samples, random_state=random_state, **kwargs)
         assert (
             covariates.shape[0] == n_samples
         ), "Covariate function should return a dataframe with `n_samples` rows"
@@ -117,12 +118,12 @@ def generate_data(
     rep_dfs = list()
     for i in range(n_replications):
         rep_df = pd.DataFrame(columns=DATA_COLS)
-        rep_df[Col.t] = treatment(covariates)
+        rep_df[Col.t] = treatment(covariates, random_state=random_state, **kwargs)
         assert (
             rep_df.shape[0] == n_samples
         ), "Treatment function must return vector with dimension `n_samples`"
 
-        mu_0, mu_1, y_0, y_1 = outcomes(covariates)
+        mu_0, mu_1, y_0, y_1 = outcomes(covariates, random_state=random_state, **kwargs)
         assert (
             y_0.shape[0] == y_1.shape[0] == n_samples
         ), "Outcome function must return vectors, each with dimension `n_samples`"

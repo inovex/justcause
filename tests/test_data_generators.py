@@ -11,16 +11,16 @@ from justcause.data.utils import generate_data
 def test_generator():
     ihdp_cov = get_ihdp_covariates()
 
-    def treatment(covariates):
+    def treatment(covariates, *, random_state, **kwargs):
         return np.ones(len(covariates), dtype=np.int)
 
-    def outcomes(covariates):
+    def outcomes(covariates, *, random_state, **kwargs):
         y_0 = np.zeros(len(covariates), dtype=np.int)
         y_1 = np.ones(len(covariates), dtype=np.int)
         mu_0, mu_1 = y_1, y_0
         return mu_0, mu_1, y_0, y_1
 
-    def covariates(_):
+    def covariates(_, *, random_state, **kwargs):
         return ihdp_cov
 
     df = generate_data(covariates=ihdp_cov, treatment=treatment, outcomes=outcomes)

@@ -1,8 +1,14 @@
+from typing import Optional, Union
+
 import numpy as np
+from numpy.random import RandomState
 from scipy.special import expit
 
 from ..sets.ihdp import get_ihdp_covariates
 from ..utils import generate_data
+
+#: Type aliases
+OptRandState = Optional[Union[int, RandomState]]
 
 
 def multi_modal_effect(covariates):
@@ -14,7 +20,7 @@ def exponential_effect(covariates):
     return np.exp(1 + expit(covariates[:, 7]))  # use birth weight
 
 
-def multi_outcome(covariates):
+def multi_outcome(covariates, *, random_state: RandomState, **kwargs):
     y_0 = np.random.normal(0, 0.2, size=len(covariates))
     y_1 = y_0 + multi_modal_effect(covariates)
     # ToDo: Check if we should add a noise term here
@@ -22,7 +28,7 @@ def multi_outcome(covariates):
     return mu_0, mu_1, y_0, y_1
 
 
-def expo_outcome(covariates):
+def expo_outcome(covariates, *, random_state: RandomState, **kwargs):
     y_0 = np.random.normal(0, 0.2, size=len(covariates))
     y_1 = y_0 + exponential_effect(covariates)
     # ToDo: Check if we should add a noise term here
@@ -30,12 +36,17 @@ def expo_outcome(covariates):
     return mu_0, mu_1, y_0, y_1
 
 
-def treatment_assignment(covariates):
+def treatment_assignment(covariates, *, random_state: RandomState, **kwargs):
     """ Assigns treatment based on covariate """
     return np.random.binomial(1, p=expit(covariates[:, 7]))
 
 
-def multi_expo_on_ihdp(setting="multi-modal", n_samples=None, n_replications=1):
+def multi_expo_on_ihdp(
+    setting="multi-modal",
+    n_samples=None,
+    n_replications=1,
+    random_state: OptRandState = None,
+):
     """
     Reproduces a specific DGP based on IHDP covariates.
 
@@ -72,4 +83,5 @@ def multi_expo_on_ihdp(setting="multi-modal", n_samples=None, n_replications=1):
         outcome,
         n_samples=n_samples,
         n_replications=n_replications,
+        random_state=random_state,
     )

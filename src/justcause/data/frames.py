@@ -24,7 +24,7 @@ class Col:
     t = "t"
     y = "y"
     y_cf = "y_cf"
-    # Todo: make these `mu_0` and `mu_1` after the changes in generators.py
+    # Todo: make these `mu_0` and `mu_1` after the changes in justcause-data
     mu_0 = "y_0"
     mu_1 = "y_1"
     ite = "ite"
@@ -48,16 +48,17 @@ DATA_COLS = [
 class CausalFrame(pd.DataFrame):
     _metadata = ["_names"]
 
-    def __init__(self, *args, **kwargs):
-        data = args[0]
+    def __init__(self, data, *args, **kwargs):
         covariates = kwargs.pop("covariates", None)
         treatment = kwargs.pop("treatment", Col.t)
         outcome = kwargs.pop("outcome", Col.y)
-        internal_op = kwargs.pop("_internal_operation", False)
+        internal_op = kwargs.pop("_internal_operation", False) or isinstance(
+            data, BlockManager
+        )
 
-        super().__init__(*args, **kwargs)
+        super().__init__(data, *args, **kwargs)
 
-        if not internal_op and not isinstance(data, BlockManager):
+        if not internal_op:
             # constructor called explicitly thus check parameters
             assert covariates is not None, "Parameter `covariates` missing"
             assert isinstance(covariates, (list, tuple)), "List of covariates needed"
