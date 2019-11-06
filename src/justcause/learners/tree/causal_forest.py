@@ -14,7 +14,6 @@ class CausalForest:
         from rpy2.robjects import numpy2ri
         from rpy2.robjects.packages import LibraryError, importr
 
-        # Activate parsing once CausalForest module is accessed
         numpy2ri.activate()
 
         try:

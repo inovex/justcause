@@ -283,7 +283,7 @@ intersphinx_mapping = {
     'python': ('https://docs.python.org/' + python_version, None),
     'matplotlib': ('https://matplotlib.org', None),
     'numpy': ('https://docs.scipy.org/doc/numpy', None),
-    'sklearn': ('http://scikit-learn.org/stable', None),
-    'pandas': ('http://pandas.pydata.org/pandas-docs/stable', None),
+    'sklearn': ('https://scikit-learn.org/stable/objects.inv', None),
+    'pandas': ('https://pandas.pydata.org/pandas-docs/stable/objects.inv', None),
     'scipy': ('https://docs.scipy.org/doc/scipy/reference', None),
 }
