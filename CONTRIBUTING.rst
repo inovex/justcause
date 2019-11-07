@@ -6,7 +6,7 @@ Contributing
 Issue Reports
 =============
 
-If you experience bugs or in general issues with PyScaffold, please file an
+If you experience bugs or in general issues with JustCause, please file an
 issue report on our `issue tracker`_.
 
 
