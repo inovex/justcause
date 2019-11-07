@@ -1,26 +1,17 @@
 =========
-justcause
+JustCause
 =========
 
-This is the documentation of **justcause**.
+Comparing algorithms for causality analysis in a fair and just way.
 
-.. note::
+Evaluating causal inference methods in a scientifically thorough way is a cumbersome and error-prone task.
+To foster good scientific practice **JustCause** provides a framework to easily:
 
-    This is the main page of your project's `Sphinx`_ documentation.
-    It is formatted in `reStructuredText`_. Add additional pages
-    by creating rst-files in ``docs`` and adding them to the `toctree`_ below.
-    Use then `references`_ in order to link them from this page, e.g.
-    :ref:`authors` and :ref:`changes`.
+1. evaluate your method using common data sets like IHDP, IBM ACIC and others;
+2. create synthetic data sets with a generic but standardized approach;
+3. benchmark your method against several baseline and state-of-the-art methods.
 
-    It is also possible to refer to the documentation of other Python packages
-    with the `Python domain syntax`_. By default you can reference the
-    documentation of `Sphinx`_, `Python`_, `NumPy`_, `SciPy`_, `matplotlib`_,
-    `Pandas`_, `Scikit-Learn`_. You can add more by extending the
-    ``intersphinx_mapping`` in your Sphinx's ``conf.py``.
-
-    The pretty useful extension `autodoc`_ is activated by default and lets
-    you include documentation from docstrings. Docstrings can be written in
-    `Google style`_ (recommended!), `NumPy style`_ and `classical style`_.
+JustCause is a work in progress and new contributors are always welcome.
 
 
 Contents
@@ -29,6 +20,8 @@ Contents
 .. toctree::
    :maxdepth: 2
 
+   Contributions & Help <contributing>
+   Best Practices <best_practices>
    License <license>
    Authors <authors>
    Changelog <changelog>
