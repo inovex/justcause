@@ -2,16 +2,15 @@
 JustCause
 =========
 
-Comparing algorithms for causality analysis in a fair and just way.
-
 Evaluating causal inference methods in a scientifically thorough way is a cumbersome and error-prone task.
 To foster good scientific practice **JustCause** provides a framework to easily:
 
-1. evaluate your method using common data sets like IHDP, IBM ACIC and others;
+1. evaluate your method using common data sets like IHDP, IBM ACIC, and others;
 2. create synthetic data sets with a generic but standardized approach;
 3. benchmark your method against several baseline and state-of-the-art methods.
 
-JustCause is a work in progress and new contributors are always welcome.
+Our *cause* is to develop a framework that allows you to compare methods for causal inference
+in a fair and *just* way. JustCause is a work in progress and new contributors are always welcome.
 
 
 Contents
