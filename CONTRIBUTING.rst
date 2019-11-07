@@ -33,12 +33,12 @@ Clone the repository
 
 #. Create an environment ``justcause`` with the help of `Miniconda`_ and activate it::
 
-   conda env create -f environment.yaml
-   conda activate justcause
+    conda env create -f environment.yaml
+    conda activate justcause
 
 #. Install ``justcause`` with::
 
-   python setup.py develop
+    python setup.py develop
 
 #. Install ``pre-commit``::
 
