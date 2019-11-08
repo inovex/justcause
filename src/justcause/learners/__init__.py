@@ -15,7 +15,5 @@ ___all__ = [
     "RLearner",
     "XLearner",
     "CausalForest",
-    "DoubleRobustEstimator"
-    "PSWEstimator"
+    "DoubleRobustEstimator" "PSWEstimator",
 ]
-

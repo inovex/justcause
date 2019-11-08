@@ -3,6 +3,7 @@ from typing import List
 from causalml.propensity import ElasticNetPropensityModel
 from sklearn.calibration import CalibratedClassifierCV
 
+
 def replace_factual_outcomes(y_0, y_1, y, t):
     """ Replaces the predicted components with factual observations where possible
 
