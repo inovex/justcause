@@ -167,6 +167,13 @@ def test_causalforest(ihdp_data, grf):
     true_ate = np.mean(rep["ite"].values)
     assert abs(pred_ate - true_ate) < 0.2
 
+    # Try passing keyword arguments to the R implenetation
+    cf = CausalForest(num_trees=50, alpha=0.1, honesty=False)
+    cf.fit(x, t, y)
+    pred_ate = cf.predict_ate(x, t, y)
+    true_ate = np.mean(rep["ite"].values)
+    assert abs(pred_ate - true_ate) < 0.2
+
 
 def test_dre(ihdp_data):
     rep = next(ihdp_data)
