@@ -1,8 +1,12 @@
+import pytest
+
 import numpy as np
 import rpy2.robjects.packages as rpackages
+from numpy.random import RandomState
 
 from justcause.data.utils import iter_rep
 from justcause.learners.utils import install_r_packages, replace_factual_outcomes
+from justcause.utils import int_from_random_state
 
 
 def test_iter_rep(dummy_df):
@@ -28,3 +32,19 @@ def test_install_r_packages(uninstall_grf):
     package_names = ["grf"]
     install_r_packages(package_names, verbose=True)
     assert rpackages.isinstalled(package_names[0])
+
+
+def test_int_from_random_state():
+    rs = RandomState(5)
+    rs_int = int_from_random_state(rs)
+    assert isinstance(rs_int, int)
+
+    rs = RandomState(5)
+    rs_int_new = int_from_random_state(rs)
+    # check if the same int is returned for the same RandomState
+    assert rs_int == rs_int_new
+    # check that integers are returned directly
+    assert int_from_random_state(5) == 5
+
+    with pytest.raises(ValueError):
+        int_from_random_state("wrong-input")
