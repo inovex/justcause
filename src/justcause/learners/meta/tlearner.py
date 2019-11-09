@@ -14,7 +14,7 @@ from ..utils import (
 SingleComp = Union[Tuple[np.array, np.array, np.array], np.array]
 
 
-class BaseTLearner:
+class TLearner:
     """ Base class for all T-Learners; bundles duplicate code
 
     Defaults to a LassoLars learner for both treated and control
@@ -56,6 +56,29 @@ class BaseTLearner:
             self.learner_t.__class__.__name__,
         )
 
+    def fit(
+        self, x: np.array, t: np.array, y: np.array, weights: Optional[np.array] = None,
+    ) -> None:
+        """
+
+        Args:
+            x: covariates, shape (num_instances, num_features)
+            t: treatment indicator
+            y: factual outcomes
+            weights: sample weights for weighted fitting
+        """
+        assert (
+            t is not None and y is not None
+        ), "treatment and factual outcomes are required to fit Causal Forest"
+        if weights is not None:
+            assert len(weights) == len(t), "weights must match the number of instances"
+            self.learner_c.fit(x[t == 0], y[t == 0], sample_weights=weights)
+            self.learner_t.fit(x[t == 1], y[t == 1], sample_weights=weights)
+        else:
+            # Fit without weights to avoid unknown argument error
+            self.learner_c.fit(x[t == 0], y[t == 0])
+            self.learner_t.fit(x[t == 1], y[t == 1])
+
     def predict_ite(
         self,
         x: np.array,
@@ -85,92 +108,26 @@ class BaseTLearner:
         else:
             return y_1 - y_0
 
-    def predict_ate(self, x: np.array, t: np.array = None, y: np.array = None) -> float:
-        return float(np.mean(self.predict_ite(x, t, y)))
-
-
-class TLearner(BaseTLearner):
-    """
-    Implements a generic T-learner
-
-    References:
-        [1] S. R. Künzel, J. S. Sekhon, P. J. Bickel, and B. Yu,
-        “Meta-learners for Estimating Heterogeneous Treatment Effects
-            using Machine Learning,” 2019.
-    """
-
-    def fit(self, x: np.array, t: np.array, y: np.array) -> None:
-        self.learner_c.fit(x[t == 0], y[t == 0])
-        self.learner_t.fit(x[t == 1], y[t == 1])
-
-
-class WeightedTLearner(BaseTLearner):
-    """
-    Implements a weighted generic T-Learner
-
-    Propensity learner defaults to the ElasticNetPropensityModel proposed
-    in CausalML. Otherwise requires the propensity learner to have a
-    predict_proba method
-
-    References:
-        CausalML Framework `on Github <https://github.com/uber/causalml/>'_.
-
-        [1] S. R. Künzel, J. S. Sekhon, P. J. Bickel, and B. Yu,
-        “Meta-learners for Estimating Heterogeneous Treatment Effects
-            using Machine Learning,” 2019.
-
-    """
-
-    def __init__(
-        self,
-        learner=None,
-        learner_c=None,
-        learner_t=None,
-        propensity_learner=None,
-        random_state=None,
-    ):
-        """
-        Args:
-            learner: base learner with parameter 'sample_weight' in fit()
-            learner_c: specific learner for control outcome
-            learner_t: specific learner for control outcome
-            propensity_learner: calibrated classifier for propensity estimation
-                must have 'predict_proba'
-            random_state:
-        """
-        super().__init__(learner, learner_c, learner_t, random_state)
-        self.propensity_learner = set_propensity_learner(propensity_learner)
-
-    def __str__(self):
-        """ Simple string representation for logs and outputs"""
-        return "{}(control={}, treated={}, propensity={})".format(
-            self.__class__.__name__,
-            self.learner_c.__class__.__name__,
-            self.learner_t.__class__.__name__,
-            self.propensity_learner.__class__.__name__,
-        )
-
-    def fit(
+    def estimate_ate(
         self,
         x: np.array,
-        t: np.array,
-        y: np.array,
-        propensity: Optional[np.array] = None,
-    ) -> None:
-        """ Fits the T-learner with weighted samples
+        t: np.array = None,
+        y: np.array = None,
+        weights: Optional[np.array] = None,
+    ) -> float:
+        """ Estimates the average treatment effect of the given population
 
-        If propensity scores are not given explicitly, the propensity learner
-        of the module is used
+        First, it fits the model on the given population, then predicts ITEs and uses
+        the mean as an estimate for the ATE
 
         Args:
             x: covariates
             t: treatment indicator
             y: factual outcomes
-            propensity: propensity scores to be used
-        """
-        if propensity is None:
-            propensity = fit_predict_propensity(self.propensity_learner, x, t)
+            weights: sample weights for weighted fitting
 
-        ipt = 1 / propensity
-        self.learner_c.fit(x[t == 0], y[t == 0], sample_weight=ipt[t == 0])
-        self.learner_t.fit(x[t == 1], y[t == 1], sample_weight=ipt[t == 1])
+        Returns: ATE estimate as the mean of ITEs
+        """
+        self.fit(x, t, y, weights)
+        ite = self.predict_ite(x, t, y)
+        return float(np.mean(ite))

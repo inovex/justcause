@@ -9,8 +9,12 @@ from ..utils import (
 )
 
 
-class BaseSLearner(object):
-    """ Base class for all S-Learners; bundles duplicate code"""
+class SLearner(object):
+    """ Generic S-Learner for the binary treatment case
+
+    :ref:
+    [S-Learner](﻿https://arxiv.org/pdf/1706.03461.pdf)
+    """
 
     def __init__(self, learner):
         """
@@ -21,6 +25,31 @@ class BaseSLearner(object):
 
     def __repr__(self):
         return self.__str__()
+
+    def __str__(self):
+        """ Simple string representation for logs and outputs"""
+        return ("{}(learner={})").format(
+            self.__class__.__name__, self.learner.__class__.__name__
+        )
+
+    def fit(
+        self, x: np.array, t: np.array, y: np.array, weights: Optional[np.array] = None,
+    ) -> None:
+        """ Fits (optionally weighted) learner on the given samples
+
+        Args:
+            x: covariates
+            t: treatment indicator
+            y: factual outcomes
+            weights: propensity scores to be used
+        """
+        train = np.c_[x, t]
+        if weights is not None:
+            assert len(weights) == len(t), "weights must match the number of instances"
+            self.learner.fit(train, y, sample_weight=weights)
+        else:
+            # Fit without weights to avoid unknown argument error
+            self.learner.fit(train, y)
 
     def predict_ite(
         self,
@@ -56,91 +85,22 @@ class BaseSLearner(object):
         else:
             return y_1 - y_0
 
-    def predict_ate(self, x: np.array, t: np.array = None, y: np.array = None):
-        """Predicts ATE as a mean of ITE predictions
+    def estimate_ate(
+        self, x: np.array, t: np.array = None, y: np.array = None
+    ) -> float:
+        """Estimates the ATE of the given population
+
+        First, fits the learner on the population, then uses the mean of ITE
+        predicitions as the ATE estimate
 
         Args:
             x: covariates
             t: treatment
             y: factual outcomes
 
-        Returns: ATE for given data
+        Returns: ATE estimate for the given population
 
         """
-        return np.mean(self.predict_ite(x, t, y))
-
-
-class SLearner(BaseSLearner):
-    """ Generic S-Learner for the binary treatment case
-
-    :ref:
-    [S-Learner](﻿https://arxiv.org/pdf/1706.03461.pdf)
-    """
-
-    def __str__(self):
-        """ Simple string representation for logs and outputs"""
-        return ("{}(regressor={})").format(
-            self.__class__.__name__, self.learner.__class__.__name__
-        )
-
-    def fit(self, x, t, y) -> None:
-        """ Fits the base learner on the outcome function"""
-        train = np.c_[x, t]
-        self.learner.fit(train, y)
-
-
-class WeightedSLearner(BaseSLearner):
-    """ Weighted generic S-Learner
-
-    Samples are weighted before prediction with the inverse probability of
-    treatment.
-
-    References
-    [S-Learner](﻿https://arxiv.org/pdf/1706.03461.pdf)
-    """
-
-    def __init__(self, learner, propensity_learner=None):
-        """
-        Checks if the given propenstiy_regressor has the predict_proba function
-        as required.
-
-        Args:
-            learner: The outcome learner fitting (x, t) -> y
-            propensity_learner: the propensity learner fitting x -> p(T | X)
-        """
-        super().__init__(learner)
-        self.propensity_learner = set_propensity_learner(propensity_learner)
-
-    def __str__(self):
-        """ Simple String Representation for logs and outputs"""
-        return ("{}(regressor={}, propensity={})").format(
-            self.__class__.__name__,
-            self.learner.__class__.__name__,
-            self.propensity_learner.__class__.__name__,
-        )
-
-    def fit(
-        self,
-        x: np.array,
-        t: np.array,
-        y: np.array,
-        propensity: Optional[np.array] = None,
-    ):
-        """ Fits weighted regressor on the given samples
-
-        If propensity scores are not given explicitly, the propensity regressor
-        of the module is used
-
-        Args:
-            x: covariates
-            t: treatment indicator
-            y: factual outcomes
-            propensity: propensity scores to be used
-        """
-        if propensity is None:
-            propensity = fit_predict_propensity(self.propensity_learner, x, t)
-
-        ipt = 1 / propensity
-
-        train = np.c_[x, t]
-        self.learner.fit(train, y, sample_weight=ipt)
+        self.fit(x, t, y)
+        ite = self.predict_ite(x, t, y)
+        return float(np.mean(ite))
