@@ -35,9 +35,9 @@ class CausalForest:
                 "install it with justcause.learners.utils.install_r_packages(['grf'])"
             )
 
-        assert type(random_state) is int, (
-            "Only integer type random state " "can be passed to rpy2"
-        )
+        assert isinstance(
+            random_state, int
+        ), "Only integer type random state can be passed to rpy2"
 
         """ Holds the rpy2 object for the trained model"""
         self.forest = None
