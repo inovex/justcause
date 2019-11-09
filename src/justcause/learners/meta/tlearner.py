@@ -4,11 +4,7 @@ from typing import Optional, Tuple, Union
 import numpy as np
 from sklearn.linear_model import LassoLars
 
-from ..utils import (
-    fit_predict_propensity,
-    replace_factual_outcomes,
-    set_propensity_learner,
-)
+from ..utils import replace_factual_outcomes
 
 #: Type alias for predict_ite return type
 SingleComp = Union[Tuple[np.array, np.array, np.array], np.array]
@@ -21,7 +17,7 @@ class TLearner:
 
     """
 
-    def __init__(self, learner=None, learner_c=None, learner_t=None, random_state=None):
+    def __init__(self, learner=None, learner_c=None, learner_t=None):
         """
         Takes either one base learner for both or two specific base learners
 
@@ -29,7 +25,6 @@ class TLearner:
             learner: base learner for treatment and control outcomes
             learner_c: base learner for control outcome
             learner_t: base learner for treatment  outcome
-            random_state: random state; currently unused
         """
         if learner is None:
             if learner_c is None and learner_t is None:
@@ -42,8 +37,6 @@ class TLearner:
         else:
             self.learner_c = copy.deepcopy(learner)
             self.learner_t = copy.deepcopy(learner)
-
-        self.random_state = random_state
 
     def __repr__(self):
         return self.__str__()
