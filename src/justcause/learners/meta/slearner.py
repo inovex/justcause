@@ -2,11 +2,7 @@ from typing import Optional, Tuple, Union
 
 import numpy as np
 
-from ..utils import (
-    fit_predict_propensity,
-    replace_factual_outcomes,
-    set_propensity_learner,
-)
+from ..utils import replace_factual_outcomes
 
 # Return Type of predict_ite
 SingleComp = Union[Tuple[np.array, np.array, np.array], np.array]
