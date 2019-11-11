@@ -1,7 +1,11 @@
-from typing import List
+from typing import List, Tuple
+
+import numpy as np
 
 
-def replace_factual_outcomes(y_0, y_1, y, t):
+def replace_factual_outcomes(
+    y_0: np.array, y_1: np.array, y: np.array, t: np.array
+) -> Tuple[np.array, np.array]:
     """ Replaces the predicted components with factual observations where possible
 
     Args:
@@ -12,11 +16,8 @@ def replace_factual_outcomes(y_0, y_1, y, t):
 
     Returns: y_0, y_1 with factual outcomes replaced where possible
     """
-    for i in range(len(t)):
-        if t[i] == 1:
-            y_1[i] = y[i]
-        else:
-            y_0[i] = y[i]
+    y_0 = np.where(t == 0, y, y_0)
+    y_1 = np.where(t == 1, y, y_1)
     return y_0, y_1
 
 
