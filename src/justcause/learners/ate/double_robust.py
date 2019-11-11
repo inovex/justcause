@@ -4,7 +4,7 @@ from typing import Optional
 import numpy as np
 from sklearn.linear_model import LassoLars
 
-from ..utils import fit_predict_propensity, set_propensity_learner
+from ..propensity import fit_predict_propensity, set_propensity_learner
 
 
 class DoubleRobustEstimator:
