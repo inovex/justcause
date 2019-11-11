@@ -1,4 +1,5 @@
 import copy
+from typing import Optional
 
 import numpy as np
 from sklearn.linear_model import LassoLars
@@ -19,12 +20,18 @@ class DoubleRobustEstimator:
     """
 
     def __init__(
-        self, propensity_learner=None, learner=None, learner_c=None, learner_t=None
+        self,
+        propensity_learner=None,
+        learner=None,
+        learner_c=None,
+        learner_t=None,
+        delta=0.001,
     ):
         """
 
         Args:
-            propensity_learner: propensity regression model
+            propensity_learner: propensity regression model, default set in
+                the set_propensity_learner method in justcause.learners.utils
             learner: generic outcome learner for both outcomes
             learner_c: specific control outcome learner
             learner_t: specific treatment outcome learner
@@ -43,8 +50,7 @@ class DoubleRobustEstimator:
             self.learner_c = copy.deepcopy(learner)
             self.learner_t = copy.deepcopy(learner)
 
-        # TODO: This is not very clean here
-        self.delta = 0.0001
+        self.delta = delta
 
     def __str__(self):
         """ Simple string representation for logs and outputs"""
@@ -55,11 +61,28 @@ class DoubleRobustEstimator:
             self.propensity_learner.__class__.__name__,
         )
 
-    def predict_ate(self, x, t, y, propensity=None):
-        """ **Fits** and Predicts average treatment effect of the given population"""
-        # TODO: Out-of-sample prediction makes little sense here
+    def estimate_ate(
+        self,
+        x: np.array,
+        t: np.array,
+        y: np.array,
+        propensity: Optional[np.array] = None,
+    ) -> float:
+        """ Fits learners and estimates average treatment
+        effect of the given population
 
-        self.fit(x, t, y)
+        Args:
+            x: covariates in shape (num_instances, num_features)
+            t: treatment indicator
+            y: factual outcomes
+            propensity: explicit propensity scores of all instances to be used for
+                weighting in the formula
+
+        Returns:
+
+        """
+
+        self._fit(x, t, y)
 
         # predict propensity
         if propensity is None:
@@ -81,9 +104,9 @@ class DoubleRobustEstimator:
             )
             / x.shape[0]
         )
-        return dr1 - dr0
+        return float(dr1 - dr0)
 
-    def fit(self, x, t, y) -> None:
-        """ Fits the outcome models on treated and control separately"""
+    def _fit(self, x: np.array, t: np.array, y: np.array) -> None:
+        """ Fits the outcome learners on treated and control separately"""
         self.learner_c.fit(x[t == 0], y[t == 0])
         self.learner_t.fit(x[t == 1], y[t == 1])

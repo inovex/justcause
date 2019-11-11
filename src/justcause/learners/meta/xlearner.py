@@ -19,8 +19,6 @@ class XLearner:
         - effect control
         - effect treated
 
-    We don't pass
-
     References:
         CausalML Framework `on Github <https://github.com/uber/causalml/>'_.
 
@@ -37,7 +35,6 @@ class XLearner:
         outcome_learner_t=None,
         effect_learner_c=None,
         effect_learner_t=None,
-        random_state=None,
     ):
         if (learner is not None) or (
             (outcome_learner_c is not None)
@@ -96,35 +93,47 @@ class XLearner:
         x: np.array,
         t: np.array = None,
         y: np.array = None,
-        p: Optional[np.array] = None,
+        propensities: Optional[np.array] = None,
         return_components: bool = False,
         replace_factuals: bool = False,
     ) -> np.array:
         """
 
         Args:
-            x:
-            t:
-            y:
-            p:
+            x: covariates
+            t: treatment indicator
+            y: factual outcomes
+            propensities: propensity scores
+            return_components: whether to return Y(1) and Y(0) for all instances or not
+            replace_factuals: whether to replace predicted outcomes with the factual
+                outcomes where applicable
 
         Returns:
 
         """
-        # TODO: Allow to pass a specific propensity learner to the class,
-        #       see WeightedTLearner
-        if p is None:
+        # TODO: Replace this with a default_propensity from utils
+        if propensities is None:
+            # Set default propensity, because CausalML currently requires it
             p_learner = ElasticNetPropensityModel()
-            p = p_learner.fit_predict(x, t)
+            propensities = p_learner.fit_predict(x, t)
 
         if return_components:
-            ite, y_0, y_1 = self.model.predict(x, p, t, y, return_components=True)
+            ite, y_0, y_1 = self.model.predict(
+                x, propensities, t, y, return_components=True
+            )
             if t is not None and y is not None and replace_factuals:
                 y_0, y_1 = replace_factual_outcomes(y_0, y_1, y, t)
             return ite, y_0, y_1
         else:
-            return self.model.predict(x, p, t, y, return_components=False)
+            return self.model.predict(x, propensities, t, y, return_components=False)
 
-    def predict_ate(self, x: np.array, t: np.array, y: np.array) -> float:
+    def estimate_ate(
+        self,
+        x: np.array,
+        t: np.array,
+        y: np.array,
+        propensities: Optional[np.array] = None,
+    ) -> float:
         """ Predicts ATE for given samples; ignores the factual outcome and treatment"""
-        return float(np.mean(self.predict_ite(x, t, y)))
+        self.fit(x, t, y)
+        return float(np.mean(self.predict_ite(x, t, y, propensities)))

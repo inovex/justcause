@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Tuple, Union
 
 import numpy as np
 
@@ -7,6 +7,9 @@ from ..utils import (
     replace_factual_outcomes,
     set_propensity_learner,
 )
+
+# Return Type of predict_ite
+SingleComp = Union[Tuple[np.array, np.array, np.array], np.array]
 
 
 class SLearner(object):
@@ -41,7 +44,7 @@ class SLearner(object):
             x: covariates
             t: treatment indicator
             y: factual outcomes
-            weights: propensity scores to be used
+            weights: weights to be used by the learner
         """
         train = np.c_[x, t]
         if weights is not None:
@@ -58,7 +61,7 @@ class SLearner(object):
         y: np.array = None,
         return_components: bool = False,
         replace_factuals: bool = False,
-    ) -> np.array:
+    ) -> SingleComp:
         """ Predicts ITE for the given samples
 
         Args:

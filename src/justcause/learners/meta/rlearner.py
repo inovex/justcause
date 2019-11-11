@@ -1,7 +1,13 @@
+from typing import Optional, Union
+
 import numpy as np
 from causalml.inference.meta import BaseRRegressor
 from causalml.propensity import ElasticNetPropensityModel
+from numpy.random import RandomState
 from sklearn.linear_model import LassoLars
+from sklearn.utils import check_random_state
+
+StateType = Optional[Union[int, RandomState]]
 
 
 class RLearner:
@@ -18,11 +24,29 @@ class RLearner:
             “Quasi-Oracle Estimation of Heterogeneous Treatment Effects.”
     """
 
-    def __init__(self, learner=None, outcome_learner=None, effect_learner=None):
+    def __init__(
+        self,
+        learner=None,
+        outcome_learner=None,
+        effect_learner=None,
+        random_state: StateType = None,
+    ):
+        """
+
+        Args:
+            learner: default learner for both outcome and effect
+            outcome_learner: specific learner for outcome
+            effect_learner: specific learner for effect
+            random_state: RandomState or int to be used for K-fold splitting. NOT used
+                in the learners, this has to be done by the user.
+        """
         if learner is None and (outcome_learner is None and effect_learner is None):
             learner = LassoLars()
 
-        self.model = BaseRRegressor(learner, outcome_learner, effect_learner)
+        self.random_state = check_random_state(random_state)
+        self.model = BaseRRegressor(
+            learner, outcome_learner, effect_learner, random_state=random_state
+        )
 
     def __str__(self):
         """ Simple string representation for logs and outputs"""
@@ -49,9 +73,12 @@ class RLearner:
 
         Returns: None
         """
-        # TODO: Allow to pass a specific propensity learner to the class,
-        #       see WeightedTLearner
+        # TODO: Replace this with a default_propensity from utils
+        # TODO: Maybe just assert that propensity is not None and explain why
+        #  --> responsibility with the user
         if p is None:
+            # Propensity is needed by CausalML, so we estimate it,
+            # if it was not provided
             p_learner = ElasticNetPropensityModel()
             p = p_learner.fit_predict(x, t)
 
@@ -65,6 +92,9 @@ class RLearner:
         assert t is None and y is None, "The R-Learner does not use factual outcomes"
         return self.model.predict(x)
 
-    def predict_ate(self, x: np.array, t: np.array, y: np.array) -> float:
-        """ Predicts ATE for given samples; ignores the factual outcome and treatment"""
-        return float(np.mean(self.predict_ite(x, t, y)))
+    def estimate_ate(
+        self, x: np.array, t: np.array, y: np.array, p: Optional[np.array] = None
+    ):
+        self.fit(x, t, y, p)
+        ite = self.predict_ite(x, t, y)
+        return float(np.mean(ite))

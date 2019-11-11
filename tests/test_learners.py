@@ -88,7 +88,7 @@ def test_xlearner(ihdp_data):
     pred = xlearner.predict_ite(x, t, y)
     assert len(pred) == len(t)
 
-    pred_ate = xlearner.predict_ate(x, t, y)
+    pred_ate = xlearner.estimate_ate(x, t, y)
     true_ate = np.mean(rep["ite"].values)
     assert abs(pred_ate - true_ate) < 0.2
 
@@ -114,12 +114,12 @@ def test_dre(ihdp_data):
     rep = next(ihdp_data)
     x, t, y = rep.np.X, rep.np.t, rep.np.y
     dre = DoubleRobustEstimator(LogisticRegression())
-    ate = dre.predict_ate(x, t, y)
+    ate = dre.estimate_ate(x, t, y)
     true_ate = np.mean(rep["ite"].values)
     assert abs(ate - true_ate) < 0.2
 
     # With default learner
-    ate = dre.predict_ate(x, t, y)
+    ate = dre.estimate_ate(x, t, y)
     assert abs(ate - true_ate) < 0.4
 
 
@@ -127,10 +127,10 @@ def test_psw(ihdp_data):
     rep = next(ihdp_data)
     x, t, y = rep.np.X, rep.np.t, rep.np.y
     psw = PSWEstimator(LogisticRegression())
-    ate = psw.predict_ate(x, t, y)
+    ate = psw.estimate_ate(x, t, y)
     true_ate = np.mean(rep["ite"].values)
     assert abs(ate - true_ate) < 1
 
     psw = PSWEstimator()
-    ate = psw.predict_ate(x, t, y)
+    ate = psw.estimate_ate(x, t, y)
     assert ate > 0
