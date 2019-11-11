@@ -62,6 +62,7 @@ def train_dragon(
     val_split=0.1,
     batch_size=512,
     num_epochs=100,
+    learning_rate=0.001,
     verbose=1,
 ):
     """Build and Train the DragonNet Model on given data
@@ -93,7 +94,7 @@ def train_dragon(
 
     start_time = time.time()
 
-    dragonnet.compile(optimizer=Adam(lr=1e-3), loss=loss, metrics=metrics)
+    dragonnet.compile(optimizer=Adam(lr=learning_rate), loss=loss, metrics=metrics)
 
     class EarlyStoppingByLossVal(Callback):
         def __init__(self, monitor="regression_loss", value=400, verbose=0):
@@ -109,11 +110,6 @@ def train_dragon(
                     print("Epoch %05d: early stopping THR" % epoch)
                 self.model.stop_training = True
 
-    class SacredLogLoss(Callback):
-        def on_batch_end(self, batch, logs=None):
-            # TODO: Implement sacred logging without circular dependencies
-            pass
-
     adam_callbacks = [
         TerminateOnNaN(),
         EarlyStopping(monitor="regression_loss", patience=10, min_delta=0.0),
@@ -126,8 +122,7 @@ def train_dragon(
             min_delta=1e-8,
             cooldown=0,
             min_lr=0,
-        ),
-        SacredLogLoss(),
+        )
     ]
 
     dragonnet.fit(

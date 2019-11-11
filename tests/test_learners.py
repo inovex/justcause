@@ -5,6 +5,7 @@ from sklearn.linear_model import LinearRegression, LogisticRegression
 from justcause.learners import (
     CausalForest,
     DoubleRobustEstimator,
+    DragonNet,
     PSWEstimator,
     RLearner,
     SLearner,
@@ -132,3 +133,15 @@ def test_psw(ihdp_data):
     psw = PSWEstimator()
     ate = psw.estimate_ate(x, t, y)
     assert ate > 0
+
+
+def test_dragonnet(ihdp_data):
+
+    rep = next(ihdp_data)
+    x, t, y = rep.np.X, rep.np.t, rep.np.y
+    dragon = DragonNet()
+    dragon.fit(x, t, y)
+    ate = np.mean(dragon.predict_ite(x, t, y))
+
+    true_ate = np.mean(rep["ite"].values)
+    assert abs(ate - true_ate) < 0.3
