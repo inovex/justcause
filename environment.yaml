@@ -13,7 +13,7 @@ dependencies:
   - r-base
   - rpy2
   - seaborn
-  - tensorflow
+  - tensorflow=1.13.1 # required for dragonnet project code
   - keras
   - cython # needed by CausalML
   - arrow-cpp # check if needed
