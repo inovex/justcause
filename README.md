@@ -45,22 +45,17 @@ Optional and needed only once after `git clone`:
 
 
 # Further Work
-Some steps to continue the work on this project would be
-  - Implement a fully parametric DGP, following the dimensions roughly outlined in Chapter 4 of my thesis
+Some steps to continue the work on this project would be:
+  - Allow to use Confidence Intervals in the learners (see `causalml`, for example) and in the evaluation
+  - Implement a fully parametric DGP, following the dimensions roughly outlined in Chapter 4 of the thesis
   - Rewrite the plot functions in `utils.py` to simply take `DataProvider` as inputs and handle the internals within
     the functions.
-  - Implement within-sample and out-of-sample evaluation (switch between the two) as proposed in [this paper](https://arxiv.org/pdf/1606.03976.pdf).
   - Implement a run-checker that ensures that all methods fit on the data and/or that no complications arise,
     before expensive computation is started.
     (e.g. requested size is to big for given DataProvider)
-  - Enable evaluation without `sacred` logging, only storing results.
-  - Ensure train/test split can be requested for all DataProviders
-  - Obviously, add more methods and reference datasets
-  - Implement experiment as a module, which is given methods, data and settings of the experiments and returns the full
-  - add the final bachelor thesis as pdf under `docs` and reference it in Sphinx
-  - Separate Loggin/Writing stuff from the actual calculation of metrics in metrics.py (single level of responsibility)
+  - Obviously, add more methods and reference datasets ;)
   - use Sphinx (checkout `docs` folder) to create command reference and some explanations.
-  - add some example notebooks in the notebooks folder
+  - add some example notebooks in the `notebooks` folder of experiments and parameter studies
   - Check licences of third-party methods and add and note them accordingly. Within the __init__.py of the subpackage
     add a docstring and state the licences and the original authors.
 
