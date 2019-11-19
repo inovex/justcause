@@ -1,5 +1,5 @@
 import itertools
-from typing import Callable, Iterator, List, Optional, Union
+from typing import Callable, Iterator, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -38,13 +38,14 @@ def evaluate(
     Evaluate multiple methods with multiple metrics on a given set of replications
 
     Args:
-        replications:
-        methods:
-        metrics:
-        train_size:
-        random_state:
+        replications: One or more CausalFrames for each replication
+        methods: Causal methods with `fit` and `predict_ite` methods
+        metrics: metrics to score the ITE predictions
+        train_size: ratio of training data in each replication
+        random_state: random_state passed to train_test_split
 
-    Returns:
+    Returns: A DataFrame with the results in a structured manner
+        One for each (method, train/test) pair
 
     """
     if not isinstance(methods, list):
@@ -91,7 +92,8 @@ def evaluate_all(
         train_size: ratio of data used for training per replication
         random_state: random state passed to train_test_split
 
-    Returns:
+    Returns: A DataFrame with the results in a structured manner
+        One for each (data, method, train/test) pair
 
     """
 
@@ -113,7 +115,7 @@ def evaluate_all(
 
 def get_train_test_predictions(
     method, train: CausalFrame, test: CausalFrame, out_of_sample: bool = False
-):
+) -> Tuple[np.array, np.array]:
     """
     Returns the predictions of the given method after training on train
 
@@ -148,7 +150,7 @@ def get_train_test_scores(
     metrics: Union[METRIC, List[METRIC]],
     train_size: int = 0.8,
     random_state: Optional[RandomState] = None,
-):
+) -> Tuple[np.array, np.array]:
     """
     Compute the scores of a metric for all replications separately
 
