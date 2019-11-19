@@ -20,7 +20,7 @@ def pehe_score(true: np.array, predicted: np.array) -> float:
     return np.sqrt(np.mean(np.square(predicted - true)))
 
 
-def absolute_mean(true: np.array, predicted: np.array) -> float:
+def mean_absolute(true: np.array, predicted: np.array) -> float:
     """ Calculates the absolute mean error"""
     return np.abs(np.mean(true) - np.mean(predicted))
 

@@ -2,7 +2,7 @@ import pytest
 
 import numpy as np
 
-from justcause.metrics import absolute_mean, bias, enormse, pehe_score
+from justcause.metrics import bias, enormse, mean_absolute, pehe_score
 
 
 def test_pehe():
@@ -26,7 +26,7 @@ def test_absolute_mean():
     one = np.repeat(1, 100)
     two = np.repeat(2, 100)
 
-    assert absolute_mean(one, two) == 1
+    assert mean_absolute(one, two) == 1
 
 
 def test_bias():
