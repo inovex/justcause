@@ -9,16 +9,14 @@ from sklearn.model_selection import train_test_split
 from .data import CausalFrame, Col
 
 #: Type aliases
-
-METRIC = Callable[[np.array, np.array], float]
-
+Metric = Callable[[np.array, np.array], float]
 Frame = Union[CausalFrame, pd.DataFrame]
 
 STD_COL = ["method", "train", "num_rep"]
 SCORE_FORMATS = ["mean", "median", "std"]
 
 
-def make_result_df(metrics: List[METRIC]):
+def make_result_df(metrics: List[Metric]):
     cols = STD_COL + [
         "{0}-{1}".format(metric.__name__, form)
         for metric in metrics
@@ -30,8 +28,8 @@ def make_result_df(metrics: List[METRIC]):
 def evaluate(
     replications: Union[CausalFrame, List[CausalFrame]],
     methods,
-    metrics: Union[List[METRIC], METRIC],
-    train_size: int = 0.8,
+    metrics: Union[List[Metric], Metric],
+    train_size: float = 0.8,
     random_state: Optional[RandomState] = None,
 ) -> pd.DataFrame:
     """
@@ -75,9 +73,9 @@ def evaluate_all(
     datasets: List[Iterator],
     data_names: List[str],
     methods,
-    metrics: Union[List[METRIC], METRIC],
+    metrics: Union[List[Metric], Metric],
     num_replications: int,
-    train_size: int = 0.8,
+    train_size: float = 0.8,
     random_state: Optional[RandomState] = None,
 ) -> pd.DataFrame:
     """
@@ -147,12 +145,11 @@ def get_train_test_predictions(
 def get_train_test_scores(
     replications: Union[CausalFrame, List[CausalFrame]],
     method,
-    metrics: Union[METRIC, List[METRIC]],
-    train_size: int = 0.8,
+    metrics: Union[Metric, List[Metric]],
+    train_size: float = 0.8,
     random_state: Optional[RandomState] = None,
 ) -> Tuple[np.array, np.array]:
-    """
-    Compute the scores of a metric for all replications separately
+    """Compute the scores of a metric for all replications separately
 
     The scores computed here are used to summarize the performance across
     multiple replications as mean, median, ...
@@ -160,12 +157,12 @@ def get_train_test_scores(
     Args:
         replications: replications on which to evaluate
         method: method to evaluate
-        metric: list of one or more metrics used for evaluation
+        metrics: list of one or more metrics used for evaluation
         train_size: ratio of training data used
         random_state: random_state passed to train_test_split
 
-    Returns: The scores of a metric on each replication used to calculate
-
+    Returns:
+        scores of a metric on each replication used to calculate
     """
     # ensure metrics and replications are lists, even if with just one element
     if not isinstance(metrics, list):
