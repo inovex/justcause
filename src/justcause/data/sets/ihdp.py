@@ -17,10 +17,6 @@ DATASET_NAME: str = "ihdp"
 def load_ihdp(select_rep: Optional[Indices] = None) -> Iterable[CausalFrame]:
     covariates = get_covariates_df(DATASET_NAME)
     outcomes = get_outcomes_df(DATASET_NAME)
-    # Drop test column for now. Test set as defined in
-    # Christos Louizos et al. Causal Effect Inference with
-    # Deep Latent-Variable Models. Tech. rep. 2017.
-    del outcomes["test"]
 
     if select_rep is not None:
         outcomes = select_replication(outcomes, select_rep)
