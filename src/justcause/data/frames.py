@@ -18,15 +18,16 @@ class Col:
     """Column names of a CausalFrame
 
     Example:
-        # Todo: Add example
+        To access the untreated noiseless outcome column mu_0 in a CausalFrame cf,
+        write cf[Col.mu_0] to avoid misspelling and to robust against changes in the
+        terminology, which will we added here.
     """
 
     t = "t"
     y = "y"
     y_cf = "y_cf"
-    # Todo: make these `mu_0` and `mu_1` after the changes in justcause-data
-    mu_0 = "y_0"
-    mu_1 = "y_1"
+    mu_0 = "mu_0"
+    mu_1 = "mu_1"
     ite = "ite"
     rep = "rep"
     sample_id = "sample_id"
