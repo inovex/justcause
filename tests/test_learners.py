@@ -47,7 +47,9 @@ def test_tlearner(ihdp_data):
     ate = tlearner.estimate_ate(x, t, y)
     assert abs(ate - true_ate) < 0.2
 
-    tlearner = TLearner(learner_c=LinearRegression(), learner_t=RandomForestRegressor())
+    tlearner = TLearner(
+        learner_c=LinearRegression(), learner_t=RandomForestRegressor(random_state=42)
+    )
     tlearner.fit(x, t, y)
     pred = tlearner.predict_ite(x, t, y)
 
@@ -112,7 +114,7 @@ def test_causalforest(ihdp_data, grf):
 def test_dre(ihdp_data):
     rep = next(ihdp_data)
     x, t, y = rep.np.X, rep.np.t, rep.np.y
-    dre = DoubleRobustEstimator(LogisticRegression())
+    dre = DoubleRobustEstimator(LogisticRegression(random_state=42))
     ate = dre.estimate_ate(x, t, y)
     true_ate = np.mean(rep["ite"].values)
     assert abs(ate - true_ate) < 0.2
@@ -125,7 +127,7 @@ def test_dre(ihdp_data):
 def test_psw(ihdp_data):
     rep = next(ihdp_data)
     x, t, y = rep.np.X, rep.np.t, rep.np.y
-    psw = PSWEstimator(LogisticRegression())
+    psw = PSWEstimator(LogisticRegression(random_state=42))
     ate = psw.estimate_ate(x, t, y)
     true_ate = np.mean(rep["ite"].values)
     assert abs(ate - true_ate) < 1
