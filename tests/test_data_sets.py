@@ -40,8 +40,8 @@ def test_ibm_acic_data_load_all():
 def test_twins_data(twins_data):
     twins_data = list(twins_data)
     rep = twins_data[0]
-    assert np.max(rep["y_1"]) == 1
-    assert np.min(rep["y_1"]) == 0
+    assert np.max(rep["mu_1"]) == 1
+    assert np.min(rep["mu_1"]) == 0
     assert len(rep) == 8215
 
 

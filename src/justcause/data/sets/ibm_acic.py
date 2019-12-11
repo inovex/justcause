@@ -24,9 +24,6 @@ def load_ibm_acic(select_rep: Optional[Indices] = None) -> Iterable[CausalFrame]
     full = pd.merge(covariates, outcomes, on=Col.sample_id)
     full[Col.ite] = full[Col.mu_1] - full[Col.mu_0]
 
-    # Todo: Instead of removing here, remove from original parquet file
-    del full["size"]
-
     cov_names = [col for col in covariates.columns if col != Col.sample_id]
     df = CausalFrame(full, covariates=cov_names)
     return iter_rep(df)
