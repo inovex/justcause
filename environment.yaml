@@ -32,3 +32,4 @@ dependencies:
   - pip:
       - pre-commit
       - causalml
+      - pygam
