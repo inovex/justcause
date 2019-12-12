@@ -117,7 +117,7 @@ def test_dre(ihdp_data):
     dre = DoubleRobustEstimator(LogisticRegression(random_state=42))
     ate = dre.estimate_ate(x, t, y)
     true_ate = np.mean(rep["ite"].values)
-    assert abs(ate - true_ate) < 0.2
+    assert abs(ate - true_ate) < 0.3
 
     # With default learner
     ate = dre.estimate_ate(x, t, y)
