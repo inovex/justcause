@@ -12,6 +12,7 @@ from justcause.learners import (
     TLearner,
     XLearner,
 )
+from justcause.metrics import pehe_score
 
 
 def test_slearner(ihdp_data):
@@ -71,10 +72,19 @@ def test_tlearner(ihdp_data):
 def test_rlearner(ihdp_data):
     rep = next(ihdp_data)
     x, t, y = rep.np.X, rep.np.t, rep.np.y
-    rlearner = RLearner(LinearRegression())
+
+    # with RF explicitly
+    rlearner = RLearner(RandomForestRegressor())
     rlearner.fit(x, t, y)
     pred = rlearner.predict_ite(x)
     assert len(pred) == len(t)
+
+    # With default
+    rlearner = RLearner()
+    rlearner.fit(x, t, y)
+    pred = rlearner.predict_ite(x)
+    assert len(pred) == len(t)
+
     assert (
         str(rlearner) == "RLearner(outcome=LinearRegression, effect=LinearRegression)"
     )
@@ -83,11 +93,20 @@ def test_rlearner(ihdp_data):
 def test_xlearner(ihdp_data):
     rep = next(ihdp_data)
     x, t, y = rep.np.X, rep.np.t, rep.np.y
+    true_ite = rep["ite"].values
+
+    # With LinearRegression
     xlearner = XLearner(LinearRegression())
     xlearner.fit(x, t, y)
-
     pred = xlearner.predict_ite(x, t, y)
     assert len(pred) == len(t)
+
+    # With default
+    xlearner = XLearner(LinearRegression())
+    xlearner.fit(x, t, y)
+    pred = xlearner.predict_ite(x, t, y)
+    assert len(pred) == len(t)
+    assert abs(pehe_score(true_ite, pred) - 0.5) < 0.2
 
     pred_ate = xlearner.estimate_ate(x, t, y)
     true_ate = np.mean(rep["ite"].values)

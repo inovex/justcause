@@ -123,9 +123,11 @@ class XLearner:
             )
             if t is not None and y is not None and replace_factuals:
                 y_0, y_1 = replace_factual_outcomes(y_0, y_1, y, t)
-            return ite, y_0, y_1
+            return ite.flatten(), y_0.flatten(), y_1.flatten()
         else:
-            return self.model.predict(x, propensities, t, y, return_components=False)
+            return self.model.predict(
+                x, propensities, t, y, return_components=False
+            ).flatten()
 
     def estimate_ate(
         self,
