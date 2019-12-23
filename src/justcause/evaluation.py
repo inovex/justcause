@@ -1,5 +1,4 @@
-import itertools
-from typing import Callable, Iterator, List, Optional, Tuple, Union
+from typing import Callable, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -10,35 +9,64 @@ from .data import CausalFrame, Col
 
 #: Type aliases
 Metric = Callable[[np.array, np.array], float]
+Format = Callable[[Union[np.array, List[np.array]]], Union[float, List[float]]]
 Frame = Union[CausalFrame, pd.DataFrame]
 
-STD_COL = ["method", "train", "num_rep"]
-SCORE_FORMATS = ["mean", "median", "std"]
+STD_COL = ["method", "train"]
 
 
-def make_result_df(metrics: List[Metric]):
+def setup_scores_df(metrics: Union[List[Metric], Metric]):
+    """Setup DataFrame containing the metric scores for all replications
+
+    Args:
+        metrics: metrics used for naming the columns
+
+    Returns: DataFrame to store the scores for each replication
+    """
+    cols = [metric.__name__ for metric in metrics]
+    return pd.DataFrame(columns=cols)
+
+
+def setup_result_df(
+    metrics: Union[List[Metric], Metric], formats=(np.mean, np.median, np.std)
+):
+    """Setup DataFrame containing the summarized scores for all methods and datasets
+
+    Args:
+        metrics: metrics used for scoring
+        formats: formats for summarizing metrics (e.g. mean, std, ...)
+
+    Returns: DataFrame to store the results for each method
+    """
     cols = STD_COL + [
-        "{0}-{1}".format(metric.__name__, form)
+        "{0}-{1}".format(metric.__name__, form.__name__)
         for metric in metrics
-        for form in SCORE_FORMATS
+        for form in formats
     ]
     return pd.DataFrame(columns=cols)
 
 
-def evaluate(
+def evaluate_ite(
     replications: Union[CausalFrame, List[CausalFrame]],
     methods,
     metrics: Union[List[Metric], Metric],
+    formats: Union[List[Format], Format] = (np.mean, np.median, np.std),
     train_size: float = 0.8,
     random_state: Optional[RandomState] = None,
 ) -> pd.DataFrame:
-    """
-    Evaluate multiple methods with multiple metrics on a given set of replications
+    """Evaluate methods with multiple metrics on a given set of replications
+
+    Good for use with standard causal methods and callables on new datasets.
+    See `notebooks/example_evalutation.ipynb` for an example.
+    ITE prediction and evaluation is the most common setting,
+    which is why this is automated, while other settings like ATE estimation are left
+    to the user for now.
 
     Args:
         replications: One or more CausalFrames for each replication
         methods: Causal methods with `fit` and `predict_ite` methods
         metrics: metrics to score the ITE predictions
+        formats: formats to summarize metrics over multiple replications
         train_size: ratio of training data in each replication
         random_state: random_state passed to train_test_split
 
@@ -55,75 +83,107 @@ def evaluate(
     if not isinstance(replications, list):
         replications = [replications]
 
-    results_df = make_result_df(metrics)
+    results_df = setup_result_df(metrics, formats)
 
     for method in methods:
 
-        multi_result = _evaluate_single_method(
-            replications, method, metrics, train_size, random_state
+        train_result, test_result = _evaluate_single_method(
+            replications, method, metrics, formats, train_size, random_state
         )
-        results_df = _append_evaluation_rows(
-            results_df, multi_result, str(method), len(replications)
-        )
+
+        if callable(method):
+            name = method.__name__
+        else:
+            name = str(method)
+
+        results_df.loc[len(results_df)] = np.append([name, True], train_result)
+        results_df.loc[len(results_df)] = np.append([name, False], test_result)
 
     return results_df
 
 
-def evaluate_all(
-    datasets: List[Iterator],
-    data_names: List[str],
-    methods,
-    metrics: Union[List[Metric], Metric],
-    num_replications: int,
-    train_size: float = 0.8,
-    random_state: Optional[RandomState] = None,
-) -> pd.DataFrame:
+def _evaluate_single_method(
+    replications,
+    method,
+    metrics,
+    formats=(np.mean, np.median, np.std),
+    train_size=0.8,
+    random_state=None,
+):
+    """Helper to evaluate method with multiple metrics on the given replications
+
+    This is the standard variant of an evaluation loop, which the user can implement
+    manually to modify parts of it. Here, only ITE prediction and evaluation is
+    considered.
+
     """
-    Evaluates multiple methods on multiple datasets with given metrics
+    if not isinstance(metrics, list):
+        metrics = [metrics]
+
+    if not isinstance(replications, list):
+        replications = [replications]
+
+    test_scores = setup_scores_df(metrics)
+    train_scores = setup_scores_df(metrics)
+
+    for rep in replications:
+        train, test = train_test_split(
+            rep, train_size=train_size, random_state=random_state
+        )
+
+        if callable(method):
+            train_ite, test_ite = method(train, test)
+        else:
+            train_ite, test_ite = default_predictions(method, train, test)
+
+        test_scores.loc[len(test_scores)] = calc_scores(
+            test[Col.ite], test_ite, metrics
+        )
+
+        train_scores.loc[len(train_scores)] = calc_scores(
+            train[Col.ite], train_ite, metrics
+        )
+
+    train_results = summarize_scores(train_scores, formats)
+    test_results = summarize_scores(train_scores, formats)
+
+    return train_results, test_results
+
+
+def calc_scores(true: np.array, pred: np.array, metrics):
+    """Compare ground-truth to predictions with given metrics for one replication
+
+    Call for train and test separately
 
     Args:
-        datasets: a list of iterators providing the replications to be evaluated on
-        data_names: a list of data names used in the dataframe to identify datasets
-        methods: a list of methods which to evaluate
-        metrics: a list of metrics used to score the methods
-        num_replications: number of replications for each dataset
-        train_size: ratio of data used for training per replication
-        random_state: random state passed to train_test_split
+        true: True ITE
+        pred: predicted ITE
+        metrics: metrics to evaluate on the ITEs
 
-    Returns: A DataFrame with the results in a structured manner
-        One for each (data, method, train/test) pair
+    Returns: a list of scores with length == len(metrics), i.e. the row to be added to
+        the scores dataframe
 
     """
+    # ensure metrics and replications are lists, even if with just one element
+    if not isinstance(metrics, list):
+        metrics = [metrics]
 
-    results_df = make_result_df(metrics)
-    results_df["data"] = "placeholder"
-
-    for i, data_it in enumerate(datasets):
-
-        # TODO: Check if enough replications are available? Do we have
-        #  to load all in order to check for that?
-        replications = list(itertools.islice(data_it, num_replications))
-
-        data_res = evaluate(replications, methods, metrics, train_size, random_state)
-        data_res["data"] = data_names[i]
-        results_df = results_df.append(data_res, ignore_index=True)
-
-    return results_df
+    return np.array([metric(true, pred) for metric in metrics])
 
 
-def get_train_test_predictions(
-    method, train: CausalFrame, test: CausalFrame, out_of_sample: bool = False
+def default_predictions(
+    method, train: CausalFrame, test: CausalFrame
 ) -> Tuple[np.array, np.array]:
-    """
-    Returns the predictions of the given method after training on train
+    """Returns the default predictions of the causal method after training on train
+
+    Convenience method to use with standard methods.
 
     Args:
         method: Causal method with `fit` and `predict_ite` methods
         train: the train CausalFrame
         test: the test CausalFrame
-        out_of_sample: whether or not out-of-sample predictions should be returned, too
 
-    Returns:
+    Returns: (train_ite, test_ite), ITE predictions for train and test
 
     """
     # get numpy data out of CausalFrame
@@ -132,101 +192,49 @@ def get_train_test_predictions(
 
     method.fit(train_X, train_t, train_y)
 
-    if out_of_sample:
-        train_ite = method.predict_ite(train_X)
-        test_ite = method.predict_ite(test_X)
-    else:
-        train_ite = method.predict_ite(train_X, train_t, train_y)
-        test_ite = method.predict_ite(test_X, test_t, test_y)
+    train_ite = method.predict_ite(train_X, train_t, train_y)
+    test_ite = method.predict_ite(test_X, test_t, test_y)
 
     return train_ite, test_ite
 
 
-def get_train_test_scores(
-    replications: Union[CausalFrame, List[CausalFrame]],
-    method,
-    metrics: Union[Metric, List[Metric]],
-    train_size: float = 0.8,
-    random_state: Optional[RandomState] = None,
-) -> Tuple[np.array, np.array]:
-    """Compute the scores of a metric for all replications separately
-
-    The scores computed here are used to summarize the performance across
-    multiple replications as mean, median, ...
+def get_default_callable(method):
+    """Helper to get an evaluation callable for standard methods
 
     Args:
-        replications: replications on which to evaluate
-        method: method to evaluate
-        metrics: list of one or more metrics used for evaluation
-        train_size: ratio of training data used
-        random_state: random_state passed to train_test_split
+        method: Method to use for the standard callable
 
-    Returns:
-        scores of a metric on each replication used to calculate
+    Returns: Callable for evaluation in custom loop
     """
-    # ensure metrics and replications are lists, even if with just one element
-    if not isinstance(metrics, list):
-        metrics = [metrics]
 
-    if not isinstance(replications, list):
-        replications = [replications]
+    def default_callable(train, test):
+        train_X, train_t, train_y = train.np.X, train.np.t, train.np.y
+        test_X, test_t, test_y = test.np.X, test.np.t, test.np.y
 
-    train_scores = np.zeros((len(replications), len(metrics)))
-    test_scores = np.zeros((len(replications), len(metrics)))
+        method.fit(train_X, train_t, train_y)
 
-    for i, rep in enumerate(replications):
-        train, test = train_test_split(
-            rep, train_size=train_size, random_state=random_state
-        )
+        train_ite = method.predict_ite(train_X, train_t, train_y)
+        test_ite = method.predict_ite(test_X, test_t, test_y)
 
-        train_ite, test_ite = get_train_test_predictions(method, train, test)
-        train_scores[i, :] = np.array(
-            [metric(train[Col.ite], train_ite) for metric in metrics]
-        )
-        test_scores[i, :] = np.array(
-            [metric(test[Col.ite], test_ite) for metric in metrics]
-        )
+        return train_ite, test_ite
 
-    return train_scores, test_scores
+    return default_callable
 
 
-def _evaluate_single_method(
-    replications, method, metrics, train_size=0.8, random_state=None
-):
-    """ Helper to evaluate a method with multiple metrics on the given replications"""
+def summarize_scores(
+    scores_df: pd.DataFrame,
+    formats: Union[List[Format], Format] = (np.mean, np.median, np.std),
+) -> np.array:
+    """
 
-    train_scores, test_scores = get_train_test_scores(
-        replications, method, metrics, train_size, random_state
-    )
+    Call for train and test separately
 
-    train_results = [
-        np.mean(train_scores, axis=0),
-        np.median(train_scores, axis=0),
-        np.std(train_scores, axis=0),
-    ]
-    test_results = [
-        np.mean(test_scores, axis=0),
-        np.median(test_scores, axis=0),
-        np.std(test_scores, axis=0),
-    ]
+    Args:
+        scores_df: the dataframe containing scores for all replications
+        formats: Summaries to calculate over the scores of multiple replications
 
-    # Returns the mean, median, std. for all metrics over all replications
-    return train_results, test_results
+    Returns: The rows to be added to the result dataframe
 
-
-def _make_row(metric_tuple, method_name, train, num_rep):
-    """ Format helper to make a row out of the score tuples"""
-    mean, median, std = metric_tuple
-    scores = [x for t in zip(mean, median, std) for x in t]
-    row = [method_name, train, num_rep] + scores
-    return row
-
-
-def _append_evaluation_rows(df, multi_metric_result, method_name, num_rep):
-    """ Reformat results into a dataframe row"""
-    train, test = multi_metric_result
-    train_row = _make_row(train, method_name, 1, num_rep)
-    df.loc[len(df)] = train_row
-    test_row = _make_row(test, method_name, 0, num_rep)
-    df.loc[len(df)] = test_row
-    return df
+    """
+    list_of_results = np.array([np.array(form(scores_df, axis=0)) for form in formats])
+    return list_of_results.flatten("F")

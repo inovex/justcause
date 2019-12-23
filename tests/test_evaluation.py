@@ -1,31 +1,36 @@
 from itertools import islice
 
-from sklearn.ensemble import RandomForestRegressor
+import numpy as np
+import pandas as pd
 from sklearn.linear_model import LinearRegression
 
-from justcause.evaluation import evaluate, evaluate_all
+from justcause.evaluation import calc_scores, evaluate_ite, summarize_scores
 from justcause.learners import SLearner
-from justcause.metrics import mean_absolute, pehe_score
+from justcause.metrics import pehe_score
 
 
 def test_single_evaluation(ihdp_data):
     reps = list(islice(ihdp_data, 10))
     learner = SLearner(LinearRegression())
-    df = evaluate(reps, learner, pehe_score, 0.8)
-    assert len(df) == 2  # three format per metric are reported
+    df = evaluate_ite(reps, learner, pehe_score, train_size=0.8)
+    assert len(df) == 2
+    assert len(df.columns) == 5  # 2 standard + 3 formats for one metric
     assert "pehe_score-mean" in df.columns  # three format per metric are reported
 
 
-def test_evaluate_all(ihdp_data, twins_data):
-    datasets = [ihdp_data, twins_data]
-    data_names = ["ihdp", "twins"]
-    learners = [SLearner(LinearRegression()), SLearner(RandomForestRegressor())]
-    metrics = [pehe_score, mean_absolute]
+def test_summary():
+    data = np.full((10, 5), 1)
+    df = pd.DataFrame(data)
+    summary = summarize_scores(df)
+    assert len(summary) == 15  # 5 pseudo-metrics times 3 formats
+    assert summary[0] == 1
 
-    df = evaluate_all(datasets, data_names, learners, metrics, 1)
-    assert len(df) == 8  # 8 rows. one for each (data, learner, train/test)
+    data = np.arange(10).reshape((-1, 1))
+    df = pd.DataFrame(data)
+    assert summarize_scores(df)[0] == np.mean(data)
 
-    assert "pehe_score-mean" in df.columns  # three format per metric are reported
-    assert "mean_absolute-mean" in df.columns  # three format per metric are reported
-    assert "mean_absolute-median" in df.columns  # three format per metric are reported
-    assert "mean_absolute-std" in df.columns  # three format per metric are reported
+
+def test_calc_scores():
+    true = np.full(100, 1)
+    pred = np.full(100, 0)
+    assert calc_scores(true, pred, pehe_score)[0] == 1
