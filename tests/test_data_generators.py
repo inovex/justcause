@@ -23,86 +23,102 @@ def test_generator():
     def covariates(_, *, random_state, **kwargs):
         return ihdp_cov
 
-    df = generate_data(covariates=ihdp_cov, treatment=treatment, outcomes=outcomes)
+    gen = generate_data(covariates=ihdp_cov, treatment=treatment, outcomes=outcomes)
+    df = list(gen)[0]
     assert len(df) == len(ihdp_cov)
 
     with pytest.raises(AssertionError):
         generate_data(covariates=covariates, treatment=treatment, outcomes=outcomes)
 
-    df = generate_data(
+    gen = generate_data(
         covariates=covariates,
         treatment=treatment,
         outcomes=outcomes,
         n_samples=len(ihdp_cov),
     )
+    df = list(gen)[0]
     assert len(df) == len(ihdp_cov)
     assert len(set(df.columns).intersection({f"{i}" for i in range(25)})) == 25
 
-    df = generate_data(
+    gen = generate_data(
         covariates=ihdp_cov.to_numpy(),
         treatment=treatment,
         outcomes=outcomes,
         n_samples=100,
     )
+    df = list(gen)[0]
     assert len(df) == 100
     assert len(set(df.columns).intersection({f"x{i}" for i in range(25)})) == 25
 
     cov_names = [f"cov{i}" for i in range(25)]
-    df = generate_data(
+    gen = generate_data(
         covariates=ihdp_cov.to_numpy(),
         treatment=treatment,
         outcomes=outcomes,
         covariate_names=cov_names,
     )
+    df = list(gen)[0]
     assert len(df) == len(ihdp_cov)
     assert len(set(df.columns).intersection(set(cov_names))) == 25
 
 
 def test_ihdp_generator():
-    ihdp = multi_expo_on_ihdp(setting="multi-modal", n_replications=10)
-    assert len(ihdp) == 747 * 10
-    assert len(ihdp.groupby("rep")) == 10
+    gen = multi_expo_on_ihdp(setting="multi-modal", n_replications=10)
+    ihdp_reps = list(gen)
+    assert len(ihdp_reps[0]) == 747
+    assert len(ihdp_reps) == 10
 
-    ihdp = multi_expo_on_ihdp(setting="multi-modal", n_samples=500, n_replications=10)
-    assert len(ihdp) == 500 * 10
+    gen = multi_expo_on_ihdp(setting="multi-modal", n_samples=500, n_replications=10)
+    ihdp_reps = list(gen)
+    assert len(ihdp_reps) == 10
+    assert len(ihdp_reps[0]) == 500
 
-    ihdp = multi_expo_on_ihdp(setting="exponential", n_samples=200, n_replications=100)
-    assert len(ihdp) == 200 * 100
+    gen = multi_expo_on_ihdp(setting="exponential", n_samples=200, n_replications=100)
+    ihdp_reps = list(gen)
+    assert len(ihdp_reps) == 100
+    assert len(ihdp_reps[0]) == 200
 
 
 def test_toy_generator():
     n_samples = 10000
     n_replications = 5
 
-    toy = toy_data_synthetic(
+    gen = toy_data_synthetic(
         setting="simple", n_samples=n_samples, n_replications=n_replications
     )
-    assert len(toy) == n_samples * n_replications
-    assert len(toy.groupby("rep")) == n_replications
+    toy_reps = list(gen)
+    assert len(toy_reps) == n_replications
+    assert len(toy_reps[0]) == n_samples
 
     n_samples = 100
     n_replications = 50
 
-    toy = toy_data_synthetic(
-        setting="hard", n_samples=n_samples, n_replications=n_replications
+    toy_reps = list(
+        toy_data_synthetic(
+            setting="hard", n_samples=n_samples, n_replications=n_replications
+        )
     )
-    assert len(toy) == n_samples * n_replications
-    assert len(toy.groupby("rep")) == n_replications
+    assert len(toy_reps[0]) == n_samples
+    assert len(toy_reps) == n_replications
 
     n_samples = 10000
     n_replications = 10
 
-    toy = toy_example_emcs(
-        setting="simple", n_samples=n_samples, n_replications=n_replications
+    toy_reps = list(
+        toy_example_emcs(
+            setting="simple", n_samples=n_samples, n_replications=n_replications
+        )
     )
-    assert len(toy) == n_samples * n_replications
-    assert len(toy.groupby("rep")) == n_replications
+    assert len(toy_reps) == n_replications
+    assert len(toy_reps[0]) == n_samples
 
-    toy = toy_example_emcs(
-        setting="hard", n_samples=n_samples, n_replications=n_replications
+    toy_reps = list(
+        toy_example_emcs(
+            setting="hard", n_samples=n_samples, n_replications=n_replications
+        )
     )
-    assert len(toy) == n_samples * n_replications
-    assert len(toy.groupby("rep")) == n_replications
+    assert len(toy_reps) == n_replications
+    assert len(toy_reps[0]) == n_samples
 
     with pytest.raises(RuntimeError):
         toy_example_emcs(

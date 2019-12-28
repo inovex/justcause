@@ -87,7 +87,7 @@ def generate_data(
     covariate_names: Optional[List[str]] = None,
     random_state: OptRandState = None,
     **kwargs,
-) -> CausalFrame:
+) -> Iterator[Union[CausalFrame, pd.DataFrame]]:
     """Generate CausalFrame from covariates, treatment and outcome functions
     """
     random_state = check_random_state(random_state)
@@ -136,4 +136,5 @@ def generate_data(
 
     rep_df = pd.concat(rep_dfs)
     df = pd.merge(cov_df, rep_df, how="inner", on=Col.sample_id)
-    return CausalFrame(df, covariates=covariate_names)
+    df = CausalFrame(df, covariates=covariate_names)
+    return iter_rep(df)
