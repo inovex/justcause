@@ -4,10 +4,15 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://black.readthedocs.io/en/stable/)
 [![PyPI-Server](https://img.shields.io/pypi/v/justcause.svg)](https://pypi.org/project/justcause/)
 
+<br/><br/>
 
-<img alt="JustCause logo" class="align-center" src="https://justcause.readthedocs.io/en/latest/_static/logo.png">
+<div style="text-align:center">
+<img alt="JustCause logo" src="https://justcause.readthedocs.io/en/latest/_static/logo.png">
+</div>
 
-# JustCause
+<br/><br/>
+
+# Introduction
 
 Evaluating causal inference methods in a scientifically thorough way is a cumbersome and error-prone task.
 To foster good scientific practice **JustCause** provides a framework to easily:
