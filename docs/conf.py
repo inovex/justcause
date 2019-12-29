@@ -158,9 +158,12 @@ html_theme = 'alabaster'
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
+    'logo': 'logo.png',
     'sidebar_width': '300px',
     'page_width': '1200px',
-    'logo_only': True
+    'logo_name': False,
+    'github_button': True,
+    'github_repo': 'https://github.com/inovex/justcause'
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
