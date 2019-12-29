@@ -5,7 +5,7 @@
 [![PyPI-Server](https://img.shields.io/pypi/v/justcause.svg)](https://pypi.org/project/justcause/)
 
 
-<img alt="JustCause logo" class="align-center" src="https://justcause.readthedocs.io/en/latest/_images/logo.png">
+<img alt="JustCause logo" class="align-center" src="https://justcause.readthedocs.io/en/latest/_static/logo.png">
 
 # JustCause
 

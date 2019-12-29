@@ -1,2 +1,0 @@
-# This separate file is needed since CausalML doesn't define cython in setup_requires
-causalml
