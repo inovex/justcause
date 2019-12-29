@@ -10,6 +10,8 @@
 </p>
 </div>
 
+<br/>
+
 # Introduction
 
 Evaluating causal inference methods in a scientifically thorough way is a cumbersome and error-prone task.
