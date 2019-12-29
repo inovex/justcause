@@ -98,8 +98,8 @@ source_suffix = ['.rst', '.md']
 master_doc = 'index'
 
 # General information about the project.
-project = u'justcause'
-copyright = u'2019, Florian Wilhelm'
+project = u'JustCause'
+copyright = u'2019, Maximilian Franz, Florian Wilhelm'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -158,12 +158,13 @@ html_theme = 'alabaster'
 # further.  For a list of options available for each theme, see the
 # documentation.
 html_theme_options = {
-    'logo': 'logo.png',
+    'logo': 'sidebar.png',
     'sidebar_width': '300px',
     'page_width': '1200px',
     'logo_name': False,
     'github_button': True,
-    'github_repo': 'https://github.com/inovex/justcause'
+    'github_user': 'inovex',
+    'github_repo': 'justcause'
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
@@ -183,7 +184,7 @@ html_short_title = None
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = "gfx/logo.png"
+#html_logo = "gfx/sidebar.png"
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -193,7 +194,7 @@ html_logo = "gfx/logo.png"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ['gfx']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.

@@ -5,7 +5,7 @@ pandas
 keras
 matplotlib==2.2.4
 pyarrow>=0.15  # Mac problems with 0.13
-scikit-learn
+scikit-learn>=0.22
 scipy
 seaborn
 tensorflow
