@@ -4,10 +4,10 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://black.readthedocs.io/en/stable/)
 [![PyPI-Server](https://img.shields.io/pypi/v/justcause.svg)](https://pypi.org/project/justcause/)
 
-<br/><br/>
-
 <div style="text-align:center">
+<p align="center">
 <img alt="JustCause logo" src="https://justcause.readthedocs.io/en/latest/_static/logo.png">
+</p>
 </div>
 
 <br/><br/>
