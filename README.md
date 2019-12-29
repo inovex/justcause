@@ -5,6 +5,8 @@
 [![PyPI-Server](https://img.shields.io/pypi/v/justcause.svg)](https://pypi.org/project/justcause/)
 
 
+<img alt="JustCause logo" class="align-center" src="https://justcause.readthedocs.io/en/latest/_images/logo.png">
+
 # JustCause
 
 Evaluating causal inference methods in a scientifically thorough way is a cumbersome and error-prone task.
