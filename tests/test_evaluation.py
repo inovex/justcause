@@ -4,9 +4,15 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 
-from justcause.evaluation import calc_scores, evaluate_ite, summarize_scores
+from justcause.evaluation import (
+    calc_scores,
+    evaluate_ite,
+    setup_result_df,
+    setup_scores_df,
+    summarize_scores,
+)
 from justcause.learners import SLearner
-from justcause.metrics import pehe_score
+from justcause.metrics import enormse, pehe_score
 
 
 def test_single_evaluation(ihdp_data):
@@ -34,3 +40,26 @@ def test_calc_scores():
     true = np.full(100, 1)
     pred = np.full(100, 0)
     assert calc_scores(true, pred, pehe_score)[0] == 1
+
+
+def test_setup_df():
+
+    metrics = [pehe_score]
+
+    df = setup_scores_df(metrics)
+    assert len(df.columns) == 1
+    assert "pehe_score" in df.columns
+
+    metrics = [pehe_score, enormse]
+    df = setup_scores_df(metrics)
+    assert len(df.columns) == 2
+    assert "enormse" in df.columns
+
+    result = setup_result_df(metrics)
+    assert len(result.columns) == 8  # 2 base + 3 for each metric
+    assert "pehe_score-mean" in result.columns
+
+    formats = [np.mean, np.std]
+    result = setup_result_df(metrics, formats)
+    assert len(result.columns) == 6  # 2 base + 2 for each metric
+    assert "enormse-std" in result.columns
