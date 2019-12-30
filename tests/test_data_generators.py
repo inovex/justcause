@@ -3,6 +3,7 @@ import pytest
 import numpy as np
 
 from justcause.data.generators.ihdp import multi_expo_on_ihdp
+from justcause.data.generators.rlearner import rlearner_simulation_data
 from justcause.data.generators.toy import toy_data_synthetic, toy_example_emcs
 from justcause.data.sets.ihdp import get_ihdp_covariates
 from justcause.data.utils import generate_data
@@ -124,3 +125,30 @@ def test_toy_generator():
         toy_example_emcs(
             setting="non-existent", n_samples=n_samples, n_replications=n_replications
         )
+
+
+def test_rlearner_simulation():
+    n_samples = 1000
+    n_covariates = 7
+    n_rep = 100
+
+    gen = rlearner_simulation_data(n_samples, n_covariates, n_rep, setting="A")
+    data = list(gen)
+    assert len(data) == n_rep
+    assert len(data[0]) == n_samples
+
+    gen = rlearner_simulation_data(n_samples, n_covariates, n_rep, setting="B")
+    data = list(gen)
+    assert len(data) == n_rep
+    assert len(data[0]) == n_samples
+
+    gen = rlearner_simulation_data(n_samples, n_covariates, n_rep, setting="C")
+    data = list(gen)
+    assert len(data) == n_rep
+    assert len(data[0]) == n_samples
+    assert np.mean(data[0].mu_1 - data[0].mu_0) == 1
+
+    gen = rlearner_simulation_data(n_samples, n_covariates, n_rep, setting="D")
+    data = list(gen)
+    assert len(data) == n_rep
+    assert len(data[0]) == n_samples
