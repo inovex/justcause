@@ -1,6 +1,6 @@
-=========
-JustCause
-=========
+============
+Introduction
+============
 
 Evaluating causal inference methods in a scientifically thorough way is a cumbersome and error-prone task.
 To foster good scientific practice **JustCause** provides a framework to easily:

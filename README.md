@@ -26,45 +26,42 @@ in a fair and *just* way. JustCause is a work in progress and new contributors a
 
 # Installation
 
-In order to set up the necessary environment:
+If you just want to use the functionality of JustCause, install it with:
+```
+pip install justcause
+```
+Consider using [conda] to create a virtual environment first.
 
-1. create an environment `justcause` with the help of [conda],
+Developers that want to develop and contribute own algorithms and data sets to the JustCause framework, should:
+
+1. clone the repository and change into the directory
+   ```
+   git clone https://github.com/inovex/justcause.git
+   cd justcause
+   ```
+
+2. create an environment `justcause` with the help of [conda],
    ```
    conda env create -f environment.yaml
    ```
-2. activate the new environment with
+3. activate the new environment with
    ```
    conda activate justcause
    ```
-3. install `justcause` with:
+4. install `justcause` with:
    ```
    python setup.py install # or `develop`
    ```
 
 Optional and needed only once after `git clone`:
 
-4. install several [pre-commit] git hooks with:
+5. install several [pre-commit] git hooks with:
    ```
    pre-commit install
    ```
    and checkout the configuration under `.pre-commit-config.yaml`.
    The `-n, --no-verify` flag of `git commit` can be used to deactivate pre-commit hooks temporarily.
 
-
-# Further Work
-Some steps to continue the work on this project would be:
-  - Allow to use Confidence Intervals in the learners (see `causalml`, for example) and in the evaluation
-  - Implement a fully parametric DGP, following the dimensions roughly outlined in Chapter 4 of the thesis
-  - Rewrite the plot functions in `utils.py` to simply take `DataProvider` as inputs and handle the internals within
-    the functions.
-  - Implement a run-checker that ensures that all methods fit on the data and/or that no complications arise,
-    before expensive computation is started.
-    (e.g. requested size is to big for given DataProvider)
-  - Obviously, add more methods and reference datasets ;)
-  - use Sphinx (checkout `docs` folder) to create command reference and some explanations.
-  - add some example notebooks in the `notebooks` folder of experiments and parameter studies
-  - Check licences of third-party methods and add and note them accordingly. Within the __init__.py of the subpackage
-    add a docstring and state the licences and the original authors.
 
 ## Note
 
