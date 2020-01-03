@@ -13,12 +13,20 @@ Our *cause* is to develop a framework that allows you to compare methods for cau
 in a fair and *just* way. JustCause is a work in progress and new contributors are always welcome.
 
 
+Quickstart
+==========
+
+Add here a minimum example for how to use JustCause. Roughly 25-30 rows.
+
+
 Contents
 ========
 
 .. toctree::
    :maxdepth: 2
 
+   Concepts <concepts>
+   Usage <usage>
    Contributions & Help <contributing>
    Best Practices <best_practices>
    License <license>
