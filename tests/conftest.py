@@ -61,6 +61,17 @@ def dummy_cf(dummy_df):
 
 
 @pytest.fixture
+def dummy_covariates_and_treatment():
+    X_0 = np.full((100, 10), 1)
+    X_1 = np.full((80, 10), 2)
+    X = np.append(X_0, X_1, axis=0)
+    T_0 = np.full(100, 1)
+    T_1 = np.full(80, 0)
+    t = np.append(T_0, T_1)
+    return X, t
+
+
+@pytest.fixture
 def uninstall_grf():
     """ Ensures the grf packages is not installed before the test runs"""
     if rpackages.isinstalled("grf"):
