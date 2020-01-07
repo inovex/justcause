@@ -112,7 +112,7 @@ class NamesAccessor:
         return self._obj._names["outcome"]
 
     @property
-    def other(self) -> List[str]:
+    def others(self) -> List[str]:
         """Return all other column names of a CausalFrame"""
         col_types = ["covariates", "treatment", "outcome"]
         exclude = {col for col_type in col_types for col in self._obj._names[col_type]}

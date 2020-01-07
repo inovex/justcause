@@ -19,8 +19,8 @@ All data sets provided by JustCause provided in terms of iterators over CausalFr
     >>> type(cf)
     justcause.data.frames.CausalFrame
 
-As usual ``cf.columns`` would list the column names. To find out which columns are covariates, treatment, outcome or others,
-we can use the attribute accessor ``names``::
+As usual ``cf.columns`` would list the names of all columns. To find out if a columns actually is a covariate, treatment,
+outcome or something else, we can use the attribute accessor ``names``::
 
     >>> cf.names.treatment
     't'
@@ -36,13 +36,15 @@ we can use the attribute accessor ``names``::
      '22',
      '23',
      '24']
+    >>> cf.names.others
+    ['sample_id', 'mu_1', 'mu_0', 'y_cf', 'ite']
 
-This allows us to easily apply transformations for instance only covariates and in general leads to more robust code
+This allows us to easily apply transformations for instance only to covariates. In general, this leads to more robust code
 since the API of a CausalFrame enforces the differentiation between covariates, outcome, treatment and other columns
-such as metadata like a datetime of an observation.
+such as metadata like a datetime or an id of an observation.
 
-If we want to construct a CausalFrame, we do that just in the same way as with a DataFrame but have to define the roles
-of the columns::
+If we want to construct a CausalFrame, we do that just in the same way as with a DataFrame but have to specify covariate,
+treatment and outcome columns::
 
     >>> import justcause as jc
     >>> from numpy.random import rand, randint
@@ -54,23 +56,23 @@ of the columns::
                              covariates=['c1', 'c2'], treatment='t', outcome='y')
 
 In our example, we do not need to pass ``treatment='t', outcome='y'`` since ``'t'`` and ``'y'`` are used as default
-values for parameters ``treatment`` and ``outcome``, respectively if they exist as columns. All columns not listed as
-covariates, treatment and outcome will be considered as *other*::
+values for the parameters ``treatment`` and ``outcome``, respectively if they exist as columns. All columns not listed as
+covariates, treatment and outcome will be considered as *others*::
 
-    >>> cf.names.other
+    >>> cf.names.others
     ['date']
 
 Working with Learners
 =====================
 
 Within the PyData stack, `Numpy`_ surely is the lowest common denominator and is thus used by a lot of libraries. Since
-JustCause only wraps third-party libraries for causal methods under a common API, the decision was taken to only allow
+JustCause mainly wraps third-party libraries for causal methods under a common API, the decision was taken to only allow
 passing Numpy arrays to the learners, i.e. causal methods, within JustCause. This allows for more flexibility and keeps
 the abstraction layer to the original method much smaller.
 
 The ``fit`` method of a learner takes at least the parameters ``X`` for the covariate matrix,  ``t`` for the treatment
-vector and ``y`` for the outcome, i.e. target, as Numpy arrays. In order to bridge the gap between rich CausalFrames and
-plain arrays, a :class:`~.CausalFrame` provides the attribute accessor ``np`` (for ``numpy``). Using it, we can easily pass
+ and ``y`` for the outcome, i.e. target, vector as Numpy arrays. In order to bridge the gap between rich CausalFrames and
+plain arrays, a :class:`~.CausalFrame` provides the attribute accessor ``np`` (for *numpy*). Using it, we can easily pass
 the covariates, treatment and outcome to a learner::
 
     >>> from sklearn.ensemble import RandomForestRegressor
