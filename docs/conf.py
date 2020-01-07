@@ -164,7 +164,8 @@ html_theme_options = {
     'logo_name': False,
     'github_button': True,
     'github_user': 'inovex',
-    'github_repo': 'justcause'
+    'github_repo': 'justcause',
+    'github_type': 'follow'
 }
 
 # Add any paths that contain custom themes here, relative to this directory.
