@@ -67,8 +67,8 @@ Contents
    :maxdepth: 2
 
    Usage <usage>
-   Contributions & Help <contributing>
    Best Practices <best_practices>
+   Contributions & Help <contributing>
    License <license>
    Authors <authors>
    Changelog <changelog>
