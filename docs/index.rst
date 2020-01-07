@@ -38,12 +38,12 @@ da a train/test split and apply a basic learner on each replication::
     >>> from sklearn.model_selection import train_test_split
     >>> from sklearn.linear_model import LinearRegression
     >>> import pandas as pd
-    >>>
+
     >>> replications = load_ihdp(select_rep=[0, 1, 2])
     >>> slearner = SLearner(LinearRegression())
     >>> metrics = [pehe_score, mean_absolute]
     >>> scores = []
-    >>>
+
     >>> for rep in replications:
     >>>    train, test = train_test_split(rep, train_size=0.8)
     >>>    p = estimate_propensities(train.np.X, train.np.t)

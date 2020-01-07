@@ -20,7 +20,7 @@ All data sets provided by JustCause are provided as lists of CausalFrames, i.e. 
 Thus, we get a single CausalFrame ``cf`` from one of the provided data sets by::
 
     >>> from justcause.data.sets import load_ihdp
-    >>>
+
     >>> cf = load_ihdp(select_rep=0)[0]  # select replication 0
     >>> type(cf)
     justcause.data.frames.CausalFrame
@@ -55,7 +55,7 @@ treatment and outcome columns::
     >>> import justcause as jc
     >>> from numpy.random import rand, randint
     >>> import pandas as pd
-    >>>
+
     >>> N = 10
     >>> dates = pd.date_range('2020-01-01', periods=N)
     >>> cf = jc.CausalFrame({'c1': rand(N),
@@ -89,7 +89,7 @@ plain arrays, a :class:`~.CausalFrame` provides the attribute accessor ``np`` (f
 the covariates, treatment and outcome to a learner::
 
     >>> from sklearn.ensemble import RandomForestRegressor
-    >>>
+
     >>> reg = RandomForestRegressor()
     >>> learner = jc.learners.SLearner(reg)
     >>> learner.fit(cf.np.X, cf.np.t, cf.np.y)
