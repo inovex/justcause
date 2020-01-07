@@ -22,11 +22,11 @@ Dependency Management & Reproducibility
 Organization, Logging and Reproduction of Experiments
 =====================================================
 
- `Sacred`_ is a wonderful tool to do reproducible experimentation. From their documentation:
+`Sacred`_ is a wonderful tool to do reproducible experimentation. From their documentation:
 
     Sacred is a tool to configure, organize, log and reproduce computational experiments.
     It is designed to introduce only minimal overhead, while encouraging modularity and configurability of experiments.
 
-  We thus recommend to use it together with JustCause and will add some more details soon.
+We thus recommend to use it together with JustCause and will add some more details here soon.
 
 .. _Sacred: https://sacred.readthedocs.io/
