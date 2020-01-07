@@ -28,7 +28,7 @@ but consider using `conda`_ to set up an isolated environment beforehand. This c
 with the following `environment.yaml`_.
 
 For a minimal example we gonna load the `IHDP`_ (Infant Health and Development Program) data set,
-da a train/test split and apply a basic learner on each replication::
+do a train/test split, apply a basic learner on each replication and display some metrics::
 
     >>> from justcause.data.sets import load_ihdp
     >>> from justcause.learners import SLearner
