@@ -13,8 +13,8 @@ Our *cause* is to develop a framework that allows you to compare methods for cau
 in a fair and *just* way. JustCause is a work in progress and new contributors are always welcome.
 
 
-Quickstart
-==========
+Installation
+============
 
 Install JustCause with::
 
@@ -26,6 +26,9 @@ but consider using `conda`_ to set up an isolated environment beforehand. This c
     conda activate justcause
 
 with the following `environment.yaml`_.
+
+Quickstart
+==========
 
 For a minimal example we gonna load the `IHDP`_ (Infant Health and Development Program) data set,
 do a train/test split, apply a basic learner on each replication and display some metrics::
@@ -50,7 +53,7 @@ do a train/test split, apply a basic learner on each replication and display som
     >>>    slearner.fit(train.np.X, train.np.t, train.np.y, weights=1/p)
     >>>    pred_ite = slearner.predict_ite(test.np.X, test.np.t, test.np.y)
     >>>    scores.append(calc_scores(test['ite'], pred_ite, metrics))
-    >>>
+
     >>> pd.DataFrame(scores)
        pehe_score  mean_absolute
     0    0.998388       0.149710
