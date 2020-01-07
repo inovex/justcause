@@ -16,8 +16,46 @@ in a fair and *just* way. JustCause is a work in progress and new contributors a
 Quickstart
 ==========
 
-Add here a minimum example for how to use JustCause. Roughly 25-30 rows.
+Install JustCause with::
 
+    pip install justcause
+
+but consider using `conda`_ to set up an isolated environment beforehand. This can be done with::
+
+    conda env create -f environment.yaml
+    conda activate justcause
+
+with the following `environment.yaml`_.
+
+For a minimal example we gonna load the `IHDP`_ (Infant Health and Development Program) data set,
+da a train/test split and apply a basic learner on each replication::
+
+    >>> from justcause.data.sets import load_ihdp
+    >>> from justcause.learners import SLearner
+    >>> from justcause.learners.propensity import estimate_propensities
+    >>> from justcause.metrics import pehe_score, mean_absolute
+    >>> from justcause.evaluation import calc_scores
+    >>> from sklearn.model_selection import train_test_split
+    >>> from sklearn.linear_model import LinearRegression
+    >>> import pandas as pd
+    >>>
+    >>> replications = load_ihdp(select_rep=[0, 1, 2])
+    >>> slearner = SLearner(LinearRegression())
+    >>> metrics = [pehe_score, mean_absolute]
+    >>> scores = []
+    >>>
+    >>> for rep in replications:
+    >>>    train, test = train_test_split(rep, train_size=0.8)
+    >>>    p = estimate_propensities(train.np.X, train.np.t)
+    >>>    slearner.fit(train.np.X, train.np.t, train.np.y, weights=1/p)
+    >>>    pred_ite = slearner.predict_ite(test.np.X, test.np.t, test.np.y)
+    >>>    scores.append(calc_scores(test['ite'], pred_ite, metrics))
+    >>>
+    >>> pd.DataFrame(scores)
+       pehe_score  mean_absolute
+    0    0.998388       0.149710
+    1    0.790441       0.119423
+    2    0.894113       0.151275
 
 Contents
 ========
@@ -25,7 +63,6 @@ Contents
 .. toctree::
    :maxdepth: 2
 
-   Concepts <concepts>
    Usage <usage>
    Contributions & Help <contributing>
    Best Practices <best_practices>
@@ -57,3 +94,6 @@ Indices and tables
 .. _Google style: https://github.com/google/styleguide/blob/gh-pages/pyguide.md#38-comments-and-docstrings
 .. _NumPy style: https://numpydoc.readthedocs.io/en/latest/format.html
 .. _classical style: http://www.sphinx-doc.org/en/stable/domains.html#info-field-lists
+.. _conda: https://docs.conda.io/
+.. _environment.yaml: https://github.com/inovex/justcause/blob/master/environment.yaml
+.. _IHDP: https://www.icpsr.umich.edu/web/HMCA/studies/9795
