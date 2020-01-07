@@ -54,14 +54,14 @@ treatment and outcome columns::
     >>> N = 10
     >>> dates = pd.date_range('2020-01-01', periods=N)
     >>> cf = jc.CausalFrame({'c1': rand(N),
-                             'c2': rand(N),
-                             'date': dates,
-                             't': randint(2, size=N),
-                             'y': rand(N)
-                             },
-                             covariates=['c1', 'c2'],
-                             treatment='t',
-                             outcome='y')
+    >>>                      'c2': rand(N),
+    >>>                      'date': dates,
+    >>>                      't': randint(2, size=N),
+    >>>                      'y': rand(N)
+    >>>                      },
+    >>>                      covariates=['c1', 'c2'],
+    >>>                      treatment='t',
+    >>>                      outcome='y')
 
 In our example, we do not need to pass ``treatment='t'`` and ``outcome='y'`` since ``'t'`` and ``'y'`` are used as default
 values for the parameters ``treatment`` and ``outcome``, respectively, if they exist as column names.
