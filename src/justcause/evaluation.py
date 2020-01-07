@@ -14,6 +14,17 @@ Frame = Union[CausalFrame, pd.DataFrame]
 
 STD_COL = ["method", "train"]
 
+METHOD = "method"
+TRAIN = "train"
+
+
+def format_metric(metric, form):
+    if callable(metric):
+        metric_string = metric.__name__
+    else:
+        metric_string = str(metric)
+    return "{}-{}".format(metric_string, form.__name__)
+
 
 def setup_scores_df(metrics: Union[List[Metric], Metric]):
     """Setup DataFrame containing the metric scores for all replications
@@ -39,9 +50,7 @@ def setup_result_df(
     Returns: DataFrame to store the results for each method
     """
     cols = STD_COL + [
-        "{0}-{1}".format(metric.__name__, form.__name__)
-        for metric in metrics
-        for form in formats
+        format_metric(metric, form) for metric in metrics for form in formats
     ]
     return pd.DataFrame(columns=cols)
 
@@ -96,8 +105,12 @@ def evaluate_ite(
         else:
             name = str(method)
 
-        results_df.loc[len(results_df)] = np.append([name, True], train_result)
-        results_df.loc[len(results_df)] = np.append([name, False], test_result)
+        # Add run
+        train_result.update({METHOD: name, TRAIN: True})
+        test_result.update({METHOD: name, TRAIN: False})
+
+        results_df = results_df.append(train_result, ignore_index=True)
+        results_df = results_df.append(test_result, ignore_index=True)
 
     return results_df
 
@@ -236,5 +249,9 @@ def summarize_scores(
     Returns: The rows to be added to the result dataframe
 
     """
-    list_of_results = np.array([np.array(form(scores_df, axis=0)) for form in formats])
-    return list_of_results.flatten("F")
+    dict_of_results = {
+        format_metric(metric, form): form(scores_df[metric])
+        for metric in scores_df.columns
+        for form in formats
+    }
+    return dict_of_results

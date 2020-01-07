@@ -25,15 +25,17 @@ def test_single_evaluation(ihdp_data):
 
 
 def test_summary():
-    data = np.full((10, 5), 1)
-    df = pd.DataFrame(data)
+    metrics = [pehe_score]
+    df = setup_scores_df(metrics)
+    df["pehe_score"] = np.full(10, 1)
     summary = summarize_scores(df)
-    assert len(summary) == 15  # 5 pseudo-metrics times 3 formats
-    assert summary[0] == 1
+    assert len(summary) == 3  # 5 pseudo-metrics times 3 formats
+    assert summary["pehe_score-mean"] == 1
 
     data = np.arange(10).reshape((-1, 1))
     df = pd.DataFrame(data)
-    assert summarize_scores(df)[0] == np.mean(data)
+    values = list(summarize_scores(df).values())
+    assert values[0] == np.mean(data)
 
 
 def test_calc_scores():
