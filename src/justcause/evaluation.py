@@ -1,4 +1,4 @@
-from typing import Callable, Iterator, List, Optional, Tuple, Union
+from typing import Callable, List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -13,14 +13,6 @@ Format = Callable[[Union[np.array, List[np.array]]], Union[float, List[float]]]
 Frame = Union[CausalFrame, pd.DataFrame]
 
 STD_COL = ["method", "train"]
-
-
-def format_metric(metric, form):
-    if callable(metric):
-        metric_string = metric.__name__
-    else:
-        metric_string = str(metric)
-    return "{}-{}".format(metric_string, form.__name__)
 
 
 def setup_scores_df(metrics: Union[List[Metric], Metric]):
@@ -47,14 +39,15 @@ def setup_result_df(
     Returns: DataFrame to store the results for each method
     """
     cols = STD_COL + [
-        format_metric(metric, form) for metric in metrics for form in formats
+        "{0}-{1}".format(metric.__name__, form.__name__)
+        for metric in metrics
+        for form in formats
     ]
     return pd.DataFrame(columns=cols)
 
 
 def evaluate_ite(
-    generator: Iterator[Frame],
-    num_reps: int,
+    replications: Union[CausalFrame, List[CausalFrame]],
     methods,
     metrics: Union[List[Metric], Metric],
     formats: Union[List[Format], Format] = (np.mean, np.median, np.std),
@@ -70,8 +63,7 @@ def evaluate_ite(
     to the user for now.
 
     Args:
-        generator: generator yielding the replications of a dataset
-        num_reps: the number of replications used for evaluation
+        replications: One or more CausalFrames for each replication
         methods: Causal methods with `fit` and `predict_ite` methods
         metrics: metrics to score the ITE predictions
         formats: formats to summarize metrics over multiple replications
@@ -88,12 +80,15 @@ def evaluate_ite(
     if not isinstance(metrics, list):
         metrics = [metrics]
 
+    if not isinstance(replications, list):
+        replications = [replications]
+
     results_df = setup_result_df(metrics, formats)
 
     for method in methods:
 
         train_result, test_result = _evaluate_single_method(
-            generator, num_reps, method, metrics, formats, train_size, random_state
+            replications, method, metrics, formats, train_size, random_state
         )
 
         if callable(method):
@@ -101,26 +96,19 @@ def evaluate_ite(
         else:
             name = str(method)
 
-        train_result["method"] = name
-        train_result["train"] = True
-
-        test_result["method"] = name
-        test_result["train"] = False
-
-        results_df = results_df.append(train_result, ignore_index=True)
-        results_df = results_df.append(test_result, ignore_index=True)
+        results_df.loc[len(results_df)] = np.append([name, True], train_result)
+        results_df.loc[len(results_df)] = np.append([name, False], test_result)
 
     return results_df
 
 
 def _evaluate_single_method(
-    generator: Iterator[Frame],
-    num_reps: int,
+    replications,
     method,
-    metrics: Union[List[Metric], Metric],
-    formats: Union[List[Format], Format] = (np.mean, np.median, np.std),
-    train_size: int = 0.8,
-    random_state: RandomState = None,
+    metrics,
+    formats=(np.mean, np.median, np.std),
+    train_size=0.8,
+    random_state=None,
 ):
     """Helper to evaluate method with multiple metrics on the given replications
 
@@ -132,12 +120,13 @@ def _evaluate_single_method(
     if not isinstance(metrics, list):
         metrics = [metrics]
 
+    if not isinstance(replications, list):
+        replications = [replications]
+
     test_scores = setup_scores_df(metrics)
     train_scores = setup_scores_df(metrics)
 
-    for _ in range(num_reps):
-        # Only instantiate replication data when needed
-        rep = next(generator)
+    for rep in replications:
         train, test = train_test_split(
             rep, train_size=train_size, random_state=random_state
         )
@@ -247,10 +236,5 @@ def summarize_scores(
     Returns: The rows to be added to the result dataframe
 
     """
-    # TODO: Rewrite to use dict with respective names and values
-    dict_of_results = {
-        format_metric(metric, form): form(scores_df[metric])
-        for metric in scores_df.columns
-        for form in formats
-    }
-    return dict_of_results
+    list_of_results = np.array([np.array(form(scores_df, axis=0)) for form in formats])
+    return list_of_results.flatten("F")
