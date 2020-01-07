@@ -123,7 +123,7 @@ def _evaluate_single_method(
     train_size=0.8,
     random_state=None,
 ):
-    """Helper to evaluate method with multiple metrics on the given replications
+    """Helper to evaluate method with multiple metrics on the given replications.
 
     This is the standard variant of an evaluation loop, which the user can implement
     manually to modify parts of it. Here, only ITE prediction and evaluation is
@@ -149,12 +149,12 @@ def _evaluate_single_method(
         else:
             train_ite, test_ite = default_predictions(method, train, test)
 
-        test_scores.loc[len(test_scores)] = calc_scores(
-            test[Col.ite], test_ite, metrics
+        test_scores = test_scores.append(
+            calc_scores(test[Col.ite], test_ite, metrics), ignore_index=True
         )
 
-        train_scores.loc[len(train_scores)] = calc_scores(
-            train[Col.ite], train_ite, metrics
+        train_scores = train_scores.append(
+            calc_scores(train[Col.ite], train_ite, metrics), ignore_index=True
         )
 
     train_results = summarize_scores(train_scores, formats)
@@ -163,25 +163,29 @@ def _evaluate_single_method(
     return train_results, test_results
 
 
-def calc_scores(true: np.array, pred: np.array, metrics):
+def calc_scores(
+    true: np.array, pred: np.array, metrics: Union[List[Metric], Metric]
+) -> dict:
     """Compare ground-truth to predictions with given metrics for one replication
 
     Call for train and test separately
 
+    TODO: Also replace np.array with dict
+
     Args:
-        true: True ITE
+        true: true ITE
         pred: predicted ITE
         metrics: metrics to evaluate on the ITEs
 
-    Returns: a list of scores with length == len(metrics), i.e. the row to be added to
-        the scores dataframe
+    Returns:
+        dict: a dict of (score_name, scores) pairs with len(metrics) entries
 
     """
     # ensure metrics and replications are lists, even if with just one element
     if not isinstance(metrics, list):
         metrics = [metrics]
 
-    return np.array([metric(true, pred) for metric in metrics])
+    return {metric.__name__: metric(true, pred) for metric in metrics}
 
 
 def default_predictions(
@@ -209,29 +213,6 @@ def default_predictions(
     test_ite = method.predict_ite(test_X, test_t, test_y)
 
     return train_ite, test_ite
-
-
-def get_default_callable(method):
-    """Helper to get an evaluation callable for standard methods
-
-    Args:
-        method: Method to use for the standard callable
-
-    Returns: Callable for evaluation in custom loop
-    """
-
-    def default_callable(train, test):
-        train_X, train_t, train_y = train.np.X, train.np.t, train.np.y
-        test_X, test_t, test_y = test.np.X, test.np.t, test.np.y
-
-        method.fit(train_X, train_t, train_y)
-
-        train_ite = method.predict_ite(train_X, train_t, train_y)
-        test_ite = method.predict_ite(test_X, test_t, test_y)
-
-        return train_ite, test_ite
-
-    return default_callable
 
 
 def summarize_scores(

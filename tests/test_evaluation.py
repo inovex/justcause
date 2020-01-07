@@ -41,7 +41,9 @@ def test_summary():
 def test_calc_scores():
     true = np.full(100, 1)
     pred = np.full(100, 0)
-    assert calc_scores(true, pred, pehe_score)[0] == 1
+    score_dict = calc_scores(true, pred, pehe_score)
+    assert list(score_dict.values())[0] == 1
+    assert "pehe_score" in score_dict.keys()
 
 
 def test_setup_df():
