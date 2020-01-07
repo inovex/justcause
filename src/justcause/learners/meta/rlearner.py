@@ -4,7 +4,7 @@ import numpy as np
 from causalml.inference.meta import BaseRRegressor
 from causalml.propensity import ElasticNetPropensityModel
 from numpy.random import RandomState
-from sklearn.linear_model import LassoLars
+from sklearn.linear_model import LinearRegression
 from sklearn.utils import check_random_state
 
 StateType = Optional[Union[int, RandomState]]
@@ -41,7 +41,7 @@ class RLearner:
                 in the learners, this has to be done by the user.
         """
         if learner is None and (outcome_learner is None and effect_learner is None):
-            learner = LassoLars()
+            learner = LinearRegression()
 
         self.random_state = check_random_state(random_state)
         self.model = BaseRRegressor(
@@ -89,8 +89,8 @@ class RLearner:
     ) -> np.array:
         """ Predicts ITE for given samples; ignores the factual outcome and treatment"""
 
-        assert t is None and y is None, "The R-Learner does not use factual outcomes"
-        return self.model.predict(x)
+        # assert t is None and y is None, "The R-Learner does not use factual outcomes"
+        return self.model.predict(x).flatten()
 
     def estimate_ate(
         self, x: np.array, t: np.array, y: np.array, p: Optional[np.array] = None
