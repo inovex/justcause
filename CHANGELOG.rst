@@ -2,15 +2,21 @@
 Changelog
 =========
 
+Version 0.3
+===========
+
+- data sets and generators now return list of CausalFrames instead of iterators
+
 Version 0.2
 ===========
 
 - Complete overhaul of everything that was done before in order to have:
-  * a distributable Python package
-  * unit tests
-  * a consistent API
-  * some documentation
-  * and much more ;-)
+
+  - a distributable Python package
+  - unit tests
+  - a consistent API
+  - some documentation
+  - and much more ;-)
 
 
 Version 0.1
