@@ -12,7 +12,7 @@ A CausalFrame encompasses all the functionality of a Pandas DataFrame but additi
 are a *covariates*, *treatment*, *outcome* or *others*. This allows to easily access them in a programmatic way.
 
 All data sets provided by JustCause are provided as lists of CausalFrames, i.e. for each replication one CausalFrame.
-Thus, we get a single CausalFrame ``cf`` from one of data sets by::
+Thus, we get a single CausalFrame ``cf`` from one of the provided data sets by::
 
     >>> from justcause.data.sets import load_ihdp
 
@@ -20,7 +20,7 @@ Thus, we get a single CausalFrame ``cf`` from one of data sets by::
     >>> type(cf)
     justcause.data.frames.CausalFrame
 
-As usual ``cf.columns`` would list the names of all columns. To find out if a columns actually is a covariate, treatment,
+As usual, ``cf.columns`` would list the names of all columns. To find out if a column actually is a covariate, treatment,
 outcome or something else, we can use the attribute accessor ``names``::
 
     >>> cf.names.treatment
@@ -56,9 +56,9 @@ treatment and outcome columns::
     >>> cf = jc.CausalFrame({'c1': rand(N), 'c2': rand(N), 'date': dates, 't': randint(2, size=N), 'y': rand(N)},
                              covariates=['c1', 'c2'], treatment='t', outcome='y')
 
-In our example, we do not need to pass ``treatment='t', outcome='y'`` since ``'t'`` and ``'y'`` are used as default
-values for the parameters ``treatment`` and ``outcome``, respectively if they exist as columns. All columns not listed as
-covariates, treatment and outcome will be considered as *others*::
+In our example, we do not need to pass ``treatment='t'`` and ``outcome='y'`` since ``'t'`` and ``'y'`` are used as default
+values for the parameters ``treatment`` and ``outcome``, respectively, if they exist as column names.
+All columns not listed as covariates, treatment and outcome will be considered as *others*::
 
     >>> cf.names.others
     ['date']
@@ -72,7 +72,7 @@ passing Numpy arrays to the learners, i.e. causal methods, within JustCause. Thi
 the abstraction layer to the original method much smaller.
 
 The ``fit`` method of a learner takes at least the parameters ``X`` for the covariate matrix,  ``t`` for the treatment
- and ``y`` for the outcome, i.e. target, vector as Numpy arrays. In order to bridge the gap between rich CausalFrames and
+and ``y`` for the outcome, i.e. target, vector as Numpy arrays. In order to bridge the gap between rich CausalFrames and
 plain arrays, a :class:`~.CausalFrame` provides the attribute accessor ``np`` (for *numpy*). Using it, we can easily pass
 the covariates, treatment and outcome to a learner::
 
