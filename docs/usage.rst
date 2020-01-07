@@ -11,7 +11,8 @@ JustCause uses a generalization of a Pandas :class:`~pandas.DataFrame` for manag
 A CausalFrame encompasses all the functionality of a Pandas DataFrame but additionally keeps track which columns
 are a *covariates*, *treatment*, *outcome* or *others*. This allows to easily access them in a programmatic way.
 
-All data sets provided by JustCause provided in terms of iterators over CausalFrames. Thus, we get a CausalFrame ``cf`` by::
+All data sets provided by JustCause are provided as lists of CausalFrames, i.e. for each replication one CausalFrame.
+Thus, we get a single CausalFrame ``cf`` from one of data sets by::
 
     >>> from justcause.data.sets import load_ihdp
 
