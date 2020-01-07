@@ -1,4 +1,4 @@
-from typing import Iterable, Optional
+from typing import List, Optional
 
 import pandas as pd
 
@@ -7,14 +7,24 @@ from ..utils import (
     Indices,
     get_covariates_df,
     get_outcomes_df,
-    iter_rep,
     select_replication,
+    to_rep_list,
 )
 
 DATASET_NAME: str = "ihdp"
 
 
-def load_ihdp(select_rep: Optional[Indices] = None) -> Iterable[CausalFrame]:
+def load_ihdp(select_rep: Optional[Indices] = None) -> List[CausalFrame]:
+    """
+
+    TODO: Docstring
+
+    Args:
+        select_rep:
+
+    Returns:
+
+    """
     covariates = get_covariates_df(DATASET_NAME)
     outcomes = get_outcomes_df(DATASET_NAME)
 
@@ -27,8 +37,15 @@ def load_ihdp(select_rep: Optional[Indices] = None) -> Iterable[CausalFrame]:
 
     cov_names = [col for col in covariates.columns if col != Col.sample_id]
     df = CausalFrame(full, covariates=cov_names)
-    return iter_rep(df)
+    return to_rep_list(df)
 
 
 def get_ihdp_covariates() -> pd.DataFrame:
+    """
+
+    TODO: Docstring
+
+    Returns:
+
+    """
     return get_covariates_df(DATASET_NAME).drop(Col.sample_id, axis=1)

@@ -4,16 +4,24 @@ import numpy as np
 import rpy2.robjects.packages as rpackages
 from numpy.random import RandomState
 
-from justcause.data.utils import iter_rep
+from justcause.data.utils import to_rep_iter, to_rep_list
 from justcause.learners.utils import install_r_packages, replace_factual_outcomes
 from justcause.utils import int_from_random_state
 
 
 def test_iter_rep(dummy_df):
     assert "rep" in dummy_df.columns
-    single_rep = next(iter_rep(dummy_df))
+    single_rep = next(to_rep_iter(dummy_df))
     assert "rep" not in single_rep.columns
     assert single_rep.shape[0] == 5
+
+
+def test_to_rep_list(dummy_rep_df):
+    replist = to_rep_list(dummy_rep_df)
+    assert len(replist) == 5
+    single_rep = replist[0]
+    assert "rep" not in single_rep.columns
+    assert single_rep.shape[0] == 10
 
 
 def test_replace_factuals():

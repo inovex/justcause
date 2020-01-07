@@ -44,11 +44,41 @@ def select_replication(df: pd.DataFrame, indices: Indices):
         return df.loc[df[Col.rep].isin(indices)]
 
 
-def iter_rep(df: Frame) -> Iterator[Frame]:
-    """Iterate over all replications in dataset
+def to_rep_iter(df: Frame) -> Iterator[Frame]:
+    """Turns a monolithic DataFrame into a generator of replication-wise DataFrames
+
+    Args:
+        df: the Frame to be split up into a generator
+
+    Returns:
+        generator: a python iterator yielding one replication at a time
+
     """
+    assert (
+        Col.rep in df.columns
+    ), "replication information required to perform the split"
     for rep in df[Col.rep].unique():
         yield df[df[Col.rep] == rep].drop(Col.rep, axis=1)
+
+
+def to_rep_list(df: Frame) -> List[Frame]:
+    """
+    Turns a monolithic DataFrame into a list of Frames, one for each replication
+
+    Args:
+        df: CausalFrame or DataFrame to be split into a list of Frames
+            by the replication
+
+    Returns:
+        list: a list of Causal- or DataFrames, one for each replication
+
+    """
+    assert (
+        Col.rep in df.columns
+    ), "replication information required to perform the split"
+    return [
+        df[df[Col.rep] == rep].drop(Col.rep, axis=1) for rep in df[Col.rep].unique()
+    ]
 
 
 def _add_outcomes(
@@ -57,14 +87,21 @@ def _add_outcomes(
     """Adds outcomes and derivatives of them to the DataFrame
 
     Calculates the factual and counterfactual distributions from potential outcomes
-    given the treatment in the dataframe
+    given the treatment in the dataframe and adds everything to the Frame
 
     Args:
-        df: dataframe to add to
-        size: number of samples for which to add outcomes
-        outcome:
+        df: dataframe to add the outcomes to with len(df) = num_instances
+        m_0: The noiseless, untreated outcome to be added to the Frame,
+            shape (num_instances)
+        m_1: The noiseless, treated outcome to be added to the Frame,
+            shape (num_instances)
+        y_0: The untreated outcome with added noise,
+            shape (num_instances)
+        y_1: the treated outcome with added noise,
+            shape (num_instances)
 
     Returns:
+        df: The DataFrame with added outcome columns
 
     """
     df = df.copy()  # avoid side-effects
@@ -87,8 +124,23 @@ def generate_data(
     covariate_names: Optional[List[str]] = None,
     random_state: OptRandState = None,
     **kwargs,
-) -> Iterator[Union[CausalFrame, pd.DataFrame]]:
-    """Generate CausalFrame from covariates, treatment and outcome functions
+) -> List[Union[CausalFrame, pd.DataFrame]]:
+    """
+
+    Todo: Docstring
+
+    Args:
+        covariates:
+        treatment:
+        outcomes:
+        n_samples:
+        n_replications:
+        covariate_names:
+        random_state:
+        **kwargs:
+
+    Returns:
+
     """
     random_state = check_random_state(random_state)
 
@@ -137,4 +189,4 @@ def generate_data(
     rep_df = pd.concat(rep_dfs)
     df = pd.merge(cov_df, rep_df, how="inner", on=Col.sample_id)
     df = CausalFrame(df, covariates=covariate_names)
-    return iter_rep(df)
+    return to_rep_list(df)

@@ -27,12 +27,19 @@ RUNS_ON_CIRRUS = bool(strtobool(os.environ.get("CIRRUS_CI", "false")))
 
 
 @pytest.fixture
-def ihdp_data():
+def ihdp_data_full():
     return load_ihdp()
 
 
 @pytest.fixture
+def ihdp_data():
+    # Limit the replications for better runtime in tests
+    return load_ihdp(select_rep=[0, 1])
+
+
+@pytest.fixture
 def ibm_acic_data():
+    # Limit the replications for better runtime in tests
     return load_ibm_acic(select_rep=[0, 1])
 
 
@@ -58,6 +65,21 @@ def dummy_df():
 @pytest.fixture
 def dummy_cf(dummy_df):
     return CausalFrame(dummy_df, covariates=["a", "b"])
+
+
+@pytest.fixture
+def dummy_rep_df():
+    N = 10
+    num_rep = 5
+    return pd.DataFrame(
+        {
+            "a": np.repeat(np.arange(N), num_rep),
+            "b": np.repeat(2 * np.arange(N), num_rep),
+            "t": np.repeat((2 * np.arange(N) / N), num_rep).astype(np.int),
+            "y": np.repeat(np.linspace(0.0, 1.0, N), num_rep),
+            "rep": np.tile(np.arange(num_rep), N),
+        }
+    )
 
 
 @pytest.fixture

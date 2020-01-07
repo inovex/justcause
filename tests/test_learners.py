@@ -15,7 +15,7 @@ from justcause.learners import (
 
 
 def test_slearner(ihdp_data):
-    rep = next(ihdp_data)
+    rep = ihdp_data[0]
     x, t, y = rep.np.X, rep.np.t, rep.np.y
     slearner = SLearner(LinearRegression())
     slearner.fit(x, t, y)
@@ -31,7 +31,7 @@ def test_slearner(ihdp_data):
 
 def test_tlearner(ihdp_data):
     """Construct T-Learner in different ways and ensure it works"""
-    rep = next(ihdp_data)
+    rep = ihdp_data[0]
     x, t, y = rep.np.X, rep.np.t, rep.np.y
     tlearner = TLearner(LinearRegression())
     tlearner.fit(x, t, y)
@@ -69,7 +69,7 @@ def test_tlearner(ihdp_data):
 
 
 def test_rlearner(ihdp_data):
-    rep = next(ihdp_data)
+    rep = ihdp_data[0]
     x, t, y = rep.np.X, rep.np.t, rep.np.y
     rlearner = RLearner(LinearRegression())
     rlearner.fit(x, t, y)
@@ -81,7 +81,7 @@ def test_rlearner(ihdp_data):
 
 
 def test_xlearner(ihdp_data):
-    rep = next(ihdp_data)
+    rep = ihdp_data[0]
     x, t, y = rep.np.X, rep.np.t, rep.np.y
     xlearner = XLearner(LinearRegression())
     xlearner.fit(x, t, y)
@@ -95,7 +95,7 @@ def test_xlearner(ihdp_data):
 
 
 def test_causalforest(ihdp_data, grf):
-    rep = next(ihdp_data)
+    rep = ihdp_data[0]
     x, t, y = rep.np.X, rep.np.t, rep.np.y
     cf = CausalForest()
     cf.fit(x, t, y)
@@ -112,7 +112,7 @@ def test_causalforest(ihdp_data, grf):
 
 
 def test_dre(ihdp_data):
-    rep = next(ihdp_data)
+    rep = ihdp_data[0]
     x, t, y = rep.np.X, rep.np.t, rep.np.y
     dre = DoubleRobustEstimator(LogisticRegression(random_state=42))
     ate = dre.estimate_ate(x, t, y)
@@ -125,7 +125,7 @@ def test_dre(ihdp_data):
 
 
 def test_psw(ihdp_data):
-    rep = next(ihdp_data)
+    rep = ihdp_data[0]
     x, t, y = rep.np.X, rep.np.t, rep.np.y
     psw = PSWEstimator(LogisticRegression(random_state=42))
     ate = psw.estimate_ate(x, t, y)
@@ -139,7 +139,7 @@ def test_psw(ihdp_data):
 
 def test_dragonnet(ihdp_data):
 
-    rep = next(ihdp_data)
+    rep = ihdp_data[0]
     x, t, y = rep.np.X, rep.np.t, rep.np.y
     dragon = DragonNet()
     dragon.fit(x, t, y)
