@@ -6,6 +6,7 @@ https://pandas.pydata.org/pandas-docs/stable/development/extending.html
 """
 from __future__ import annotations
 
+from abc import ABC
 from functools import partial
 from typing import List, Type
 
@@ -46,7 +47,7 @@ DATA_COLS = [
 ]
 
 
-class CausalFrame(pd.DataFrame):
+class CausalFrame(pd.DataFrame, ABC):
     _metadata = ["_names"]
 
     def __init__(self, data, *args, **kwargs):
@@ -93,7 +94,7 @@ class NamesAccessor:
 
     @staticmethod
     def _validate(obj):
-        assert isinstance(obj, CausalFrame), "Works only with CausalFrames"
+        assert isinstance(obj, CausalFrame), "CausalFrame is needed for this accessor"
 
     @property
     def covariates(self) -> List[str]:
@@ -109,6 +110,13 @@ class NamesAccessor:
     def outcome(self) -> str:
         """Return outcome name of a CausalFrame"""
         return self._obj._names["outcome"]
+
+    @property
+    def other(self) -> List[str]:
+        """Return all other column names of a CausalFrame"""
+        col_types = ["covariates", "treatment", "outcome"]
+        exclude = {col for col_type in col_types for col in self._obj._names[col_type]}
+        return [col for col in self._obj.columns if col not in exclude]
 
 
 @pd.api.extensions.register_dataframe_accessor("np")
