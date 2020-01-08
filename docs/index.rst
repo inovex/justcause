@@ -12,6 +12,16 @@ To foster good scientific practice **JustCause** provides a framework to easily:
 Our *cause* is to develop a framework that allows you to compare methods for causal inference
 in a fair and *just* way. JustCause is a work in progress and new contributors are always welcome.
 
+The reasons for creating a library like JustCause are laid out in the thesis
+:download:`A Systematic Review of Machine Learning Estimators for Causal Effects <thesis.pdf>`
+of Maximilian Franz. Therein, it is shown that many publications about causality:
+
+    * lack reproducibility,
+    * use different versions of the seemingly same data set,
+    * fail to state that some theoretical conditions in the data set are not met,
+    * miss several state of the art methods in their comparison.
+
+A more standardised approach, as offered by JustCause, is able to improve these points.
 
 Installation
 ============
@@ -30,7 +40,7 @@ with the following `environment.yaml`_.
 Quickstart
 ==========
 
-For a minimal example we gonna load the `IHDP`_ (Infant Health and Development Program) data set,
+For a minimal example we are going to load the `IHDP`_ (Infant Health and Development Program) data set,
 do a train/test split, apply a basic learner on each replication and display some metrics::
 
     >>> from justcause.data.sets import load_ihdp
@@ -38,8 +48,10 @@ do a train/test split, apply a basic learner on each replication and display som
     >>> from justcause.learners.propensity import estimate_propensities
     >>> from justcause.metrics import pehe_score, mean_absolute
     >>> from justcause.evaluation import calc_scores
+
     >>> from sklearn.model_selection import train_test_split
     >>> from sklearn.linear_model import LinearRegression
+
     >>> import pandas as pd
 
     >>> replications = load_ihdp(select_rep=[0, 1, 2])
@@ -68,10 +80,10 @@ Contents
 
    Usage <usage>
    Best Practices <best_practices>
-   Contributions & Help <contributing>
    License <license>
    Authors <authors>
    Changelog <changelog>
+   Contributions & Help <contributing>
    Module Reference <api/modules>
 
 
