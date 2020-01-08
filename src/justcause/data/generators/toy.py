@@ -14,7 +14,7 @@ from typing import List
 from numpy.random import RandomState
 from scipy.special import expit
 
-from ..sets.ibm_acic import get_ibm_acic_covariates
+from ..sets.ibm import get_ibm_covariates
 from ..utils import Frame, OptRandState, generate_data
 
 
@@ -106,7 +106,7 @@ def toy_data_emcs(
     Returns:
         data: a list of CausalFrames, one for each replication
     """
-    covariates = get_ibm_acic_covariates().to_numpy()
+    covariates = get_ibm_covariates().to_numpy()
     assert (
         n_samples < covariates.shape[0]
     ), "requested size {} is bigger than available covariates {}".format(

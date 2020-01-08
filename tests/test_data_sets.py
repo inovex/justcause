@@ -8,7 +8,7 @@ import pytest
 
 import numpy as np
 
-from justcause.data.sets import load_ibm_acic, load_ihdp
+from justcause.data.sets import load_ibm, load_ihdp
 from justcause.data.sets.twins import get_twins_covariates
 
 RUNS_ON_CIRRUS = bool(strtobool(os.environ.get("CIRRUS_CI", "false")))
@@ -25,15 +25,15 @@ def test_ihdp_data(ihdp_data, ihdp_data_full):
     assert len(df) == 747
 
 
-def test_ibm_acic_data(ibm_acic_data):
+def test_ibm_data(ibm_acic_data):
     rep = ibm_acic_data[0]
     assert len(rep) == 1000
     assert len(ibm_acic_data) == 2  # number of replications selected in conftest.py
 
 
 @pytest.mark.skipif(RUNS_ON_CIRRUS, reason="Needs a lot of memory")
-def test_ibm_acic_data_load_all():
-    df = load_ibm_acic()[0]
+def test_ibm_data_load_all():
+    df = load_ibm()[0]
     assert len(df) == 10000
 
 

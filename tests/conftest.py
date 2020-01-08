@@ -18,7 +18,7 @@ from rpy2 import robjects
 from rpy2.robjects import StrVector
 
 from justcause.data.frames import CausalFrame
-from justcause.data.sets.ibm_acic import load_ibm_acic
+from justcause.data.sets.ibm import load_ibm
 from justcause.data.sets.ihdp import load_ihdp
 from justcause.data.sets.twins import load_twins
 from justcause.learners.utils import install_r_packages
@@ -40,7 +40,7 @@ def ihdp_data():
 @pytest.fixture
 def ibm_acic_data():
     # Limit the replications for better runtime in tests
-    return load_ibm_acic(select_rep=[0, 1])
+    return load_ibm(select_rep=[0, 1])
 
 
 @pytest.fixture

@@ -1,3 +1,16 @@
+"""Provides access to the so called Twins data set.
+
+The Twins dataset is first compounded and analyzed in [1]. The version here is the
+exact data used in [2] provided
+[here](https://github.com/AMLab-Amsterdam/CEVAE/tree/master/datasets/TWINS).
+
+References:
+    [1] D. Almond, K. Y. Chay, and D. S. Lee,
+    “The costs of low birth weight,” Quarterly Journal of Economics. 2005.
+    [2] [1] C. Louizos, U. Shalit, J. Mooij, D. Sontag, R. Zemel, and M. Welling,
+    “Causal Effect Inference with Deep Latent-Variable Models,” 2017.
+
+"""
 from typing import List
 
 import numpy as np
@@ -10,13 +23,13 @@ DATASET_NAME: str = "twins"
 
 
 def load_twins() -> List[CausalFrame]:
-    """
+    """Returns the Twins dataset as a list of one replication.
 
-    TODO: Docstring
-
-    There are no replications in the twins dataset, thus no is selection required
+    There are no replications in the twins dataset, thus no is selection required. For
+    consistency, the data is still returned as a list of on CausalFrame.
 
     Returns:
+        data: a list with one CausalFrame for the one replication
 
     """
     covariates = get_covariates_df(DATASET_NAME)
@@ -32,11 +45,5 @@ def load_twins() -> List[CausalFrame]:
 
 
 def get_twins_covariates() -> pd.DataFrame:
-    """
-
-    TODO: Docstring
-
-    Returns:
-
-    """
+    """Returns the covariates of the original Twins dataset."""
     return get_covariates_df(DATASET_NAME).drop(Col.sample_id, axis=1)
