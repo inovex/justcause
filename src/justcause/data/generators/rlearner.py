@@ -1,4 +1,19 @@
-from typing import Iterator, Optional, Tuple, Union
+"""Re-Implementation of the four DGPs in the R-Learner paper [1].
+
+Exports the generator function, which can be used to access the DGP, and a helper
+to transform poential outcomes of the R-Learner into our convention. All other helpers
+are not meant for external usage.
+
+In the four settings, different sampling strategies for the covariates are used -
+normal and uniform. There are non-linear effects, constant effects and smooth effects.
+
+References:
+    [1] X. Nie and S. Wager,
+    “Quasi-Oracle Estimation of Heterogeneous Treatment Effects.”,
+    4th of February 2019.
+
+"""
+from typing import List, Optional, Tuple, Union
 
 import numpy as np
 import pandas as pd
@@ -13,13 +28,16 @@ Frame = Union[CausalFrame, pd.DataFrame]
 
 
 def outcomes_from_base(base: np.array, tau: np.array) -> Tuple[np.array, np.array]:
-    """Helper to transform from the format used in the paper to our convention
+    """Transforms outcomes from the DGP format used in the paper to our convention.
 
     Args:
-        base: the base value for all samples in one replication
-        tau: the treatment effect for all samples in one replication
+        base: the base value for all samples in one replication. This is usually the
+            mean of mu_0 and mu_1
+        tau: the treatment effect for all samples in one replication, which is later
+            implicit in the difference tau = mu_1 - mu_0
 
-    Returns: The potential outcomes without noise
+    Returns:
+        mu_0, mu_1: The potential outcomes without noise
     """
 
     mu_0 = base - 0.5 * tau
@@ -27,14 +45,16 @@ def outcomes_from_base(base: np.array, tau: np.array) -> Tuple[np.array, np.arra
     return mu_0, mu_1
 
 
-def _normal_covariates(n_samples, n_covariates):
-    return np.random.normal(0, 1, size=n_covariates * n_samples).reshape(
+def _normal_covariates(n_samples, n_covariates, random_state=None):
+    random_state = check_random_state(random_state)
+    return random_state.normal(0, 1, size=n_covariates * n_samples).reshape(
         (n_samples, n_covariates)
     )
 
 
-def _uniform_covariates(n_samples, n_covariates):
-    return np.random.uniform(0, 1, size=n_covariates * n_samples).reshape(
+def _uniform_covariates(n_samples, n_covariates, random_state=None):
+    random_state = check_random_state(random_state)
+    return random_state.uniform(0, 1, size=n_covariates * n_samples).reshape(
         (n_samples, n_covariates)
     )
 
@@ -54,7 +74,6 @@ def _outcome_a(covariates, random_state=None):
 def _treatment_a(covariates, random_state=None):
     X = covariates  # for brevity
     propensity = np.clip(np.sin(np.pi * X[:, 0] * X[:, 1]), 0.1, 0.9)
-    random_state = check_random_state(random_state)
     return random_state.binomial(1, p=propensity)
 
 
@@ -68,8 +87,6 @@ def _outcome_b(covariates, random_state=None):
 
 
 def _treatment_b(covariates, random_state=None):
-    """ Random treatment assignment for setting B"""
-    random_state = check_random_state(random_state)
     return random_state.binomial(1, p=0.5, size=len(covariates))
 
 
@@ -81,10 +98,8 @@ def _outcome_c(covariates, random_state=None):
 
 
 def _treatment_c(covariates, random_state=None):
-    """ Random treatment assignment for setting B"""
-    X = covariates
+    X = covariates  # for brevity
     propensity = 1 / (1 + np.exp(X[:, 1] + X[:, 2]))
-    random_state = check_random_state(random_state)
     return random_state.binomial(1, p=propensity)
 
 
@@ -98,16 +113,15 @@ def _outcome_d(covariates, random_state=None):
 
 
 def _treatment_d(covariates, random_state=None):
-    """ Random treatment assignment for setting B"""
     X = covariates
     propensity = 1 / (1 + np.exp(-1 * X[:, 0]) + np.exp(-1 * X[:, 1]))
-    random_state = check_random_state(random_state)
     return random_state.binomial(1, p=propensity)
 
 
 def _make_outcome(outcome_in, sigma):
     def outcome(covariates, random_state, **kwargs):
-        noise = sigma * np.random.normal(0, 1, size=len(covariates))
+        random_state = check_random_state(random_state)  # prepare random_state
+        noise = sigma * random_state.normal(0, 1, size=len(covariates))
         mu_0, mu_1 = outcome_in(covariates, random_state)
         return mu_0, mu_1, mu_0 + noise, mu_1 + noise
 
@@ -121,14 +135,13 @@ def rlearner_simulation_data(
     sigma: float = 0.5,
     setting: str = "A",
     random_state: OptRandState = None,
-) -> Iterator[Frame]:
-    """
-    Provides the simulated experiment data used in the orginal RLearner paper.
+) -> List[Frame]:
+    """Provides the simulated experiment data used in the original RLearner paper.
 
-    Defaults are based on the original paper [1].
-    Note that indizes in R start with 1, which is why all indizes from the original
-    script are used (-1), although it should not make an difference, as all
-    covariates are sampled from the same distribution.
+    Defaults are based on the original paper [1]. Note that indices in R start with 1,
+    which is why all indices from the original script are used minus one, although it
+    should not make a difference, as all covariates are sampled from the
+    same distribution.
 
     References:
         [1] X. Nie and S. Wager,
@@ -136,18 +149,20 @@ def rlearner_simulation_data(
         4th of February 2019.
 
     Args:
-        n_samples:
-        n_covariates:
-        n_replications:
-        setting:
+        n_samples: Number of samples per replications.
+        n_covariates: Number of covariates per instance.
+        n_replications: Number of replications.
+        sigma: Scalar multiplier of the gaussian noise added to the outcomes.
+        setting: the desired setting in {A, B, C, D}.
 
-    Returns: iterator of replications
+    Returns:
+        data: a list of CausalFrames, one for each replication
     """
 
-    covariates = _normal_covariates(n_samples, n_covariates)
+    covariates = _normal_covariates(n_samples, n_covariates, random_state)
 
     if setting == "A":
-        covariates = _uniform_covariates(n_samples, n_covariates)
+        covariates = _uniform_covariates(n_samples, n_covariates, random_state)
         outcome = _make_outcome(_outcome_a, sigma)
         treatment = _treatment_a
     elif setting == "B":

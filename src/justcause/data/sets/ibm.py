@@ -1,3 +1,17 @@
+"""Provides access to *one* setting of the the IBM ACIC challenge data.
+
+The challenge data and further explanations of the corresponding
+data can be found in [2]. The authors also provide a rough evaluation guideline
+in their paper [1], which unfortunately has not been maintained since publication.
+
+References:
+    [1] Y. Shimoni, C. Yanover, E. Karavani, and Y. Goldschmnidt,
+    “Benchmarking Framework for Performance-Evaluation of Causal Inference Analysis,”
+    2018.
+
+    [2] Data Set Download: https://www.synapse.org/#!Synapse:syn11738767/wiki/512854
+
+"""
 from typing import List, Optional
 
 import pandas as pd

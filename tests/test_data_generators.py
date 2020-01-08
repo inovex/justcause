@@ -4,7 +4,7 @@ import numpy as np
 
 from justcause.data.generators.ihdp import multi_expo_on_ihdp
 from justcause.data.generators.rlearner import rlearner_simulation_data
-from justcause.data.generators.toy import toy_data_synthetic, toy_example_emcs
+from justcause.data.generators.toy import toy_data_emcs, toy_data_synthetic
 from justcause.data.sets.ihdp import get_ihdp_covariates
 from justcause.data.utils import generate_data
 
@@ -106,7 +106,7 @@ def test_toy_generator():
     n_replications = 10
 
     toy_reps = list(
-        toy_example_emcs(
+        toy_data_emcs(
             setting="simple", n_samples=n_samples, n_replications=n_replications
         )
     )
@@ -114,7 +114,7 @@ def test_toy_generator():
     assert len(toy_reps[0]) == n_samples
 
     toy_reps = list(
-        toy_example_emcs(
+        toy_data_emcs(
             setting="hard", n_samples=n_samples, n_replications=n_replications
         )
     )
@@ -122,7 +122,7 @@ def test_toy_generator():
     assert len(toy_reps[0]) == n_samples
 
     with pytest.raises(RuntimeError):
-        toy_example_emcs(
+        toy_data_emcs(
             setting="non-existent", n_samples=n_samples, n_replications=n_replications
         )
 
