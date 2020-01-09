@@ -74,8 +74,8 @@ extensions = ['sphinx.ext.autodoc', 'sphinx.ext.intersphinx', 'sphinx.ext.todo',
 templates_path = ['_templates']
 
 
-# To configure AutoStructify
 def setup(app):
+    # To configure AutoStructify
     from recommonmark.transform import AutoStructify
     app.add_config_value('recommonmark_config', {
         'auto_toc_tree_section': 'Contents',
@@ -84,6 +84,8 @@ def setup(app):
         'enable_inline_math': True
     }, True)
     app.add_transform(AutoStructify)
+    # include custom CSS
+    app.add_css_file('custom.css')
 
 # Additional parsers besides rst
 source_parsers = {
@@ -194,7 +196,7 @@ else:
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
-html_logo = "gfx/logo.png"
+html_logo = "static/logo.png"
 
 # The name of an image file (within the static path) to use as favicon of the
 # docs.  This file should be a Windows icon file (.ico) being 16x16 or 32x32
@@ -204,7 +206,7 @@ html_logo = "gfx/logo.png"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['gfx']
+html_static_path = ['static']
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
@@ -273,7 +275,7 @@ latex_documents = [
 
 # The name of an image file (relative to this directory) to place at the top of
 # the title page.
-latex_logo = "gfx/logo.png"
+latex_logo = "static/logo.png"
 
 # For "manual" documents, if this is true, then toplevel headings are parts,
 # not chapters.

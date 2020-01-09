@@ -18,8 +18,8 @@ Briefly, a reference data set following our convention contains these columns:
  - ``t``: binary treatment indicator
  - ``y``: true observed outcome
  - ``y_cf``: counterfactual outcome
- - ``y_0``: untreated potential outcome with noise potentially
- - ``y_1``: treated potential outcome with noise potentially
+ - ``y_0``: untreated potential outcome with possible noise
+ - ``y_1``: treated potential outcome with possible noise
  - ``mu_0``: true untreated potential outcome without noise
  - ``mu_1``: true treated potential outcome without noise
  - ``ite``: true individual treatment effect
