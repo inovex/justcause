@@ -8,29 +8,27 @@ The Reason for DGPs
 ===================
 Due to the so called `Fundamental Problem of Causal Inference`_, there is no ground truth for any real treatment effect dataset.
 In order to be able to evaluate methods, we thus need to resort to semi- or fully-synthetic data. The process of generating such a
-dataset is called a data generating process (DGP). We distinguish between 1) a Empirical Monte Carlo Study [1]_ which uses
-real covariates - the features of real instances (e.g. patients, ...) - and generates a sythetic potential outcome on top of it and
-2) a fully synthetic approach, where covariates are sampled from some distribution.
+dataset is called a data generating process (DGP). We distinguish between i) an Empirical Monte Carlo Study `[1]`_ which uses
+real covariates - the features of real instances (e.g. patients, ...) - and generates a synthetic potential outcome on top of it and
+ii) a fully synthetic approach, where covariates are sampled from some distribution.
 
 Briefly, a reference data set following our convention contains these columns:
 
- - ``x_*``: covariates, as many as needed (e.g. x_1, x_2, ...)
- - ``t``: a binary treatment indicator
- - ``y``: the true observed outcome
- - ``y_cf``: the counterfactual outcome
- - ``y_0``: the true untreated potential outcome
- - ``y_1``: the true treated potential outcome
- - ``mu_0``: the noiseless untreated outcome (may be equal to y_0, in some cases)
- - ``mu_1``: the noiseless treated outcome (may be equal to y_1)
- - ``ite``: the explicit individual treatment effect
+ - ``x_*``: covariates, e.g. x_1, x_2, ...
+ - ``t``: binary treatment indicator
+ - ``y``: true observed outcome
+ - ``y_cf``: counterfactual outcome
+ - ``y_0``: untreated potential outcome with noise potentially
+ - ``y_1``: treated potential outcome with noise potentially
+ - ``mu_0``: true untreated potential outcome without noise
+ - ``mu_1``: true treated potential outcome without noise
+ - ``ite``: true individual treatment effect
 
-For which the follow relationships should hold:
-
-::
+For those columns the following relationships holds::
 
     ite = mu_0 - mu_1
     y = t*y_1 + (1-t)*y_0
-    y_cf = (1-t)*y_1 + (t)*y_0 # the opposite of y in {y_0, y_1}
+    y_cf = 1 - y  # the counterfactual of y
 
 
 Replications
