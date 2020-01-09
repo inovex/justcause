@@ -10,3 +10,4 @@ scipy
 seaborn
 tensorflow
 causalml
+sphinx_rtd_theme

@@ -3,9 +3,9 @@
 The helpers begin with an underscore, as they are not exported and should not be
 used by themselves. `multi_expo_on_ihdp` makes the entry point to access this DGP.
 
-Basic Usage:
+Basic Usage: ::
 
-    replications = multi_expo_on_ihdp(setting="multi-modal", n_replications=100)
+    >>> replications = multi_expo_on_ihdp(setting="multi-modal", n_replications=100)
 
 """
 from typing import List, Optional, Union
@@ -57,25 +57,31 @@ def multi_expo_on_ihdp(
     n_replications: int = 1,
     random_state: OptRandState = None,
 ) -> List[Frame]:
-    """Reproduces a specific DGP used in the Thesis based on IHDP covariates.
+    r"""Reproduces a specific DGP used in the Thesis based on IHDP covariates.
 
     The DGP has been designed to show that some learners,
     specifically tree-based learner, are very good in a multi-modal
     settings, while in a smooth exponential setting, linear learners are much better
     suited to estimate individual treatment effects.
-    For details, see Chapter 5.3.1 (p.56) in the thesis (`docs/thesis.pdf`).
+    For details, see Chapter 5.3.1 (p.56) in the Thesis.
 
+    .. math ::
 
-    y_0 = N(0, 0.2)
-    y_1 = y_0 + tau
-    t = BERN[sigmoid(X_8)]
+        y_0 &= N(0, 0.2) \\
+        y_1 &= y_0 + tau \\
+        t &= \text{BERN}[sigmoid(X_8)]
 
-    and tau is either exponential:
-    tau = exp(1 + sigmoid(X_8))
+    and tau is either exponential
+
+    .. math :: \tau = exp(1 + sigmoid(X_8))
 
     or multi-modal
-    c = I(sigmoid(X_8) > 0.5) # indicator based on feature
-    tau = N(3*c + (1 - c), 0.1)
+
+    .. math ::
+
+        c &= \mathbb{I}(sigmoid(X_8) > 0.5) \\
+        \tau &= N(3*c + (1 - c), 0.1)
+
 
     Args:
         setting: either 'multi-modal' or 'exponential'
@@ -84,7 +90,7 @@ def multi_expo_on_ihdp(
         random_state: a random state from which to draw
 
     Returns:
-        data: a list of CausalFrames for each replication requested
+        a list of CausalFrames for each replication requested
 
     """
     # Use covariates as nd.array
