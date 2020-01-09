@@ -5,7 +5,7 @@ Usage
 This sections gives you a detailed explanation how to use JustCause.
 
 The Reason for DGPs
-=========
+===================
 Due to the so called `Fundamental Problem of Causal Inference`_, there is no ground truth for any real treatment effect dataset.
 In order to be able to evaluate methods, we thus need to resort to semi- or fully-synthetic data. The process of generating such a
 dataset is called a data generating process (DGP). We distinguish between 1) a Empirical Monte Carlo Study [1]_ which uses
@@ -42,8 +42,6 @@ In the case of IHDP 1000 replications of the same data are used for
 a full evaluation, thus ensuring robust evaluation results.
 
 The concept of replications is build into JustCause by design to encourage robust comparisons.
-
-.. automethod:: justcause.data.sets.ihdp.load_ihdp
 
 
 Handling Data
