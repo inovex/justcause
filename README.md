@@ -63,17 +63,18 @@ Optional and needed only once after `git clone`:
    The `-n, --no-verify` flag of `git commit` can be used to deactivate pre-commit hooks temporarily.
 
 
-## Note
-
-This project has been set up using [PyScaffold] 3.2.2 and the [dsproject extension] 0.4.
-For details and usage information on PyScaffold see https://pyscaffold.org/.
-
 # See also
 Similar and related project are:
  1. [causalml](https://github.com/uber/causalml): causal inference with machine learning algorithms in Python
  2. [DoWhy](https://github.com/Microsoft/dowhy): causal inference using graphs for identification
  3. [EconML](https://github.com/microsoft/EconML): Heterogeneous Effect Estimation in Python
  4. [awesome-list](https://github.com/rguo12/awesome-causality-algorithms): A very extensive list of causal methods and respective code
+
+
+## Note
+
+This project has been set up using [PyScaffold] 3.2.2 and the [dsproject extension] 0.4.
+For details and usage information on PyScaffold see https://pyscaffold.org/.
 
 
 [conda]: https://docs.conda.io/

@@ -24,11 +24,11 @@ Briefly, a reference data set following our convention contains these columns:
  - ``mu_1``: true treated potential outcome without noise
  - ``ite``: true individual treatment effect
 
-For those columns the following relationships holds::
+For those columns the following relationships hold:
 
-    ite = mu_0 - mu_1
-    y = t*y_1 + (1-t)*y_0
-    y_cf = 1 - y  # the counterfactual of y
+ - ``ite = mu_0 - mu_1``
+ - ``y = t*y_1 + (1-t)*y_0``
+ - ``y_cf = 1 - y`` (*counterfactual* of y)
 
 
 Replications
