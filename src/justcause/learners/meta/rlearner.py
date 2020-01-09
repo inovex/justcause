@@ -2,10 +2,11 @@ from typing import Optional, Union
 
 import numpy as np
 from causalml.inference.meta import BaseRRegressor
-from causalml.propensity import ElasticNetPropensityModel
 from numpy.random import RandomState
 from sklearn.linear_model import LinearRegression
 from sklearn.utils import check_random_state
+
+from ..propensity import estimate_propensities
 
 StateType = Optional[Union[int, RandomState]]
 
@@ -60,10 +61,11 @@ class RLearner:
         return self.__str__()
 
     def fit(self, x: np.array, t: np.array, y: np.array, p: np.array = None) -> None:
-        """ Fits the RLearner on given samples
+        """Fits the RLearner on given samples.
 
-        Defaults to ElasticNetPropensityModel for propensity if not given expclicitly,
-        in order to allow a generic call to fit()
+        Defaults to `justcause.learners.propensities.estimate_propensities`
+        for propensity if not given expclicitly, in order to allow a generic call
+        to the fit() method
 
         Args:
             x: covariate matrix of shape (num_instances, num_features)
@@ -71,16 +73,11 @@ class RLearner:
             y: factual outcomes, (num_instances)
             p: propensities, shape (num_instances)
 
-        Returns: None
         """
-        # TODO: Replace this with a default_propensity from utils
-        # TODO: Maybe just assert that propensity is not None and explain why
-        #  --> responsibility with the user
         if p is None:
             # Propensity is needed by CausalML, so we estimate it,
             # if it was not provided
-            p_learner = ElasticNetPropensityModel()
-            p = p_learner.fit_predict(x, t)
+            p = estimate_propensities(x, t)
 
         self.model.fit(x, p, t, y)
 

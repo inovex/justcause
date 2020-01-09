@@ -2,10 +2,11 @@ from typing import Optional
 
 import numpy as np
 from causalml.inference.meta import BaseXRegressor
-from causalml.propensity import ElasticNetPropensityModel
 from sklearn.linear_model import LassoLars
 
 from justcause.learners.utils import replace_factual_outcomes
+
+from ..propensity import estimate_propensities
 
 
 class XLearner:
@@ -76,9 +77,6 @@ class XLearner:
     def fit(self, x: np.array, t: np.array, y: np.array) -> None:
         """ Fits the RLearner on given samples
 
-        Defaults to ElasticNetPropensityModel for propensity if not given expclicitly,
-        in order to allow a generic call to fit()
-
         Args:
             x: covariate matrix of shape (num_instances, num_features)
             t: treatment indicator vector, shape (num_instances)
@@ -93,41 +91,38 @@ class XLearner:
         x: np.array,
         t: np.array = None,
         y: np.array = None,
-        propensities: Optional[np.array] = None,
+        p: Optional[np.array] = None,
         return_components: bool = False,
         replace_factuals: bool = False,
     ) -> np.array:
-        """
+        """Predicts ITE for the given population
+
+        If propensities ``p`` are not given, they are estimated using the default
+        implementation `justcause.learners.propensities.estimate_propensities`
 
         Args:
             x: covariates
             t: treatment indicator
             y: factual outcomes
-            propensities: propensity scores
+            p: propensity scores
             return_components: whether to return Y(1) and Y(0) for all instances or not
             replace_factuals: whether to replace predicted outcomes with the factual
                 outcomes where applicable
 
         Returns:
-
+            the ITE prediction either with or without components
         """
-        # TODO: Replace this with a default_propensity from utils
-        if propensities is None:
+        if p is None:
             # Set default propensity, because CausalML currently requires it
-            p_learner = ElasticNetPropensityModel()
-            propensities = p_learner.fit_predict(x, t)
+            p = estimate_propensities(x, t)
 
         if return_components:
-            ite, y_0, y_1 = self.model.predict(
-                x, propensities, t, y, return_components=True
-            )
+            ite, y_0, y_1 = self.model.predict(x, p, t, y, return_components=True)
             if t is not None and y is not None and replace_factuals:
                 y_0, y_1 = replace_factual_outcomes(y_0, y_1, y, t)
             return ite.flatten(), y_0.flatten(), y_1.flatten()
         else:
-            return self.model.predict(
-                x, propensities, t, y, return_components=False
-            ).flatten()
+            return self.model.predict(x, p, t, y, return_components=False).flatten()
 
     def estimate_ate(
         self,
