@@ -16,7 +16,7 @@ Briefly, a reference data set following our convention contains these columns:
 
  - ``x_*``: covariates, e.g. x_1, x_2, ...
  - ``t``: binary treatment indicator
- - ``y``: true observed outcome
+ - ``y``: observed outcome
  - ``y_cf``: counterfactual outcome
  - ``y_0``: untreated potential outcome with possible noise
  - ``y_1``: treated potential outcome with possible noise
@@ -26,9 +26,11 @@ Briefly, a reference data set following our convention contains these columns:
 
 For those columns the following relationships hold:
 
- - ``ite = mu_0 - mu_1``
  - ``y = t*y_1 + (1-t)*y_0``
- - ``y_cf = 1 - y`` (*counterfactual* of y)
+ - ``y_cf = 1 - y`` (*counterfactual* of ``y``)
+ - ``y = y_0 if t == 0 else y_1``
+ - ``y_0 = mu_0 + ε`` and ``y_1 = mu_1 + ε`` where ε is some random noise or 0
+ - ``ite = mu_0 - mu_1``
 
 
 Replications
