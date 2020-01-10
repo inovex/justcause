@@ -64,7 +64,7 @@ do a train/test split, apply a basic learner on each replication and display som
     >>>    p = estimate_propensities(train.np.X, train.np.t)
     >>>    slearner.fit(train.np.X, train.np.t, train.np.y, weights=1/p)
     >>>    pred_ite = slearner.predict_ite(test.np.X, test.np.t, test.np.y)
-    >>>    scores.append(calc_scores(test['ite'], pred_ite, metrics))
+    >>>    scores.append(calc_scores(test.np.ite, pred_ite, metrics))
 
     >>> pd.DataFrame(scores)
        pehe_score  mean_absolute

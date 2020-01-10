@@ -2,7 +2,7 @@
 Usage
 =====
 
-This sections gives you a detailed explanation how to use JustCause.
+This sections gives you a detailed explanation on how to use JustCause.
 
 The Reason for DGPs
 ===================
@@ -12,9 +12,8 @@ dataset is called a data generating process (DGP). We distinguish between i) an 
 real covariates - the features of real instances (e.g. patients, ...) - and generates a synthetic potential outcome on top of it and
 ii) a fully synthetic approach, where covariates are sampled from some distribution.
 
-Briefly, a reference data set following our convention contains these columns:
+Briefly, a reference data set following our convention contains these columns with special meaning:
 
- - ``x_*``: covariates, e.g. x_1, x_2, ...
  - ``t``: binary treatment indicator
  - ``y``: observed outcome
  - ``y_cf``: counterfactual outcome
@@ -32,6 +31,10 @@ For those columns the following relationships hold:
  - ``y_0 = mu_0 + ε`` and ``y_1 = mu_1 + ε`` where ε is some random noise or 0
  - ``ite = mu_0 - mu_1``
 
+Besides these column there are covariates (also called features) and optionally other columns for managing meta information
+like datetime or an id of sample. Within the provided data sets covariates are called ``x_1``, ``x_2``, etc. but can take
+any name if you use your own data set as explained below. Besides covariates, the provided data set have a column ``sample_id``
+to easily identify one sample.
 
 Replications
 ------------
@@ -48,8 +51,8 @@ Handling Data
 =============
 
 JustCause uses a generalization of a Pandas :class:`~pandas.DataFrame` for managing your data named :class:`~.CausalFrame`.
-A CausalFrame encompasses all the functionality of a Pandas DataFrame but additionally keeps track which columns
-are a *covariates*, *treatment*, *outcome* or *others*. This allows to easily access them in a programmatic way.
+A CausalFrame encompasses all the functionality of a Pandas DataFrame but additionally keeps track which columns besides
+the ones with special meaning like explained above, covariates and others. This allows to easily access them in a programmatic way.
 
 All data sets provided by JustCause are provided as lists of CausalFrames, i.e. for each replication one CausalFrame.
 Thus, we get a single CausalFrame ``cf`` from one of the provided data sets by::
@@ -60,13 +63,9 @@ Thus, we get a single CausalFrame ``cf`` from one of the provided data sets by::
     >>> type(cf)
     justcause.data.frames.CausalFrame
 
-As usual, ``cf.columns`` would list the names of all columns. To find out if a column actually is a covariate, treatment,
-outcome or something else, we can use the attribute accessor ``names``::
+As usual, ``cf.columns`` would list the names of all columns. To find out which of these columns are *covariates* or
+*others*, we can use the attribute accessor ``names``::
 
-    >>> cf.names.treatment
-    't'
-    >>> cf.names.outcome
-    'y'
     >>> cf.names.covariates
     ['0',
      '1',
@@ -78,14 +77,13 @@ outcome or something else, we can use the attribute accessor ``names``::
      '23',
      '24']
     >>> cf.names.others
-    ['sample_id', 'mu_1', 'mu_0', 'y_cf', 'ite']
+    ['sample_id']
 
 This allows us to easily apply transformations for instance only to covariates. In general, this leads to more robust code
-since the API of a CausalFrame enforces the differentiation between covariates, outcome, treatment and other columns
-such as metadata like a datetime or an id of an observation.
+since the API of a CausalFrame enforces the differentiation between covariates, columns with special meaning, e.g.
+outcome ``y``, treatment ``t`` and other columns such as metadata like a datetime or an id of an observation, e.g. ``sample_id``.
 
-If we want to construct a CausalFrame, we do that just in the same way as with a DataFrame but have to specify covariate,
-treatment and outcome columns::
+If we want to construct a CausalFrame, we do that just in the same way as with a DataFrame but have to specify covariate columns::
 
     >>> import justcause as jc
     >>> from numpy.random import rand, randint
@@ -99,13 +97,9 @@ treatment and outcome columns::
     >>>                      't': randint(2, size=N),
     >>>                      'y': rand(N)
     >>>                      },
-    >>>                      covariates=['c1', 'c2'],
-    >>>                      treatment='t',
-    >>>                      outcome='y')
+    >>>                      covariates=['c1', 'c2'])
 
-In our example, we do not need to pass ``treatment='t'`` and ``outcome='y'`` since ``'t'`` and ``'y'`` are used as default
-values for the parameters ``treatment`` and ``outcome``, respectively, if they exist as column names.
-All columns not listed as covariates, treatment and outcome will be considered as *others*::
+All columns that are neither covariates nor columns with special meaning like ``t`` and ``y`` are treated as *others*::
 
     >>> cf.names.others
     ['date']
@@ -121,7 +115,7 @@ the abstraction layer to the original method much smaller.
 The ``fit`` method of a learner takes at least the parameters ``X`` for the covariate matrix,  ``t`` for the treatment
 and ``y`` for the outcome, i.e. target, vector as Numpy arrays. In order to bridge the gap between rich CausalFrames and
 plain arrays, a :class:`~.CausalFrame` provides the attribute accessor ``np`` (for *numpy*). Using it, we can easily pass
-the covariates, treatment and outcome to a learner::
+the covariates ``X``, treatment ``t`` and outcome ``y`` to a learner::
 
     >>> from sklearn.ensemble import RandomForestRegressor
 

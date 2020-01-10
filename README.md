@@ -69,7 +69,7 @@ Optional and needed only once after `git clone`:
  2. [DoWhy](https://github.com/Microsoft/dowhy): causal inference using graphs for identification
  3. [EconML](https://github.com/microsoft/EconML): Heterogeneous Effect Estimation in Python
  4. [awesome-list](https://github.com/rguo12/awesome-causality-algorithms): A very extensive list of causal methods and respective code
-
+ 5. [IBM-Causal-Inference-Benchmarking-Framework](https://github.com/IBM-HRL-MLHLS/IBM-Causal-Inference-Benchmarking-Framework) Causal Inference Benchmarking Framework
 
 ## Note
 
