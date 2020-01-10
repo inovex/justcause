@@ -190,3 +190,20 @@ def generate_data(
     df = pd.merge(cov_df, rep_df, how="inner", on=Col.sample_id)
     df = CausalFrame(df, covariates=covariate_names)
     return to_rep_list(df)
+
+
+def add_pot_outcomes_if_missing(cf: CausalFrame):
+    """Generate missing potential outcomes y_0/y_1 from mu_0/my_1
+
+    Args:
+        cf: CausalFrame with potentially missing potential outcomes
+
+    Returns:
+        CausalFrame with columns y_0 and y_1
+
+    """
+    if Col.y_0 not in cf.columns:
+        cf[Col.y_0] = cf[Col.mu_0]
+    if Col.y_1 not in cf.columns:
+        cf[Col.y_1] = cf[Col.mu_1]
+    return cf

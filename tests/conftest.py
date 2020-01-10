@@ -57,7 +57,14 @@ def dummy_df():
             "b": 2 * np.arange(N),
             "t": (2 * np.arange(N) / N).astype(np.int),
             "y": np.linspace(0.0, 1.0, N),
+            "y_cf": 1.0 - np.linspace(0.0, 1.0, N),
+            "y_0": np.linspace(0.0, 1.0, N),
+            "y_1": np.linspace(0.0, 1.0, N),
+            "mu_0": np.linspace(0.0, 1.0, N),
+            "mu_1": np.linspace(0.0, 1.0, N),
+            "ite": np.linspace(0.0, 1.0, N),
             "rep": (2 * np.arange(N) / N).astype(np.int),
+            "sample_id": np.arange(10),
         }
     )
 

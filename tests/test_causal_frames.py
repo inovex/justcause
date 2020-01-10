@@ -34,11 +34,8 @@ def test_names_extension(dummy_cf, dummy_df):
     covariates = dummy_cf.names.covariates
     assert covariates == ["a", "b"]
 
-    treatment = dummy_cf.names.treatment
-    assert treatment == "t"
-
-    outcome = dummy_cf.names.outcome
-    assert outcome == "y"
+    others = dummy_cf.names.others
+    assert others == ["rep", "sample_id"]
 
 
 def test_np_extension(dummy_cf, dummy_df):
@@ -58,13 +55,13 @@ def test_np_extension(dummy_cf, dummy_df):
     assert_array_equal(dummy_cf["t"].to_numpy(), t)
 
     dummy_cf_no_X = dummy_cf.drop(["a", "b"], axis=1)
-    with pytest.raises(IndexError):
+    with pytest.raises(KeyError):
         _ = dummy_cf_no_X.np.X
 
     dummy_cf_no_y = dummy_cf.drop("y", axis=1)
-    with pytest.raises(IndexError):
+    with pytest.raises(KeyError):
         _ = dummy_cf_no_y.np.y
 
     dummy_cf_no_t = dummy_cf.drop("t", axis=1)
-    with pytest.raises(IndexError):
+    with pytest.raises(KeyError):
         _ = dummy_cf_no_t.np.t

@@ -1,8 +1,5 @@
 """
-Specialised DataFrame which differentiates between covariates, treatment, outcome, etc.
-
-More information under:
-https://pandas.pydata.org/pandas-docs/stable/development/extending.html
+Generalised DataFrame which differentiates between covariates and other column names
 """
 from __future__ import annotations
 
@@ -27,6 +24,8 @@ class Col:
     t = "t"
     y = "y"
     y_cf = "y_cf"
+    y_0 = "y_0"
+    y_1 = "y_1"
     mu_0 = "mu_0"
     mu_1 = "mu_1"
     ite = "ite"
@@ -34,17 +33,8 @@ class Col:
     sample_id = "sample_id"
 
 
-#: Default columns besides the covariates in each dataframe
-DATA_COLS = [
-    Col.t,
-    Col.y,
-    Col.y_cf,
-    Col.mu_0,
-    Col.mu_1,
-    Col.ite,
-    Col.rep,
-    Col.sample_id,
-]
+#: List of CausalFrame columns with defined meaning
+DATA_COLS = [Col.t, Col.y, Col.y_cf, Col.y_0, Col.y_1, Col.mu_0, Col.mu_1, Col.ite]
 
 
 class CausalFrame(pd.DataFrame, ABC):
@@ -52,8 +42,6 @@ class CausalFrame(pd.DataFrame, ABC):
 
     def __init__(self, data, *args, **kwargs):
         covariates = kwargs.pop("covariates", None)
-        treatment = kwargs.pop("treatment", Col.t)
-        outcome = kwargs.pop("outcome", Col.y)
         internal_op = kwargs.pop("_internal_operation", False) or isinstance(
             data, BlockManager
         )
@@ -68,10 +56,10 @@ class CausalFrame(pd.DataFrame, ABC):
             assert set(covariates).issubset(
                 set(self.columns)
             ), "Covariates must be a subset of columns"
-            assert treatment in self.columns, "Treatment must be a column name"
-            assert outcome in self.columns, "Outcome must be a column name"
+            for col in DATA_COLS:
+                assert col in self.columns, f"Column '{col}' not present!"
 
-        self._names = dict(covariates=covariates, treatment=treatment, outcome=outcome)
+        self._names = dict(covariates=covariates)
 
     @property
     def _constructor(self) -> partial[CausalFrame]:
@@ -114,8 +102,7 @@ class NamesAccessor:
     @property
     def others(self) -> List[str]:
         """Return all other column names of a CausalFrame"""
-        col_types = ["covariates", "treatment", "outcome"]
-        exclude = {col for col_type in col_types for col in self._obj._names[col_type]}
+        exclude = self._obj._names["covariates"] + DATA_COLS
         return [col for col in self._obj.columns if col not in exclude]
 
 
@@ -134,21 +121,9 @@ class NumpyAccessor:
         """Return covariates as a numpy array"""
         cols = [col for col in self._obj.names.covariates if col in self._obj.columns]
         if not cols:
-            raise IndexError("No known covariates in CausalFrame")
+            raise KeyError("No known covariates in CausalFrame")
         return self._obj[cols].to_numpy()
 
-    @property
-    def t(self) -> np.ndarray:
-        """Return treatment as a numpy array"""
-        if self._obj.names.treatment not in self._obj.columns:
-            raise IndexError("No treatment variable in CausalFrame")
-        else:
-            return self._obj[self._obj.names.treatment].to_numpy()
-
-    @property
-    def y(self) -> np.ndarray:
-        """Return outcome as a numpy array"""
-        if self._obj.names.outcome not in self._obj.columns:
-            raise IndexError("No outcome variable in CausalFrame")
-        else:
-            return self._obj[self._obj.names.outcome].to_numpy()
+    def __getattr__(self, col):
+        """Return single column as numpy array"""
+        return self._obj[col].to_numpy()
