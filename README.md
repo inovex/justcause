@@ -63,8 +63,8 @@ Optional and needed only once after `git clone`:
    The `-n, --no-verify` flag of `git commit` can be used to deactivate pre-commit hooks temporarily.
 
 
-# See also
-Similar and related project are:
+# Related Projects & Resources
+
  1. [causalml](https://github.com/uber/causalml): causal inference with machine learning algorithms in Python
  2. [DoWhy](https://github.com/Microsoft/dowhy): causal inference using graphs for identification
  3. [EconML](https://github.com/microsoft/EconML): Heterogeneous Effect Estimation in Python

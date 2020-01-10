@@ -27,7 +27,7 @@ Briefly, a reference data set following our convention contains these columns:
 For those columns the following relationships hold:
 
  - ``y = t*y_1 + (1-t)*y_0``
- - ``y_cf = 1 - y`` (*counterfactual* of ``y``)
+ - ``y_cf = (1-t)*y_1 + t*y_0`` (*counterfactual* of ``y``)
  - ``y = y_0 if t == 0 else y_1``
  - ``y_0 = mu_0 + ε`` and ``y_1 = mu_1 + ε`` where ε is some random noise or 0
  - ``ite = mu_0 - mu_1``
