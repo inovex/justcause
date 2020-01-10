@@ -2,12 +2,8 @@
 cython
 numpy
 pandas
-keras
 matplotlib==2.2.4
 pyarrow>=0.15  # Mac problems with 0.13
 scikit-learn>=0.22
-scipy
-seaborn
-tensorflow
 causalml
 sphinx_rtd_theme

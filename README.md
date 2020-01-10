@@ -65,11 +65,11 @@ Optional and needed only once after `git clone`:
 
 # Related Projects & Resources
 
- 1. [causalml](https://github.com/uber/causalml): causal inference with machine learning algorithms in Python
- 2. [DoWhy](https://github.com/Microsoft/dowhy): causal inference using graphs for identification
- 3. [EconML](https://github.com/microsoft/EconML): Heterogeneous Effect Estimation in Python
- 4. [awesome-list](https://github.com/rguo12/awesome-causality-algorithms): A very extensive list of causal methods and respective code
- 5. [IBM-Causal-Inference-Benchmarking-Framework](https://github.com/IBM-HRL-MLHLS/IBM-Causal-Inference-Benchmarking-Framework) Causal Inference Benchmarking Framework
+ 1. [causalml]: causal inference with machine learning algorithms in Python
+ 2. [DoWhy]: causal inference using graphs for identification
+ 3. [EconML]: Heterogeneous Effect Estimation in Python
+ 4. [awesome-list]: A very extensive list of causal methods and respective code
+ 5. [IBM-Causal-Inference-Benchmarking-Framework]: Causal Inference Benchmarking Framework by IBM
 
 ## Note
 
@@ -83,3 +83,8 @@ For details and usage information on PyScaffold see https://pyscaffold.org/.
 [Google style]: http://google.github.io/styleguide/pyguide.html#38-comments-and-docstrings
 [PyScaffold]: https://pyscaffold.org/
 [dsproject extension]: https://github.com/pyscaffold/pyscaffoldext-dsproject
+[causalml]: https://github.com/uber/causalml
+[DoWhy]: https://github.com/Microsoft/dowhy
+[EconML]: https://github.com/microsoft/EconML
+[awesome-list]: https://github.com/rguo12/awesome-causality-algorithms
+[IBM-Causal-Inference-Benchmarking-Framework]: https://github.com/IBM-HRL-MLHLS/IBM-Causal-Inference-Benchmarking-Framework
