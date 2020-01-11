@@ -82,7 +82,11 @@ def to_rep_list(df: Frame) -> List[Frame]:
 
 
 def _add_outcomes(
-    df: pd.DataFrame, m_0: np.ndarray, m_1: np.ndarray, y_0: np.ndarray, y_1: np.ndarray
+    df: pd.DataFrame,
+    mu_0: np.ndarray,
+    mu_1: np.ndarray,
+    y_0: np.ndarray,
+    y_1: np.ndarray,
 ) -> pd.DataFrame:
     """Adds outcomes and derivatives of them to the DataFrame
 
@@ -91,9 +95,9 @@ def _add_outcomes(
 
     Args:
         df: dataframe to add the outcomes to with len(df) = num_instances
-        m_0: The noiseless, untreated outcome to be added to the Frame,
+        mu_0: The noiseless, untreated outcome to be added to the Frame,
             shape (num_instances)
-        m_1: The noiseless, treated outcome to be added to the Frame,
+        mu_1: The noiseless, treated outcome to be added to the Frame,
             shape (num_instances)
         y_0: The untreated outcome with added noise,
             shape (num_instances)
@@ -110,8 +114,8 @@ def _add_outcomes(
     y_cf = np.where(t, y_0, y_1)
 
     df[Col.y], df[Col.y_cf] = y, y_cf
-    df[Col.mu_0], df[Col.mu_1] = m_0, m_1
-    df[Col.ite] = y_1 - y_0  # add explicitly
+    df[Col.mu_0], df[Col.mu_1] = mu_0, mu_1
+    df[Col.ite] = mu_1 - mu_0  # add explicitly
     return df
 
 
