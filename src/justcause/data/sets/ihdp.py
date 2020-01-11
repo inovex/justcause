@@ -23,7 +23,7 @@ References:
     2017.
     [5] Maximilian Franz, "A Systematic Review of Machine Learning Estimators for
     Causal Effects", Bachelor Thesis, Karlsruhe Institute of Technology, 2019.
-    See `docs/thesis.pdf`.
+    See `docs/thesis-mfranz.pdf`.
 
 """
 from typing import List, Optional

@@ -6,7 +6,7 @@ simple T-Learner. See Chapter 5.5 in the thesis [1].
 References:
     [1] Maximilian Luca Franz, "A Systematic Review of Machine Learning Estimators for
         Causal Effects", Bachelor Thesis, Karlsruhe Institute of Technology, 2019.
-        See `docs/thesis.pdf`.
+        See `docs/thesis-mfranz.pdf`.
 
 """
 from typing import List

@@ -13,7 +13,7 @@ Our *cause* is to develop a framework that allows you to compare methods for cau
 in a fair and *just* way. JustCause is a work in progress and new contributors are always welcome.
 
 The reasons for creating a library like JustCause are laid out in the thesis
-:download:`A Systematic Review of Machine Learning Estimators for Causal Effects <thesis.pdf>`
+:download:`A Systematic Review of Machine Learning Estimators for Causal Effects <thesis-mfranz.pdf>`
 of Maximilian Franz. Therein, it is shown that many publications about causality:
 
     * lack reproducibility,
@@ -35,7 +35,7 @@ but consider using `conda`_ to set up an isolated environment beforehand. This c
     conda env create -f environment.yaml
     conda activate justcause
 
-with the following `environment.yaml`_.
+with the following :download:`environment.yaml <../environment.yaml>`.
 
 Quickstart
 ==========
@@ -110,5 +110,4 @@ Indices and tables
 .. _NumPy style: https://numpydoc.readthedocs.io/en/latest/format.html
 .. _classical style: http://www.sphinx-doc.org/en/stable/domains.html#info-field-lists
 .. _conda: https://docs.conda.io/
-.. _environment.yaml: https://github.com/inovex/justcause/blob/master/environment.yaml
 .. _IHDP: https://www.icpsr.umich.edu/web/HMCA/studies/9795

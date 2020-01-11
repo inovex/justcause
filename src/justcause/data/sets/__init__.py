@@ -1,7 +1,7 @@
 """Contains some of the most used reference data sets for method evaluation
 
 For a more detailed explanation of the data sets, see Section 4.2 "Existing
-Benchmarking Datasets" in the thesis under (docs/thesis.pdf) [1]
+Benchmarking Datasets" in the thesis under (docs/thesis-mfranz.pdf) [1]
 
 BEWARE: The performance of the data set accessors is highly dependent on how
 they are called. For example:
@@ -18,7 +18,7 @@ only merges the outcomes and covariates for the replications requested.
 References:
     [1] Maximilian Franz, "A Systematic Review of Machine Learning Estimators for
     Causal Effects", Bachelor Thesis, Karlsruhe Institute of Technology, 2019.
-    See `docs/thesis.pdf`.
+    See `docs/thesis-mfranz.pdf`.
 
 """
 from .ibm import load_ibm

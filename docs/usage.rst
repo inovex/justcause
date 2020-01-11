@@ -31,7 +31,7 @@ For those columns the following relationships hold:
  - ``y_0 = mu_0 + ε`` and ``y_1 = mu_1 + ε`` where ε is some random noise or 0
  - ``ite = mu_0 - mu_1``
 
-Besides these column there are covariates (also called features) and optionally other columns for managing meta information
+Besides these columns, there are covariates (also called features) and optionally other columns for managing meta information
 like datetime or an id of sample. Within the provided data sets covariates are called ``x_1``, ``x_2``, etc. but can take
 any name if you use your own data set as explained below. Besides covariates, the provided data set have a column ``sample_id``
 to easily identify one sample.
