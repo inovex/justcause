@@ -103,7 +103,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'JustCause'
-copyright = u'2019, Maximilian Franz, Florian Wilhelm'
+copyright = u'2020, Maximilian Franz, Florian Wilhelm'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
