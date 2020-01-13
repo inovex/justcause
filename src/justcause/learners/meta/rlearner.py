@@ -1,3 +1,4 @@
+"""Wrapper of the python RLearner implemented in the ``causalml`` package"""
 from typing import Optional, Union
 
 import numpy as np
@@ -12,7 +13,7 @@ StateType = Optional[Union[int, RandomState]]
 
 
 class RLearner:
-    """ An adapter to the BaseRRegressor from causalml
+    """A wrapper of the BaseRRegressor from ``causalml``
 
     Defaults to LassoLars regression as a base learner if not specified otherwise.
     Allows to either specify one learner for both tasks or two distinct learners
@@ -32,7 +33,7 @@ class RLearner:
         effect_learner=None,
         random_state: StateType = None,
     ):
-        """
+        """Setup an RLearner
 
         Args:
             learner: default learner for both outcome and effect
@@ -50,7 +51,7 @@ class RLearner:
         )
 
     def __str__(self):
-        """ Simple string representation for logs and outputs"""
+        """Simple string representation for logs and outputs"""
         return "{}(outcome={}, effect={})".format(
             self.__class__.__name__,
             self.model.model_mu.__class__.__name__,
@@ -64,7 +65,7 @@ class RLearner:
         """Fits the RLearner on given samples.
 
         Defaults to `justcause.learners.propensities.estimate_propensities`
-        for propensity if not given expclicitly, in order to allow a generic call
+        for ``p`` if not given explicitly, in order to allow a generic call
         to the fit() method
 
         Args:
@@ -81,17 +82,36 @@ class RLearner:
 
         self.model.fit(x, p, t, y)
 
-    def predict_ite(
-        self, x: np.array, t: np.array = None, y: np.array = None
-    ) -> np.array:
-        """ Predicts ITE for given samples; ignores the factual outcome and treatment"""
+    def predict_ite(self, x: np.array, *args) -> np.array:
+        """Predicts ITE for given samples; ignores the factual outcome and treatment
+
+        Args:
+            x: covariates used for precition
+            *args: NOT USED but kept to work with the standard ``fit(x, t, y)`` call
+
+        """
 
         # assert t is None and y is None, "The R-Learner does not use factual outcomes"
         return self.model.predict(x).flatten()
 
     def estimate_ate(
         self, x: np.array, t: np.array, y: np.array, p: Optional[np.array] = None
-    ):
+    ) -> float:
+        """Estimate the average treatment effect (ATE) by fit and predict on given data
+
+        Estimates the ATE as the mean of ITE predictions on the given data.
+
+        Args:
+            x: covariates of shape (num_samples, num_covariates)
+            t: treatment indicator vector, shape (num_instances)
+            y: factual outcomes, (num_instances)
+            p: propensities, shape (num_instances)
+
+        Returns:
+            the average treatment effect estimate
+
+
+        """
         self.fit(x, t, y, p)
         ite = self.predict_ite(x, t, y)
         return float(np.mean(ite))

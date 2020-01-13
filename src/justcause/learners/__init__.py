@@ -1,3 +1,4 @@
+"""Basic learners and justcause-friendly wrappers for more advanced methods"""
 from .meta.slearner import SLearner  # noqa: F401
 from .meta.tlearner import TLearner  # noqa: F401
 from .meta.rlearner import RLearner  # noqa: F401

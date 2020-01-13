@@ -1,3 +1,4 @@
+"""Default methods and helpers for estimation of propensities"""
 from pygam import LogisticGAM, s
 from sklearn.linear_model import LogisticRegression
 

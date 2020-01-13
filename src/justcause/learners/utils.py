@@ -1,3 +1,4 @@
+"""Miscellaneous tools used in the `justcause.learners`"""
 from typing import List, Tuple
 
 import numpy as np
@@ -22,7 +23,13 @@ def replace_factual_outcomes(
 
 
 def install_r_packages(package_names: List[str], verbose=False):
-    """ Installs the packages if needed using rpy2 utility functions"""
+    """Installs the R packages if needed using rpy2 utility functions
+
+    Args:
+        package_names: names of the R packages to install
+        verbose: Whether to print progress information or not
+
+    """
     import rpy2.robjects.packages as rpackages
     from rpy2 import robjects
     from rpy2.robjects import StrVector

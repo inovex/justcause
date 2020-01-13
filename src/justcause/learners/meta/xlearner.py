@@ -10,10 +10,10 @@ from ..propensity import estimate_propensities
 
 
 class XLearner:
-    """ An adapter to the BaseXRegressor from causalml
+    """Wrapper of the BaseXRegressor from causalml
 
-    Defaults to LassoLars regression as a base learner if not specified otherwise.
-    Allows to either specify one learner for all or four distinct learners
+    Defaults to `sklearn.linear_model.LassoLars` as a base learner if not specified
+    otherwise. Allows to either specify one learner for all or four distinct learners
     for the tasks
         - outcome control
         - outcome treated
@@ -21,9 +21,9 @@ class XLearner:
         - effect treated
 
     References:
-        CausalML Framework `on Github <https://github.com/uber/causalml/>'_.
+        [1] CausalML Framework `on Github <https://github.com/uber/causalml/>'_.
 
-        [1] S. R. Künzel, J. S. Sekhon, P. J. Bickel, and B. Yu,
+        [2] S. R. Künzel, J. S. Sekhon, P. J. Bickel, and B. Yu,
             “Meta-learners for Estimating Heterogeneous
             Treatment Effects using Machine Learning,” 2019.
 
@@ -37,6 +37,17 @@ class XLearner:
         effect_learner_c=None,
         effect_learner_t=None,
     ):
+        """Setup a XLearner
+
+        All learners must have ``fit(x, y)`` and ``predict(x)`` methods.
+
+        Args:
+            learner: default learner for all roles
+            outcome_learner_c: specific learner for control outcome function
+            outcome_learner_t: specific learner for treated outcome function
+            effect_learner_c: specific learner for treated effect
+            effect_learner_t: specific learner for control effect
+        """
         if (learner is not None) or (
             (outcome_learner_c is not None)
             and (outcome_learner_t is not None)
@@ -62,7 +73,7 @@ class XLearner:
             )
 
     def __str__(self):
-        """ Simple string representation for logs and outputs"""
+        """Simple string representation for logs and outputs"""
         return "{}(outcome_c={}, outcome_t={}, effect_c={}, effect_t={})".format(
             self.__class__.__name__,
             self.model.model_mu_c.__class__.__name__,
@@ -75,14 +86,13 @@ class XLearner:
         return self.__str__()
 
     def fit(self, x: np.array, t: np.array, y: np.array) -> None:
-        """ Fits the RLearner on given samples
+        """Fits the RLearner on given samples
 
         Args:
             x: covariate matrix of shape (num_instances, num_features)
             t: treatment indicator vector, shape (num_instances)
             y: factual outcomes, (num_instances)
 
-        Returns: None
         """
         self.model.fit(x, t, y)
 
@@ -131,6 +141,6 @@ class XLearner:
         y: np.array,
         propensities: Optional[np.array] = None,
     ) -> float:
-        """ Predicts ATE for given samples; ignores the factual outcome and treatment"""
+        """Predicts ATE for given samples as mean of ITE predictions"""
         self.fit(x, t, y)
         return float(np.mean(self.predict_ite(x, t, y, propensities)))

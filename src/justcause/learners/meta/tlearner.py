@@ -11,15 +11,12 @@ SingleComp = Union[Tuple[np.array, np.array, np.array], np.array]
 
 
 class TLearner:
-    """ Base class for all T-Learners; bundles duplicate code
-
-    Defaults to a LassoLars learner for both treated and control
-
-    """
+    """Generic TLearner implementation for the binary treatment case"""
 
     def __init__(self, learner=None, learner_c=None, learner_t=None):
-        """
-        Takes either one base learner for both or two specific base learners
+        """Takes either one base learner for both or two specific base learners
+
+        Defaults to a `sklearn.linear_model.LassoLars` for both treated and control
 
         Args:
             learner: base learner for treatment and control outcomes
@@ -42,7 +39,7 @@ class TLearner:
         return self.__str__()
 
     def __str__(self):
-        """ Simple string representation for logs and outputs"""
+        """Simple string representation for logs and outputs"""
         return "{}(control={}, treated={})".format(
             self.__class__.__name__,
             self.learner_c.__class__.__name__,
@@ -52,13 +49,26 @@ class TLearner:
     def fit(
         self, x: np.array, t: np.array, y: np.array, weights: Optional[np.array] = None,
     ) -> None:
-        """
+        r"""Fit the two learners on the given samples
+
+        ``learner_c`` is trained on the untreated (control) samples while ``learner_t``
+        is trained on the treated samples.
+
+        .. math::
+            \mu_0(x) &= E[Y \mid X=x, T=0],\\
+            \mu_1(x) &= E[Y \mid X=x, T=1], \\
+            &\text{which are plugged into the prediction:}  \\
+            \hat{\tau}(x) &= \hat{\mu_1}(x) - \hat{\mu_0}(x).
+
+
 
         Args:
             x: covariates, shape (num_instances, num_features)
-            t: treatment indicator
-            y: factual outcomes
-            weights: sample weights for weighted fitting
+            t: treatment indicator, shape (num_instances)
+            y: factual outcomes, shape (num_instances)
+            weights: sample weights for weighted fitting.
+                If used, the learners must allow a ``sample_weights`` argument to their
+                ``fit()`` method
         """
         assert (
             t is not None and y is not None
@@ -80,7 +90,7 @@ class TLearner:
         return_components: bool = False,
         replace_factuals: bool = False,
     ) -> SingleComp:
-        """ Predicts ITE for the given samples
+        """Predicts ITE for the given samples
 
         Args:
             x: covariates in shape (num_instances, num_features)
@@ -89,8 +99,9 @@ class TLearner:
             return_components: whether to return Y(0) and Y(1) predictions separately
             replace_factuals
 
-        Returns: a vector of ITEs for the inputs;
-            also returns Y(0) and Y(1) for all inputs if return_components is True
+        Returns:
+            a vector of ITEs for the inputs; also returns Y(0) and Y(1) for all
+            inputs if return_components is True
         """
         y_0 = self.learner_c.predict(x)
         y_1 = self.learner_t.predict(x)
@@ -108,18 +119,21 @@ class TLearner:
         y: np.array = None,
         weights: Optional[np.array] = None,
     ) -> float:
-        """ Estimates the average treatment effect of the given population
+        """Estimates the average treatment effect of the given population
 
         First, it fits the model on the given population, then predicts ITEs and uses
         the mean as an estimate for the ATE
 
         Args:
-            x: covariates
-            t: treatment indicator
-            y: factual outcomes
-            weights: sample weights for weighted fitting
+            x: covariates in shape (num_instances, num_features)
+            t: treatment indicator, binary in shape (num_instances)
+            y: factual outcomes in shape (num_instances)
+            weights: sample weights for weighted fitting.
+                If used, the learners must allow a ``sample_weights`` argument to their
+                ``fit()`` method
 
-        Returns: ATE estimate as the mean of ITEs
+        Returns:
+            ATE estimate as the mean of ITEs
         """
         self.fit(x, t, y, weights)
         ite = self.predict_ite(x, t, y)

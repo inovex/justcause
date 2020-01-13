@@ -27,7 +27,7 @@ class DoubleRobustEstimator(object):
         learner_t=None,
         delta=0.001,
     ):
-        """Inits the DoubleRobustEstimator
+        """Setup a DoubleRobustEstimator
 
         Args:
             propensity_learner: a classifier model with probability estimation method
@@ -68,7 +68,16 @@ class DoubleRobustEstimator(object):
         y: np.array,
         propensity: Optional[np.array] = None,
     ) -> float:
-        """Estimates average treatment effect of the given population
+        r"""Estimates average treatment effect of the given population
+
+        .. math::
+            \widehat{\tau}_{D R} &= n^{-1} \sum_{i=1}^n \left[ \frac{T_i Y_i}{p(X_i)} -
+                \frac{T_i - p(X_i)}{p(X_i)} \mu_1(X_i) \right] \\
+                &- n^{-1} \sum_{i=1}^n \left[ \frac{(1-T_i) Y_i}{1 - p(X_i)} +
+                \frac{T_i - p(X_i)}{1 - p(X_i)} \mu_0(X_i) \right]. \\
+            \text{where} \\
+            \mu_1 &= \texttt{learner_t}, \\
+            \mu_0 &= \texttt{learner_c}
 
         Args:
             x: covariates in shape (num_instances, num_features)

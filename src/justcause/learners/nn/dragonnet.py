@@ -6,7 +6,7 @@ from ..utils import replace_factual_outcomes
 
 
 class DragonNet:
-    """ Wrapper of the DragonNet implementation found in `contrib.dragonnet`
+    """Wrapper of the DragonNet implementation in `justcause.contrib.dragonnet`
 
      Original code taken with slide adaption for usage within the framework.
      Source can be found here: https://github.com/claudiashi57/dragonnet
@@ -34,12 +34,12 @@ class DragonNet:
         )
 
     def fit(self, x: np.array, t: np.array, y: np.array) -> None:
-        """ Trains DragonNet with hyper-parameters specified in the constructor
+        """Trains DragonNet with hyper-parameters specified in the constructor
 
         Args:
             x: covariates for all instances, shape (num_instance, num_features)
-            t: treatment indicator
-            y: factual outcomes
+            t: treatment indicator vector, shape (num_instance)
+            y: factual outcomes, shape (num_instance)
 
         """
         self.model = dragonnet.train_dragon(
@@ -60,17 +60,19 @@ class DragonNet:
         return_components: bool = False,
         replace_factuals: bool = False,
     ):
-        """ Predicts ITE for the given samples
+        """Predicts ITE for the given samples
 
         Args:
             x: covariates in shape (num_instances, num_features)
             t: treatment indicator, binary in shape (num_instances)
             y: factual outcomes in shape (num_instances)
             return_components: whether to return Y(0) and Y(1) predictions separately
-            replace_factuals: whether to replace
+            replace_factuals: whether to replace outcomes with true outcomes
+                where possible
 
-        Returns: a vector of ITEs for the inputs;
-            also returns Y(0) and Y(1) for all inputs if return_components is True
+        Returns:
+            a vector of ITEs for the inputs; also returns Y(0) and Y(1) for all
+            inputs if ``return_components`` is ``True``
         """
         assert self.model is not None, "DragonNet must be fit before use"
 
@@ -87,16 +89,15 @@ class DragonNet:
     def estimate_ate(
         self, x: np.array, t: np.array = None, y: np.array = None,
     ) -> float:
-        """ Estimates the average treatment effect of the given population
+        """Estimates the average treatment effect of the given population
 
         First, it fits the model on the given population, then predicts ITEs and uses
         the mean as an estimate for the ATE
 
         Args:
-            x: covariates
-            t: treatment indicator
-            y: factual outcomes
-            weights: sample weights for weighted fitting
+            x: covariates in shape (num_instances, num_features)
+            t: treatment indicator, binary in shape (num_instances)
+            y: factual outcomes in shape (num_instances)
 
         Returns: ATE estimate as the mean of ITEs
         """

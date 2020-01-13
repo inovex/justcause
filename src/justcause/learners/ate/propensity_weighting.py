@@ -32,7 +32,13 @@ class PSWEstimator(object):
         y: np.array,
         propensities: Optional[np.array] = None,
     ) -> float:
-        """Estimates average treatment effect of the given population
+        r"""Estimates average treatment effect of the given population
+
+        The estimation for a finite sample is simply:
+
+        .. math::
+            \hat{\tau}_{IPW} = n^{-1} \sum_{i = 1}^n \frac{T_i Y_i}{\hat{p}(x)} -
+                n^{-1} \sum_{i = 1}^n \frac{(1-T_i) Y_i}{1 - \hat{p}(x)}.
 
         Args:
             x: covariate matrix of the population of shape
