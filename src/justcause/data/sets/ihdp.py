@@ -31,11 +31,10 @@ from typing import List, Optional
 import pandas as pd
 
 from ..frames import CausalFrame, Col
+from ..transport import get_covariates_df, get_outcomes_df
 from ..utils import (
     Indices,
     add_pot_outcomes_if_missing,
-    get_covariates_df,
-    get_outcomes_df,
     select_replication,
     to_rep_list,
 )

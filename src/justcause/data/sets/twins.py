@@ -17,12 +17,8 @@ import numpy as np
 import pandas as pd
 
 from ..frames import CausalFrame, Col
-from ..utils import (
-    add_pot_outcomes_if_missing,
-    get_covariates_df,
-    get_outcomes_df,
-    to_rep_list,
-)
+from ..transport import get_covariates_df, get_outcomes_df
+from ..utils import add_pot_outcomes_if_missing, to_rep_list
 
 DATASET_NAME: str = "twins"
 

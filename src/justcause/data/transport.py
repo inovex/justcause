@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Optional
 from urllib.parse import urljoin
 
+import pandas as pd
 import requests
 
 _logger = logging.getLogger(__name__)
@@ -14,6 +15,26 @@ _logger = logging.getLogger(__name__)
 DATA_URL: str = "https://raw.github.com/inovex/justcause-data/master/"
 #: Directory for storing the datasets locally
 DATA_DIR: Path = Path("~/.justcause_data").expanduser()
+#: Name of the file holding the covariates
+COVARIATES_FILE: Path = Path("covariates.parquet")
+#: Name of the file holding the outcomes and replications
+OUTCOMES_FILE: Path = Path("outcomes.parquet")
+
+
+def get_dataframe(data_path: PathLike) -> pd.DataFrame:
+    path = get_local_data_path(data_path, download_if_missing=True)
+    df = pd.read_parquet(path)
+    return df
+
+
+def get_outcomes_df(dataset_name: str) -> pd.DataFrame:
+    path = Path(dataset_name) / OUTCOMES_FILE
+    return get_dataframe(path)
+
+
+def get_covariates_df(dataset_name: str) -> pd.DataFrame:
+    path = Path(dataset_name) / COVARIATES_FILE
+    return get_dataframe(path)
 
 
 def create_data_dir(path: Path):

@@ -1,6 +1,4 @@
 from numbers import Number
-from os import PathLike
-from pathlib import Path
 from typing import Callable, Iterator, List, Optional, Union
 
 import numpy as np
@@ -9,32 +7,10 @@ from numpy.random import RandomState
 from sklearn.utils import check_random_state
 
 from .frames import DATA_COLS, CausalFrame, Col
-from .transport import get_local_data_path
-
-#: Name of the file holding the covariates
-COVARIATES_FILE: Path = Path("covariates.parquet")
-#: Name of the file holding the outcomes and replications
-OUTCOMES_FILE: Path = Path("outcomes.parquet")
 
 Indices = Union[List[int], int]
 OptRandState = Optional[Union[int, RandomState]]
 Frame = Union[CausalFrame, pd.DataFrame]
-
-
-def get_covariates_df(dataset_name: str) -> pd.DataFrame:
-    path = Path(dataset_name) / COVARIATES_FILE
-    return get_dataframe(path)
-
-
-def get_outcomes_df(dataset_name: str) -> pd.DataFrame:
-    path = Path(dataset_name) / OUTCOMES_FILE
-    return get_dataframe(path)
-
-
-def get_dataframe(data_path: PathLike) -> pd.DataFrame:
-    path = get_local_data_path(data_path, download_if_missing=True)
-    df = pd.read_parquet(path)
-    return df
 
 
 def select_replication(df: pd.DataFrame, indices: Indices):
