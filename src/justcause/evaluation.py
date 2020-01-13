@@ -1,3 +1,9 @@
+"""Contains default evaluation procedures and helpers for manual evaluation
+
+The procedure used in `justcause.evaluation.evaluate_ite` is the recommended standard
+for evaluating ITE estimation methods.
+
+"""
 from typing import Callable, List, Optional, Tuple, Union
 
 import numpy as np
@@ -19,6 +25,7 @@ TRAIN = "train"
 
 
 def format_metric(metric, form):
+    """Returns a string representation for metric-format combinations"""
     if callable(metric):
         metric_string = metric.__name__
     else:
@@ -66,7 +73,7 @@ def evaluate_ite(
     """Evaluate methods with multiple metrics on a given set of replications
 
     Good for use with standard causal methods and callables on new datasets.
-    See `notebooks/example_evalutation.ipynb` for an example.
+    See Chapter "Usage" in the docs for an example.
     ITE prediction and evaluation is the most common setting,
     which is why this is automated, while other settings like ATE estimation are left
     to the user for now.
@@ -168,9 +175,7 @@ def calc_scores(
 ) -> dict:
     """Compare ground-truth to predictions with given metrics for one replication
 
-    Call for train and test separately
-
-    TODO: Also replace np.array with dict
+    Call for train and test separately.
 
     Args:
         true: true ITE
@@ -181,7 +186,7 @@ def calc_scores(
         dict: a dict of (score_name, scores) pairs with len(metrics) entries
 
     """
-    # ensure metrics and replications are lists, even if with just one element
+    # ensure `metrics` is a list for use in list comprehension
     if not isinstance(metrics, list):
         metrics = [metrics]
 

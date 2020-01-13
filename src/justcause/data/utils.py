@@ -1,3 +1,9 @@
+"""Tools for manipulating causal data sets and generating synthetic data
+
+The most important exported function is `justcause.data.utils.generate_data`, which
+allows the user to parametrically generate data sets.
+
+"""
 from numbers import Number
 from typing import Callable, Iterator, List, Optional, Union
 
@@ -13,7 +19,17 @@ OptRandState = Optional[Union[int, RandomState]]
 Frame = Union[CausalFrame, pd.DataFrame]
 
 
-def select_replication(df: pd.DataFrame, indices: Indices):
+def select_replication(df: pd.DataFrame, indices: Indices) -> pd.DataFrame:
+    """Returns the indicated subset of replications from a DataFrame
+
+    Args:
+        df: DataFrame with a `justcause.data.frames.Col.rep` column
+        indices: an index or array-like of indices to select
+
+    Returns:
+        The subset of replications as a DataFrame
+
+    """
     if isinstance(indices, Number):
         return df.loc[df[Col.rep] == indices]
     else:
@@ -21,13 +37,13 @@ def select_replication(df: pd.DataFrame, indices: Indices):
 
 
 def to_rep_iter(df: Frame) -> Iterator[Frame]:
-    """Turns a monolithic DataFrame into a generator of replication-wise DataFrames
+    """Turns a monolithic Frame into a generator of replication-wise Frames
 
     Args:
         df: the Frame to be split up into a generator
 
     Returns:
-        generator: a python iterator yielding one replication at a time
+        generator: an iterator yielding one replication at a time
 
     """
     assert (
@@ -38,8 +54,7 @@ def to_rep_iter(df: Frame) -> Iterator[Frame]:
 
 
 def to_rep_list(df: Frame) -> List[Frame]:
-    """
-    Turns a monolithic DataFrame into a list of Frames, one for each replication
+    """Turns a monolithic DataFrame into a list of Frames, one for each replication
 
     Args:
         df: CausalFrame or DataFrame to be split into a list of Frames
@@ -105,21 +120,31 @@ def generate_data(
     random_state: OptRandState = None,
     **kwargs,
 ) -> List[Union[CausalFrame, pd.DataFrame]]:
-    """
+    """Generate a synthetic DGP from the given functions
 
-    Todo: Docstring
+    Following the convention described in the "Usage" chapter of the docs, this
+    method can be used to sample a DGP from the parametric definitions of covariates,
+    outcomes and treatment. See `justcause.data.generators.ihdp` for an example.
+
 
     Args:
-        covariates:
-        treatment:
-        outcomes:
-        n_samples:
-        n_replications:
-        covariate_names:
-        random_state:
-        **kwargs:
+        covariates: a callable taking n_samples and random_state and yielding the
+            covariates OR a 2D array of covariates with n_sample rows OR a
+            DataFrame with the same size
+        treatment: a callable taking covariates and random_state and yielding the
+            treatment indicator vector
+        outcomes: a callable taking covariates and random_state and yielding
+            the four outcomes mu_0, mu_1, y_0, y_1 for these covariates
+        n_samples: number of samples to generate, only used if covariates is a callable
+        n_replications: number of replications to generate of the DGP
+        covariate_names: desired names of the covariates in the resulting DGP, defaults
+            to [x0, x1, ...]
+        random_state: random_state to fix random number generation throughout the
+            generation process
+        **kwargs: further keyword arguments passed to all callables for manual settings
 
     Returns:
+        a dataset as list of replications generated from the functions.
 
     """
     random_state = check_random_state(random_state)
@@ -162,6 +187,8 @@ def generate_data(
         ), "Outcome function must return vectors, each with dimension `n_samples`"
 
         rep_df = _add_outcomes(rep_df, mu_0, mu_1, y_0, y_1)
+
+        # Enumerate samples in one replication for join with covariates
         rep_df[Col.sample_id] = np.arange(n_samples)
         rep_df[Col.rep] = i
         rep_dfs.append(rep_df)

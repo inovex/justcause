@@ -1,3 +1,4 @@
+.. _usage-chapter:
 =====
 Usage
 =====

@@ -38,6 +38,13 @@ DATA_COLS = [Col.t, Col.y, Col.y_cf, Col.y_0, Col.y_1, Col.mu_0, Col.mu_1, Col.i
 
 
 class CausalFrame(pd.DataFrame, ABC):
+    """Special DataFrame for causal data
+
+    The CausalFrame ensures consistent naming of the columns in a DataFrame used
+    for causal frames.
+
+    """
+
     _metadata = ["_names"]
 
     def __init__(self, data, *args, **kwargs):
@@ -76,6 +83,27 @@ class CausalFrame(pd.DataFrame, ABC):
 
 @pd.api.extensions.register_dataframe_accessor("names")
 class NamesAccessor:
+    """Custom accessor to retrieve the names of covariates
+
+    In order to access the covariate columns easily without having to inspect the
+    DataFrame beforehand, this accessor allows to retrieve the covariate names
+
+    Usage::
+
+        >>> cf = load_ihdp(select_rep=0)[0]  # select replication 0f.names
+        >>> cf.names.covariates
+            ['0',
+             '1',
+             '2',
+             '3',
+             ...
+             '21',
+             '22',
+             '23',
+             '24']
+
+    """
+
     def __init__(self, pandas_obj):
         self._validate(pandas_obj)
         self._obj = pandas_obj
@@ -108,6 +136,23 @@ class NamesAccessor:
 
 @pd.api.extensions.register_dataframe_accessor("np")
 class NumpyAccessor:
+    """Custom accessor to retrieve the numpy formatted columns
+
+    Since `numpy` is the most important data format in the Python DataScience
+    eco-system, this accessor allows to retrieve the numpy formatted data from a
+    DataFrame by simply calling df.np
+
+    Usage::
+
+        >>> cf = load_ihdp(select_rep=[0])[0]
+        >>> type(cf.np.X)
+        <class 'numpy.ndarray'>
+        >>> cf.np.X.shape
+        (747, 25)
+
+
+    """
+
     def __init__(self, pandas_obj):
         self._validate(pandas_obj)
         self._obj = pandas_obj
