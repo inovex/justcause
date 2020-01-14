@@ -18,8 +18,6 @@ Metric = Callable[[np.array, np.array], float]
 Format = Callable[[Union[np.array, List[np.array]]], Union[float, List[float]]]
 Frame = Union[CausalFrame, pd.DataFrame]
 
-STD_COL = ["method", "train"]
-
 METHOD = "method"
 TRAIN = "train"
 
@@ -33,35 +31,6 @@ def format_metric(metric, form):
     return "{}-{}".format(metric_string, form.__name__)
 
 
-def setup_scores_df(metrics: Union[List[Metric], Metric]):
-    """Setup DataFrame containing the metric scores for all replications
-
-    Args:
-        metrics: metrics used for naming the columns
-
-    Returns: DataFrame to store the scores for each replication
-    """
-    cols = [metric.__name__ for metric in metrics]
-    return pd.DataFrame(columns=cols)
-
-
-def setup_result_df(
-    metrics: Union[List[Metric], Metric], formats=(np.mean, np.median, np.std)
-):
-    """Setup DataFrame containing the summarized scores for all methods and datasets
-
-    Args:
-        metrics: metrics used for scoring
-        formats: formats for summarizing metrics (e.g. mean, std, ...)
-
-    Returns: DataFrame to store the results for each method
-    """
-    cols = STD_COL + [
-        format_metric(metric, form) for metric in metrics for form in formats
-    ]
-    return pd.DataFrame(columns=cols)
-
-
 def evaluate_ite(
     replications: Union[CausalFrame, List[CausalFrame]],
     methods,
@@ -69,7 +38,7 @@ def evaluate_ite(
     formats: Union[List[Format], Format] = (np.mean, np.median, np.std),
     train_size: float = 0.8,
     random_state: Optional[RandomState] = None,
-) -> pd.DataFrame:
+) -> List[dict]:
     """Evaluate methods with multiple metrics on a given set of replications
 
     Good for use with standard causal methods and callables on new datasets.
@@ -99,7 +68,7 @@ def evaluate_ite(
     if not isinstance(replications, list):
         replications = [replications]
 
-    results_df = setup_result_df(metrics, formats)
+    results = list()
 
     for method in methods:
 
@@ -116,10 +85,10 @@ def evaluate_ite(
         train_result.update({METHOD: name, TRAIN: True})
         test_result.update({METHOD: name, TRAIN: False})
 
-        results_df = results_df.append(train_result, ignore_index=True)
-        results_df = results_df.append(test_result, ignore_index=True)
+        results.append(train_result)
+        results.append(test_result)
 
-    return results_df
+    return results
 
 
 def _evaluate_single_method(
@@ -129,12 +98,16 @@ def _evaluate_single_method(
     formats=(np.mean, np.median, np.std),
     train_size=0.8,
     random_state=None,
-):
+) -> Tuple[dict, dict]:
     """Helper to evaluate method with multiple metrics on the given replications.
 
     This is the standard variant of an evaluation loop, which the user can implement
     manually to modify parts of it. Here, only ITE prediction and evaluation is
     considered.
+
+    Returns:
+        a tuple of two dicts which map (score_name) -> (score)
+        summarized over all replications for train and test respectively
 
     """
     if not isinstance(metrics, list):
@@ -143,8 +116,8 @@ def _evaluate_single_method(
     if not isinstance(replications, list):
         replications = [replications]
 
-    test_scores = setup_scores_df(metrics)
-    train_scores = setup_scores_df(metrics)
+    train_scores = list()
+    test_scores = list()
 
     for rep in replications:
         train, test = train_test_split(
@@ -156,13 +129,8 @@ def _evaluate_single_method(
         else:
             train_ite, test_ite = default_predictions(method, train, test)
 
-        test_scores = test_scores.append(
-            calc_scores(test[Col.ite], test_ite, metrics), ignore_index=True
-        )
-
-        train_scores = train_scores.append(
-            calc_scores(train[Col.ite], train_ite, metrics), ignore_index=True
-        )
+        train_scores.append(calc_scores(train[Col.ite], train_ite, metrics))
+        test_scores.append(calc_scores(test[Col.ite], test_ite, metrics))
 
     train_results = summarize_scores(train_scores, formats)
     test_results = summarize_scores(train_scores, formats)
@@ -221,7 +189,7 @@ def default_predictions(
 
 
 def summarize_scores(
-    scores_df: pd.DataFrame,
+    scores: Union[pd.DataFrame, List[dict]],
     formats: Union[List[Format], Format] = (np.mean, np.median, np.std),
 ) -> np.array:
     """
@@ -229,15 +197,18 @@ def summarize_scores(
     Call for train and test separately
 
     Args:
-        scores_df: the dataframe containing scores for all replications
+        scores: the DataFrame or DataFrame-like containing scores for all replications
         formats: Summaries to calculate over the scores of multiple replications
 
-    Returns: The rows to be added to the result dataframe
+    Returns:
+        dict: a dictionary mapping
 
     """
+    # make sure we're dealing with pd.DataFrame
+    df = pd.DataFrame(scores)
     dict_of_results = {
-        format_metric(metric, form): form(scores_df[metric])
-        for metric in scores_df.columns
+        format_metric(metric, form): form(df[metric])
+        for metric in df.columns
         for form in formats
     }
     return dict_of_results
