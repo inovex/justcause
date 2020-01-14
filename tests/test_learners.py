@@ -165,4 +165,4 @@ def test_dragonnet(ihdp_data):
     ate = np.mean(dragon.predict_ite(x, t, y))
 
     true_ate = np.mean(rep["ite"].values)
-    assert abs(ate - true_ate) < 0.3
+    assert abs(ate - true_ate) < 0.5
