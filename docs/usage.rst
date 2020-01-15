@@ -3,7 +3,7 @@
 Usage
 =====
 
-This sections gives you a detailed explanation on how to use JustCause.
+This section gives you a detailed explanation on how to use JustCause.
 
 Quick Overview
 ==============
