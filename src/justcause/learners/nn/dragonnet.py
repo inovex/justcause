@@ -1,7 +1,5 @@
 import numpy as np
 
-from justcause.contrib.dragonnet import dragonnet
-
 from ..utils import replace_factual_outcomes
 
 
@@ -42,6 +40,9 @@ class DragonNet:
             y: factual outcomes, shape (num_instance)
 
         """
+        # Late import to avoid installing all of dragonnet's requirements
+        from ...contrib.dragonnet import dragonnet
+
         self.model = dragonnet.train_dragon(
             t,
             y,
