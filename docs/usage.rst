@@ -5,6 +5,35 @@ Usage
 
 This sections gives you a detailed explanation on how to use JustCause.
 
+Quick Overview
+==============
+
+To get a quick overview of what JustCause has to offer, let's take a look at the package structure::
+
+    ├── contrib        <- third party methods not meant to be accessed directly
+    ├── data
+    │   ├── generators <- data generators for full synthetic data sets
+    │   ├── sets       <- empirical data sets like IHDP, Twins, etc.
+    │   ├── frames     <- provides the CausalFrame
+    │   ├── transport  <- functionality to download data sets
+    │   └── utils      <- generic helper functions for data sets
+    ├── learners
+    │   ├── ate        <- Average Treatment Effect estimators
+    │   ├── meta       <- meta learners working with the help of classical estimators
+    │   ├── nn         <- Neural Network-based learners
+    │   ├── tree       <- Tree-based learners
+    │   ├── propensity <- functionality estimate propensity scores
+    │   └── utils      <- generic helper functions for learners
+    ├── evaluation     <- helper functions for evaluation
+    ├── metrics        <- various metrics to a result to the ground truth
+    └── utils          <- most generic helper functions not related to data and learners
+
+Most commonly you will deal with the modules :mod:`.data.generators` and :mod:`.data.sets` to generate or fetch a
+data set and apply some learners within the subpackage :mod:`.learners`. To evaluate your results you can use
+:mod:`.metrics` and :mod:`.evaluation`. All methods within :mod:`.contrib` are not meant to be accessed directly and
+are provided within :mod:`.learners`.
+
+
 The Reason for DGPs
 ===================
 Due to the so called `Fundamental Problem of Causal Inference`_, there is no ground truth for any real treatment effect dataset.
@@ -52,8 +81,8 @@ Handling Data
 =============
 
 JustCause uses a generalization of a Pandas :class:`~pandas.DataFrame` for managing your data named :class:`~.CausalFrame`.
-A CausalFrame encompasses all the functionality of a Pandas DataFrame but additionally keeps track which columns besides
-the ones with special meaning like explained above, covariates and others. This allows to easily access them in a programmatic way.
+A CausalFrame encompasses all the functionality of a Pandas DataFrame but additionally keeps track which columns, besides
+the ones with special meanings like explained above, are covariates or others. This allows to easily access them in a programmatic way.
 
 All data sets provided by JustCause are provided as lists of CausalFrames, i.e. for each replication one CausalFrame.
 Thus, we get a single CausalFrame ``cf`` from one of the provided data sets by::
@@ -68,15 +97,7 @@ As usual, ``cf.columns`` would list the names of all columns. To find out which 
 *others*, we can use the attribute accessor ``names``::
 
     >>> cf.names.covariates
-    ['0',
-     '1',
-     '2',
-     '3',
-     ...
-     '21',
-     '22',
-     '23',
-     '24']
+    ['0', '1', '2', '3', ..., '22', '23', '24']
     >>> cf.names.others
     ['sample_id']
 
@@ -88,15 +109,31 @@ If we want to construct a CausalFrame, we do that just in the same way as with a
 
     >>> import justcause as jc
     >>> from numpy.random import rand, randint
+    >>> import numpy as np
     >>> import pandas as pd
 
     >>> N = 10
+    >>> mu_0 = np.zeros(N)
+    >>> mu_1 = np.zeros(N)
+    >>> ite = mu_1 - mu_0
+    >>> y_0 = mu_0 + 0.1*rand(N)
+    >>> y_1 = mu_1 + 0.1*rand(N)
+    >>> t = randint(2, size=N)
+    >>> y = np.where(t, y_1, y_0)
+    >>> y_cf = np.where(t, y_0, y_1)
+
     >>> dates = pd.date_range('2020-01-01', periods=N)
     >>> cf = jc.CausalFrame({'c1': rand(N),
     >>>                      'c2': rand(N),
     >>>                      'date': dates,
-    >>>                      't': randint(2, size=N),
-    >>>                      'y': rand(N)
+    >>>                      't': t,
+    >>>                      'y': y,
+    >>>                      'y_cf': y_cf,
+    >>>                      'y_0': y_0,
+    >>>                      'y_1': y_1,
+    >>>                      'mu_0': mu_0,
+    >>>                      'mu_1': mu_1,
+    >>>                      'ite': ite
     >>>                      },
     >>>                      covariates=['c1', 'c2'])
 
