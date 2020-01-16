@@ -60,9 +60,10 @@ For those columns the following relationships hold:
  - ``ite = mu_1 - mu_0``
 
 Besides these columns, there are covariates (also called features) and optionally other columns for managing meta information
-like datetime or an id of sample. Within the provided data sets covariates are called ``x_1``, ``x_2``, etc. but can take
-any name if you use your own data set as explained below. Besides covariates, the provided data set have a column ``sample_id``
-to easily identify one sample.
+like datetime or an id of sample. Within the provided data sets covariates are called ``x_0``, ``x_1``, etc. but can take
+any name if you use your own data set as explained below. The matrix of all covariates is ``X := [x_0, x_1, ..., x_n]``
+and its usage is explained below.
+Besides covariates, the provided data set have a column ``sample_id`` to easily identify one sample.
 
 Replications
 ------------
@@ -95,7 +96,7 @@ As usual, ``cf.columns`` would list the names of all columns. To find out which 
 *others*, we can use the attribute accessor ``names``::
 
     >>> cf.names.covariates
-    ['0', '1', '2', '3', ..., '22', '23', '24']
+    ['x_0', 'x_1', 'x_2', ..., 'x_22', 'x_23', 'x_24']
     >>> cf.names.others
     ['sample_id']
 

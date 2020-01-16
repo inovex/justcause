@@ -145,6 +145,7 @@ def generate_data(
 
     Returns:
         a dataset as list of replications generated from the functions.
+
     """
     random_state = check_random_state(random_state)
 
