@@ -497,17 +497,16 @@ Take for example the synthetic example studies in the `RLearner Paper`_ where ou
 
 .. math::
 
-    y_i = b(X_i) + (W_i - 0.5) \cdot \tau(X_i) + \sigma \epsilon_i.
+    y_i = b(X) + (W - 0.5) \cdot \tau(X) + \sigma \epsilon(X).
 
-That is to say, they start from a base value :math:`b(X_i)` and add or substract half the treatment effect :math:`\tau(X_i)`
+That is to say, they start from a base value :math:`b(X)` and add or substract half the treatment effect :math:`\tau(X)`
 depending on the treatment. This can be defined equivalently in our terminology as:
 
 .. math::
-    \mu_{i0} = b(X_i) - \frac{1}{2}\cdot \tau, \\
-    \mu_{i1} = b(X_i) + \frac{1}{2}\cdot \tau, \\
-    y_{i0} = \mu_{i0} + \sigma \epsilon_i, \\
-    y_{i1} = \mu_{i1} + \sigma \epsilon_i.
-
+    \mu_{0} = b(X) - \frac{1}{2}\cdot \tau, \\
+    \mu_{1} = b(X) + \frac{1}{2}\cdot \tau, \\
+    y_{0} = \mu_{0} + \sigma \epsilon(X), \\
+    y_{1} = \mu_{1} + \sigma \epsilon(X).
 
 We encourage users of JustCause to start their considerations with the terminology introduced at the top of this document.
 
