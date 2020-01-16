@@ -8,15 +8,14 @@ from ..propensity import estimate_propensities
 
 
 class DoubleRobustEstimator(object):
-    """Implements Double Robust Estmation with generic learners based on the
+    r"""Implements Double Robust Estmation with generic learners based on the
         equations of M. Davidian
 
 
     References:
         [1] M. Davidian, “Double Robustness in Estimation of Causal Treatment Effects”
                 2007. Presentation
-                http://www.stat.ncsu.edu/∼davidian North
-
+                https://www4.stat.ncsu.edu/~davidian/double.pdf
     """
 
     def __init__(
@@ -71,13 +70,13 @@ class DoubleRobustEstimator(object):
         r"""Estimates average treatment effect of the given population
 
         .. math::
-            \widehat{\tau}_{D R} &= n^{-1} \sum_{i=1}^n \left[ \frac{T_i Y_i}{p(X_i)} -
+            \hat{\tau}_{D R} &= n^{-1} \sum_{i=1}^n \left[ \frac{T_i Y_i}{p(X_i)} -
                 \frac{T_i - p(X_i)}{p(X_i)} \mu_1(X_i) \right] \\
                 &- n^{-1} \sum_{i=1}^n \left[ \frac{(1-T_i) Y_i}{1 - p(X_i)} +
                 \frac{T_i - p(X_i)}{1 - p(X_i)} \mu_0(X_i) \right]. \\
             \text{where} \\
-            \mu_1 &= \texttt{learner_t}, \\
-            \mu_0 &= \texttt{learner_c}
+            \mu_1 &= \text{learner\_t}, \\
+            \mu_0 &= \text{learner\_c}
 
         Args:
             x: covariates in shape (num_instances, num_features)
