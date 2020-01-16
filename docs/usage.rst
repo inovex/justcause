@@ -3,8 +3,6 @@
 Usage
 =====
 
-This section gives you a detailed explanation on how to use JustCause.
-
 Quick Overview
 ==============
 
@@ -18,20 +16,20 @@ To get a quick overview of what JustCause has to offer, let's take a look at the
     │   ├── transport  <- functionality to download data sets
     │   └── utils      <- generic helper functions for data sets
     ├── learners
-    │   ├── ate        <- Average Treatment Effect estimators
+    │   ├── ate        <- average treatment effect estimators
     │   ├── meta       <- meta learners working with the help of classical estimators
-    │   ├── nn         <- Neural Network-based learners
-    │   ├── tree       <- Tree-based learners
+    │   ├── nn         <- neural network-based learners
+    │   ├── tree       <- tree-based learners
     │   ├── propensity <- functionality estimate propensity scores
     │   └── utils      <- generic helper functions for learners
     ├── evaluation     <- helper functions for evaluation
     ├── metrics        <- various metrics to a result to the ground truth
     └── utils          <- most generic helper functions not related to data and learners
 
-Most commonly you will deal with the modules :mod:`.data.generators` and :mod:`.data.sets` to generate or fetch a
-data set and apply some learners within the subpackage :mod:`.learners`. To evaluate your results you can use
+Most commonly you will deal with :mod:`.data.generators` and :mod:`.data.sets` to generate or fetch a
+data set and apply some learners within :mod:`.learners`. To evaluate your results you can use
 :mod:`.metrics` and :mod:`.evaluation`. All methods within :mod:`.contrib` are not meant to be accessed directly and
-are provided within :mod:`.learners`.
+are wrapped within :mod:`.learners`.
 
 
 The Reason for DGPs
