@@ -23,7 +23,7 @@ To get a quick overview of what JustCause has to offer, let's take a look at the
     │   ├── propensity <- functionality estimate propensity scores
     │   └── utils      <- generic helper functions for learners
     ├── evaluation     <- helper functions for evaluation
-    ├── metrics        <- various metrics to a result to the ground truth
+    ├── metrics        <- various metrics to compare a result to the ground truth
     └── utils          <- most generic helper functions not related to data and learners
 
 Most commonly you will deal with :mod:`.data.generators` and :mod:`.data.sets` to generate or fetch a
@@ -56,7 +56,7 @@ For those columns the following relationships hold:
  - ``y = t*y_1 + (1-t)*y_0``
  - ``y_cf = (1-t)*y_1 + t*y_0`` (*counterfactual* of ``y``)
  - ``y = y_0 if t == 0 else y_1``
- - ``y_0 = mu_0 + ε`` and ``y_1 = mu_1 + ε`` where ε is some random noise or 0
+ - ``y_0 = mu_0 + e`` and ``y_1 = mu_1 + e`` where e is some random noise or 0
  - ``ite = mu_1 - mu_0``
 
 Besides these columns, there are covariates (also called features) and optionally other columns for managing meta information
@@ -78,6 +78,7 @@ The concept of replications is build into JustCause by design to encourage robus
 
 Handling Data
 =============
+.. _handling-data
 
 JustCause uses a generalization of a Pandas :class:`~pandas.DataFrame` for managing your data named :class:`~.CausalFrame`.
 A CausalFrame encompasses all the functionality of a Pandas DataFrame but additionally keeps track which columns, besides
@@ -162,6 +163,360 @@ the covariates ``X``, treatment ``t`` and outcome ``y`` to a learner::
 
 
 
+Evaluating Methods
+==================
+
+The central element of JustCause is evaluation. We want to score learners on various datasets using common metrics.
+This can either be done manually, or using predefined standard routines (:method:`~justcause.evaluation.evaluate_ite`). JustCause
+allows you to do both.
+
+Quickstart
+----------
+The simplest and fastest evaluation is using standard datasets and the methods provided by JustCause::
+
+    from justcause.learners import SLearner, TLearner, XLearner, RLearner
+    from justcause.metrics import pehe_score, mean_absolute
+    from justcause.data.sets import load_ihdp
+
+    replications = load_ihdp(select_rep=np.arange(100))
+    metrics = [pehe_score, mean_absolute]
+    train_size = 0.8
+    random_state = 42
+    methods = [basic_slearner, weighted_slearner]
+
+    # All in standard configuration
+    methods = [SLearner(), weighted_slearner, TLearner(), XLearner(), RLearner()]
+    result = evaluate_ite(replications,
+                          methods,
+                          metrics,
+                          train_size=train_size,
+                          random_state=random_state)
+
+
+
+To better understand what's happening inside and how to customize, let us take a look at an evaluation loop in more detail.
+
+Evaluating Learners
+-------------------
+Let's implement a simple evaluation of two learners - a weighted SLearner vs. a standard SLearner. The standard SLearner is
+already provided in :class:`~justcause.learners.SLearner`, while the weighted SLearner requires a slight adaption.
+We define a callable, which takes train and test data, fits a weighted model and predicts ITE for both train and test samples::
+
+    from justcause.learners import SLearner
+    from justcause.learners.propensity import estimate_propensities
+    from sklearn.linear_model import LinearRegression
+
+    def weighted_slearner(train, test):
+        """
+        Custom method that takes 'train' and 'test' CausalFrames (see causal_frames.ipynb)
+        and returns ITE predictions for both after training on 'train'.
+
+        Implement your own method in a similar fashion to evaluate them within the framework!
+        """
+        train_X, train_t, train_y = train.np.X, train.np.t, train.np.y
+        test_X, test_t, test_y = test.np.X, test.np.t, test.np.y
+
+
+        # Get calibrated propensity estimates
+        p = estimate_propensities(train_X, train_t)
+
+        # Make sure the supplied learner is able to use `sample_weights` in the fit() method
+        slearner = SLearner(LinearRegression())
+
+        # Weight with inverse probability of treatment (inverse propensity)
+        slearner.fit(train_X, train_t, train_y, weights=1/p)
+        return (
+            slearner.predict_ite(train_X, train_t, train_y),
+            slearner.predict_ite(test_X, test_t, test_y)
+        )
+
+
+    def basic_slearner(train, test):
+        """Basic SLearner callable"""
+        train_X, train_t, train_y = train.np.X, train.np.t, train.np.y
+        test_X, test_t, test_y = test.np.X, test.np.t, test.np.y
+
+        slearner = SLearner(LinearRegression())
+        slearner.fit(train_X, train_t, train_y)
+        return (
+            slearner.predict_ite(train_X, train_t, train_y),
+            slearner.predict_ite(test_X, test_t, test_y)
+        )
+
+.. note::
+    Another way to add new learners is to implement them as a Class similiar to the implementations in `justcause.learners`
+    (for example `justcause.learners.SLearner`) providing at least the methods ``fit(x, t, y)`` and ``predict_ite(x, t, y)``
+
+Custom Evaluation Loop
+----------------------
+Given the two functions defined above, we can go ahead and write our own simple evaluation loop::
+
+    import numpy as np
+    import pandas as pd
+    from sklearn.model_selection import train_test_split
+    from justcause.data import Col
+    from justcause.data.sets import load_ihdp
+    from justcause.metrics import pehe_score, mean_absolute
+    from justcause.evaluation import calc_scores, summarize_scores
+
+    replications = load_ihdp(select_rep=np.arange(100))
+    metrics = [pehe_score, mean_absolute]
+    train_size = 0.8
+    random_state = 42
+    methods = [basic_slearner, weighted_slearner]
+
+    results = list()
+
+    for method in methods:
+
+        test_scores = list()
+        train_scores = list()
+
+        for rep in replications:
+
+            train, test = train_test_split(
+                rep, train_size=train_size, random_state=random_state
+            )
+
+            # REPLACE this with the function you implemented and want to evaluate
+            train_ite, test_ite = method(train, test)
+
+            # Calculate the scores and append them to a dataframe
+            test_scores.append(calc_scores(test[Col.ite], test_ite, metrics))
+            train_scores.append(calc_scores(train[Col.ite], train_ite, metrics))
+
+        # Summarize the scores and save them in a dataframe
+        train_result, test_result = summarize_scores(train_scores), summarize_scores(test_scores)
+        train_result.update({'method': method.__name__, 'train': True})
+        test_result.update({'method': method.__name__, 'train': False})
+
+        results.append(train_result)
+        results.append(test_result)
+
+Finally, we can compare the results:
+
++--------------------+--------------------+-------------------+---------------------+----------------------+--------------------+-------------------+-------+
+| pehe_score-mean    | pehe_score-median  | pehe_score-std    | mean_absolute-mean  | mean_absolute-median | mean_absolute-std  | method            | train |
++--------------------+--------------------+-------------------+---------------------+----------------------+--------------------+-------------------+-------+
+| 5.633659795888926  | 2.623297102872904  | 8.362124759175456 | 0.7324426200135636  | 0.23818504313199096  | 1.4932757697867256 | basic_slearner    | True  |
++--------------------+--------------------+-------------------+---------------------+----------------------+--------------------+-------------------+-------+
+| 5.6259710007216395 | 2.6359926738390502 | 8.21362597153304  | 1.2926681149657069  | 0.39624557185266274  | 2.474603428686128  | basic_slearner    | False |
++--------------------+--------------------+-------------------+---------------------+----------------------+--------------------+-------------------+-------+
+| 5.5923557213070865 | 2.5694717507474367 | 8.248291408843366 | 0.36993887434693706 | 0.2124273147538498   | 0.5243953093767589 | weighted_slearner | True  |
++--------------------+--------------------+-------------------+---------------------+----------------------+--------------------+-------------------+-------+
+| 5.493401193725203  | 2.589651399901662  | 7.903173959543366 | 0.6556018033505657  | 0.28720143217333827  | 0.94194122373987   | weighted_slearner | False |
++--------------------+--------------------+-------------------+---------------------+----------------------+--------------------+-------------------+-------+
+
+Understanding Scores and Results
+--------------------------------
+In the above evaluation loop, ``train_scores`` contains the scores of ITE prediction on the train set for each replication.
+To better understand what's happening inside, let's take a look at these intermediate scores::
+
+    >>> pd.DataFrame(train_scores) # for better visualization
+
+    #   pehe_score	mean_absolute
+    0	0.893524	0.074874
+    1	0.826433	0.200816
+    2	0.909720	0.080099
+    3	1.945077	0.091223
+    4	2.671555	0.466394
+    ...	...	        ...
+    95	2.194153	0.180240
+    96	2.161083	0.087108
+    97	13.238825	1.218813
+    98	3.917264	0.054858
+    99	2.538756	0.654481
+
+And we then summarize these scores using different formats (like ``np.mean``, ``np.std``, ...)::
+
+    >>> train_result = summarize_scores(train_scores)
+    >>> pd.DataFrame([train_result])
+
+which yields:
+
++-----------------+-------------------+----------------+-----+-------------------+
+| pehe_score-mean | pehe_score-median | pehe_score-std | ... | mean_absolute-std |
++-----------------+-------------------+----------------+-----+-------------------+
+| 5.592356        | 2.569472          | 8.248291       | ... | 0.524395          |
++-----------------+-------------------+----------------+-----+-------------------+
+
+Simplifying Evaluation
+----------------------
+There's two things we can make a lot simpler using JustCause:
+
+ 1. Standard methods can be used as-is
+ 2. Standard evaluation is pre-implemented
+
+Using the standard evaluation looks like this::
+
+    from justcause.evaluation import evaluate_ite
+    result = evaluate_ite(replications,
+                          methods,
+                          metrics,
+                          train_size=train_size,
+                          random_state=random_state)
+
+And, we can also get rid of ``basic_slearner`` since that is the default usage of a learner:
+fit on train, predict on train and test without special settings or parameters. Instead, we simply
+pass the instantiation of the ``SLearner`` along to the methods parameter. Similarly, we can add all other
+methods provided by JustCause::
+
+    from justcause.learners import TLearner, XLearner, RLearner
+
+    # All in standard configuration
+    methods = [SLearner(), weighted_slearner, TLearner(), XLearner(), RLearner()]
+    result = evaluate_ite(replications,
+                          methods,
+                          metrics,
+                          train_size=train_size,
+                          random_state=random_state)
+
+
+.. note:: Note that all Meta Learners use a default setting to determine which regression to use when none is provided.
+
+Implementing New Data
+=====================
+JustCause provides some of the most common reference dataset, but is open for extension. You can either provide fixed reference datasets or
+define a parametric data generation process (DGP) that generates new data.
+
+Providing Datasets
+------------------
+In the `JustCause Data Repository`_ we provide datasets in the ``.parquet`` format, which is highly efficient and can easily be read by Pandas.
+In order to avoid duplicate data we store covariates and outcomes in separate files and only join them upon loading.
+This is to say that usually we have a fixed set of covariates for a number of instances.
+In the outcomes file we define factual outcomes and counterfactual for these instances for one or multiple replications.
+
+
+.. note::
+    If you have a new reference dataset or a useful set of covariates and want to allow others to use it,
+    feel free to submit a Pull Request in the `JustCause Data Repository`_ and this repo. See :mod:`.data.sets.ihdp` for an example.
+    In :mod:`.data.transport` we provide useful methods for fetching data. You only have to add the top level access and the respective
+    directory in ``justcause-data``.
+
+If you only want to use your data once, you can simply load it directly into a CausalFrame as shown in section :ref:`handling-data`.
+
+Parametric DGPs
+---------------
+Another way to generate data is by defining the functions of the potential outcomes based on the covariates. This allows to sample as many replications as one requires.
+Let's walk through an example to see what parts are required. Let's assume with work with the covariates from the IHDP study provided in :mod:`.data.sets.ihdp`.
+
+.. note::
+    For a fully fledged DGP we need:
+
+     1. Covariates
+     2. Potential Outcomes with and without noise
+     3. Treatment Assignment
+
+Covariates
+""""""""""
+We simply access the covariates with::
+
+    >>> from justcause.data.sets import get_ihdp_covariates
+
+    >>> covariates = get_ihdp_covariates()
+    >>> covariates.shape
+        (747, 25)
+
+Outcomes
+""""""""
+Let's define the outcome based on the following function:
+
+.. math::
+    y_0 &= N(0, 0.2) \\
+    y_1 &= y_0 + \tau \\
+
+
+where
+
+.. math::
+    c &= \mathbb{I}(sigmoid(X_8) > 0.5) \\
+    \tau &= N(3*c + (1 - c), 0.1).
+
+To implement that as a DGP in JustCause we define the outcome function as follows::
+
+    from sklearn.utils import check_random_state  # ensures usable random state
+
+    def outcome(covariates, *, random_state: RandomState, **kwargs):
+        random_state = check_random_state(random_state)
+
+        # define tau
+        prob = expit(covariates[:, 7]) > 0.5
+        tau random_state.normal((3 * prob) + 1 * (1 - prob), 0.1)
+
+        y_0 = random_state.normal(0, 0.2, size=len(covariates))
+        y_1 = y_0 + _multi_modal_effect(covariates, random_state)
+        mu_0, mu_1 = y_0, y_1  # no noise for this example
+        return mu_0, mu_1, y_0, y_1
+
+.. hint::
+    Every outcome function you want to use with JustCause must take a ``covariates`` parameter and a ``random_state``. Using the
+    ``**kwargs``, you can pass further parameters to the outcome and treatment assignemnt function.
+    The outcome function must return all four potential outcomes (with and without noise).
+
+Treatment
+"""""""""
+In order to get a confounded example, we assign treatment based on the covariates ``X_8`` that was already used to define
+the strength of the treatment effect.
+
+.. math::
+    t = \text{BERN}[sigmoid(X_8)]
+
+
+As a function this is simply::
+
+    def treatment(covariates, *, random_state: RandomState, **kwargs):
+        random_state = check_random_state(random_state)
+        return random_state.binomial(1, p=expit(covariates[:, 7]))
+
+.. hint::
+    The treatment function also has to accept ``covariates`` and ``random_state`` arguments and should return
+    the treatment indicator vector for the given covariates. Again, ``**kwargs`` can be used to pass further parameters
+
+Plugging it Together
+""""""""""""""""""""
+With the covariates we fetched and the outcomes we defined,
+we can now sample data from that DGP using the powerful :meth:`~justcause.data.utils.generate_data`::
+
+    >>> replications = generate_data(
+        covariates,
+        treatment,
+        outcome,
+        n_samples=747,  # Optional but 747 is the maximum available with IHDP covariates
+        n_replications=100,
+        random_state=0,  # Fix random_state for replicability
+        **kwargs=None,  # Use if further parameters are required
+    )
+
+A standardized Terminology
+--------------------------
+By using :meth:`~justcause.data.utils.generate_data` we encourage a consistent terminology for DGPs. This is important as
+we've found that different researchers use different formalizations that are technically identical. However, assuring that they are actually
+the same requires one to transform the notation.
+
+Take for example the synthetic example studies in the `RLearner Paper`_ where outcomes are defined as
+
+.. math::
+
+    y_i = b(X_i) + (W_i - 0.5) \cdot \tau(X_i) + \sigma \epsilon_i.
+
+That is to say, they start from a base value :math:`b(X_i)` and add or substract half the treatment effect :math:`\tau(X_i)`
+depending on the treatment. This can be defined equivalently in our terminology as:
+
+.. math::
+    \mu_{i0} = b(X_i) - \frac{1}{2}\cdot \tau, \\
+    \mu_{i1} = b(X_i) + \frac{1}{2}\cdot \tau, \\
+    y_{i0} = \mu_{i0} + \sigma \epsilon_i, \\
+    y_{i1} = \mu_{i1} + \sigma \epsilon_i.
+
+
+We encourage users of JustCause to start their considerations with the terminology introduced at the top of this document.
+
+
+
+
+
 .. _Numpy: https://numpy.org/
 .. _Fundamental Problem of Causal Inference: https://thuijskens.github.io/2016/08/25/causal-modelling/
 .. _[1]: https://arxiv.org/pdf/1810.13237.pdf
+.. _JustCause Data Repository: https://github.com/inovex/justcause-data/
+.. _RLearner Paper: https://arxiv.org/abs/1712.04912
