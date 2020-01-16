@@ -119,7 +119,7 @@ def generate_data(
     covariate_names: Optional[List[str]] = None,
     random_state: OptRandState = None,
     **kwargs,
-) -> List[Union[CausalFrame, pd.DataFrame]]:
+) -> List[CausalFrame]:
     """Generate a synthetic DGP from the given functions
 
     Following the convention described in the "Usage" chapter of the docs, this
@@ -145,7 +145,6 @@ def generate_data(
 
     Returns:
         a dataset as list of replications generated from the functions.
-
     """
     random_state = check_random_state(random_state)
 
@@ -195,22 +194,22 @@ def generate_data(
 
     rep_df = pd.concat(rep_dfs)
     df = pd.merge(cov_df, rep_df, how="inner", on=Col.sample_id)
-    df = CausalFrame(df, covariates=covariate_names)
-    return to_rep_list(df)
+    cf = CausalFrame(df, covariates=covariate_names)
+    return to_rep_list(cf)
 
 
-def add_pot_outcomes_if_missing(cf: CausalFrame):
+def add_pot_outcomes_if_missing(df: pd.DataFrame) -> pd.DataFrame:
     """Generate missing potential outcomes y_0/y_1 from mu_0/my_1
 
     Args:
-        cf: CausalFrame with potentially missing potential outcomes
+        df: CausalFrame with potentially missing potential outcomes
 
     Returns:
         CausalFrame with columns y_0 and y_1
 
     """
-    if Col.y_0 not in cf.columns:
-        cf[Col.y_0] = cf[Col.mu_0]
-    if Col.y_1 not in cf.columns:
-        cf[Col.y_1] = cf[Col.mu_1]
-    return cf
+    if Col.y_0 not in df.columns:
+        df[Col.y_0] = df[Col.mu_0]
+    if Col.y_1 not in df.columns:
+        df[Col.y_1] = df[Col.mu_1]
+    return df
