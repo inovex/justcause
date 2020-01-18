@@ -2,7 +2,6 @@
 from typing import Optional, Union
 
 import numpy as np
-from causalml.inference.meta import BaseRRegressor
 from numpy.random import RandomState
 from sklearn.linear_model import LinearRegression
 from sklearn.utils import check_random_state
@@ -42,6 +41,8 @@ class RLearner:
             random_state: RandomState or int to be used for K-fold splitting. NOT used
                 in the learners, this has to be done by the user.
         """
+        from causalml.inference.meta import BaseRRegressor
+
         if learner is None and (outcome_learner is None and effect_learner is None):
             learner = LinearRegression()
 

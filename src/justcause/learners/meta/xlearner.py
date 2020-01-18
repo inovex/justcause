@@ -1,7 +1,6 @@
 from typing import Optional
 
 import numpy as np
-from causalml.inference.meta import BaseXRegressor
 from sklearn.linear_model import LassoLars
 
 from justcause.learners.utils import replace_factual_outcomes
@@ -48,6 +47,8 @@ class XLearner:
             effect_learner_c: specific learner for treated effect
             effect_learner_t: specific learner for control effect
         """
+        from causalml.inference.meta import BaseXRegressor
+
         if (learner is not None) or (
             (outcome_learner_c is not None)
             and (outcome_learner_t is not None)
