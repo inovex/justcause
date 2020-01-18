@@ -39,7 +39,7 @@ def test_generator():
     )
     df = list(gen)[0]
     assert len(df) == len(ihdp_cov)
-    assert len(set(df.columns).intersection({f"{i}" for i in range(25)})) == 25
+    assert len(set(df.columns).intersection({f"x_{i}" for i in range(25)})) == 25
 
     gen = generate_data(
         covariates=ihdp_cov.to_numpy(),
