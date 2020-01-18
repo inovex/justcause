@@ -7,6 +7,7 @@ Version 0.3
 
 - data sets and generators now return a list of CausalFrames instead of iterators
 - treatment column is always ``t`` and outcome column always ``y``
+- improved and extended documentation
 
 Version 0.2
 ===========
