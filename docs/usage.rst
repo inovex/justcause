@@ -1,4 +1,5 @@
 .. _usage-chapter:
+
 =====
 Usage
 =====
@@ -77,11 +78,12 @@ a full evaluation, thus ensuring robust evaluation results.
 The concept of replications is build into JustCause by design to encourage robust comparisons.
 
 
+.. _handling-data:
+
 Handling Data
 =============
-.. _handling-data
 
-JustCause uses a generalization of a Pandas :class:`~pandas.DataFrame` for managing your data named :class:`~.CausalFrame`.
+JustCause uses a generalization of a Pandas :class:`~pandas.DataFrame` for managing your data named :class:`~justcause.CausalFrame`.
 A CausalFrame encompasses all the functionality of a Pandas DataFrame but additionally keeps track which columns, besides
 the ones with special meanings like explained above, are covariates or others. This allows to easily access them in a programmatic way.
 
@@ -153,7 +155,7 @@ the abstraction layer to the original method much smaller.
 
 The ``fit`` method of a learner takes at least the parameters ``X`` for the covariate matrix,  ``t`` for the treatment
 and ``y`` for the outcome, i.e. target, vector as Numpy arrays. In order to bridge the gap between rich CausalFrames and
-plain arrays, a :class:`~.CausalFrame` provides the attribute accessor ``np`` (for *numpy*). Using it, we can easily pass
+plain arrays, a :class:`~justcause.CausalFrame` provides the attribute accessor ``np`` (for *numpy*). Using it, we can easily pass
 the covariates ``X``, treatment ``t`` and outcome ``y`` to a learner::
 
     >>> from sklearn.ensemble import RandomForestRegressor
@@ -168,7 +170,7 @@ Evaluating Methods
 ==================
 
 The central element of JustCause is evaluation. We want to score learners on various datasets using common metrics.
-This can either be done manually, or using predefined standard routines (:method:`~justcause.evaluation.evaluate_ite`). JustCause
+This can either be done manually, or using predefined standard routines (:func:`~justcause.evaluation.evaluate_ite`). JustCause
 allows you to do both.
 
 Quickstart
@@ -200,7 +202,7 @@ To better understand what's happening inside and how to customize, let us take a
 Evaluating Learners
 -------------------
 Let's implement a simple evaluation of two learners - a weighted SLearner vs. a standard SLearner. The standard SLearner is
-already provided in :class:`~justcause.learners.SLearner`, while the weighted SLearner requires a slight adaption.
+already provided in :class:`~justcause.learners.meta.slearner.SLearner`, while the weighted SLearner requires a slight adaption.
 We define a callable, which takes train and test data, fits a weighted model and predicts ITE for both train and test samples::
 
     from justcause.learners import SLearner
@@ -245,8 +247,8 @@ We define a callable, which takes train and test data, fits a weighted model and
         )
 
 .. note::
-    Another way to add new learners is to implement them as a Class similiar to the implementations in `justcause.learners`
-    (for example `justcause.learners.SLearner`) providing at least the methods ``fit(x, t, y)`` and ``predict_ite(x, t, y)``
+    Another way to add new learners is to implement them as a class similiar to the implementations in :mod:`~justcause.learners`
+    (for example :class:`~justcause.learners.meta.slearner.SLearner`) providing at least the methods ``fit(x, t, y)`` and ``predict_ite(x, t, y)``
 
 Custom Evaluation Loop
 ----------------------
@@ -296,17 +298,17 @@ Given the two functions defined above, we can go ahead and write our own simple 
 
 Finally, we can compare the results:
 
-+-------------------+-------+--------------------+--------------------+-----+--------------------+
-| method            | train | pehe_score-mean    | pehe_score-median  | ... | mean_absolute-std  |
-+-------------------+-------+--------------------+--------------------+-----+--------------------+
-| basic_slearner    | True  | 5.633659795888926  | 2.623297102872904  | ... | 1.4932757697867256 |
-+-------------------+-------+--------------------+--------------------+-----+--------------------+
-| basic_slearner    | False | 5.6259710007216395 | 2.6359926738390502 | ... | 2.474603428686128  |
-+-------------------+-------+--------------------+--------------------+-----+--------------------+
-| weighted_slearner | True  | 5.5923557213070865 | 2.5694717507474367 | ... | 0.5243953093767589 |
-+-------------------+-------+--------------------+--------------------+-----+--------------------+
-| weighted_slearner | False | 5.493401193725203  | 2.589651399901662  | ... | 0.94194122373987   |
-+-------------------+-------+--------------------+--------------------+-----+--------------------+
++-------------------+-------+--------------------+-----+--------------------+
+| method            | train | pehe_score-mean    | ... | mean_absolute-std  |
++-------------------+-------+--------------------+-----+--------------------+
+| basic_slearner    | True  | 5.633659795888     | ... | 1.4932757697867    |
++-------------------+-------+--------------------+-----+--------------------+
+| basic_slearner    | False | 5.625971000721     | ... | 2.4746034286861    |
++-------------------+-------+--------------------+-----+--------------------+
+| weighted_slearner | True  | 5.592355721307     | ... | 0.5243953093767    |
++-------------------+-------+--------------------+-----+--------------------+
+| weighted_slearner | False | 5.493401193725     | ... | 0.9419412237398    |
++-------------------+-------+--------------------+-----+--------------------+
 
 Understanding Scores and Results
 --------------------------------
