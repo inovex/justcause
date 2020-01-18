@@ -60,10 +60,11 @@ For those columns the following relationships hold:
  - ``ite = mu_1 - mu_0``
 
 Besides these columns, there are covariates (also called features) and optionally other columns for managing meta information
-like datetime or an id of sample. Within the provided data sets covariates are called ``x_0``, ``x_1``, etc. but can take
-any name if you use your own data set as explained below. The matrix of all covariates is ``X := [x_0, x_1, ..., x_n]``
+like datetime or an id of sample. Within the provided data sets covariates are called ``x_0``, ``x_1``, etc. by default.
+However, named covariates from the IBM or Twins studies are kept in their format (e.g. ``dob_mm`` for date-of-birth month) for clarity.
+Accordingly you can also use any name if you use your own data set as explained below. The matrix of all covariates is ``X := [x_0, x_1, ..., x_n]``
 and its usage is explained below.
-Besides covariates, the provided data set have a column ``sample_id`` to easily identify one sample.
+Besides covariates, the provided data sets have a column ``sample_id`` to easily identify one sample in different replications.
 
 Replications
 ------------
