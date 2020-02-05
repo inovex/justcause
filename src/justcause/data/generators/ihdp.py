@@ -22,12 +22,12 @@ OptRandState = Optional[Union[int, RandomState]]
 
 
 def _multi_modal_effect(covariates, random_state):
-    prob = expit(covariates[:, 7]) > 0.5
+    prob = expit(covariates[:, 0]) > 0.5
     return random_state.normal((3 * prob) + 1 * (1 - prob), 0.1)
 
 
 def _exponential_effect(covariates):
-    return np.exp(1 + expit(covariates[:, 7]))
+    return np.exp(1 + expit(covariates[:, 0]))
 
 
 def _multi_outcome(covariates, *, random_state: RandomState, **kwargs):
@@ -48,7 +48,7 @@ def _expo_outcome(covariates, *, random_state: RandomState, **kwargs):
 
 def _treatment_assignment(covariates, *, random_state: RandomState, **kwargs):
     random_state = check_random_state(random_state)
-    return random_state.binomial(1, p=expit(covariates[:, 7]))
+    return random_state.binomial(1, p=expit(covariates[:, 0]))
 
 
 def multi_expo_on_ihdp(
