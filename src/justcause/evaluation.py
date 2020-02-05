@@ -133,7 +133,7 @@ def _evaluate_single_method(
         test_scores.append(calc_scores(test[Col.ite], test_ite, metrics))
 
     train_results = summarize_scores(train_scores, formats)
-    test_results = summarize_scores(train_scores, formats)
+    test_results = summarize_scores(test_scores, formats)
 
     return train_results, test_results
 
