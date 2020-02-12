@@ -70,6 +70,7 @@ Optional and needed only once after `git clone`:
  3. [EconML]: Heterogeneous Effect Estimation in Python
  4. [awesome-list]: A very extensive list of causal methods and respective code
  5. [IBM-Causal-Inference-Benchmarking-Framework]: Causal Inference Benchmarking Framework by IBM
+ 6. [CausalNex]: Bayesian Networks to combine machine learning and domain expertise for causal reasoning.
 
 ## Note
 
@@ -88,3 +89,4 @@ For details and usage information on PyScaffold see https://pyscaffold.org/.
 [EconML]: https://github.com/microsoft/EconML
 [awesome-list]: https://github.com/rguo12/awesome-causality-algorithms
 [IBM-Causal-Inference-Benchmarking-Framework]: https://github.com/IBM-HRL-MLHLS/IBM-Causal-Inference-Benchmarking-Framework
+[CausalNex]: https://causalnex.readthedocs.io/
