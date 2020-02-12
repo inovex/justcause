@@ -81,12 +81,13 @@ Release
 As a JustCause maintainer following steps are needed to release a new version:
 
 #. Make sure all unit tests on `Cirrus-CI`_ are green.
+#. Update the ``CHANGELOG.rst`` file.
 #. Tag the current commit on the master branch with a release tag, e.g. ``v1.2.3``.
 #. Clean up the ``dist`` and ``build`` folders with ``rm -rf dist build``
    to avoid confusion with old builds and Sphinx docs.
 #. Run ``python setup.py dists`` and check that the files in ``dist`` have
    the correct version (no ``.dirty`` or Git hash) according to the Git tag.
-   Also sizes of the distributions should be less than 500KB, otherwise unwanted
+   Also sizes of the distributions should be less than 500KB (for bdist), otherwise unwanted
    clutter may have been included.
 #. Run ``twine upload dist/*`` and check that everything was uploaded to `PyPI`_ correctly.
 
