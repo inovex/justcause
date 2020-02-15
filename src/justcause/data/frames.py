@@ -1,7 +1,8 @@
 """
 Generalised DataFrame which differentiates between covariates and other column names
 """
-from __future__ import annotations
+# Uncomment only when we require Python >= 3.7
+# from __future__ import annotations
 
 from abc import ABC
 from functools import partial
@@ -69,7 +70,7 @@ class CausalFrame(pd.DataFrame, ABC):
         self._names = dict(covariates=covariates)
 
     @property
-    def _constructor(self) -> partial[CausalFrame]:
+    def _constructor(self) -> partial["CausalFrame"]:
         # This is called during operations with CausalFrames
         # We pass a marker to differentiate between explicit and implicit invocation
         kwargs = {"_internal_operation": True, **self._names}
