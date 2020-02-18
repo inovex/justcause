@@ -70,7 +70,7 @@ class CausalFrame(pd.DataFrame, ABC):
         self._names = dict(covariates=covariates)
 
     @property
-    def _constructor(self) -> partial["CausalFrame"]:
+    def _constructor(self) -> "CausalFrame":
         # This is called during operations with CausalFrames
         # We pass a marker to differentiate between explicit and implicit invocation
         kwargs = {"_internal_operation": True, **self._names}
