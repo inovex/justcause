@@ -2,6 +2,12 @@
 Changelog
 =========
 
+Version 0.3.1
+=============
+- bugfixes in data generator based on IHDP (wrong covariate was used)
+- bugfix in evaluation (train/test results were in fact the same)
+- Support for lower Python versions (type annotations as used in JustCause were only available for Python >=3.7)
+
 Version 0.3
 ===========
 
