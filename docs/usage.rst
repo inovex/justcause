@@ -414,7 +414,7 @@ Covariates
 """"""""""
 We simply access the covariates with::
 
-    >>> from justcause.data.sets import get_ihdp_covariates
+    >>> from justcause.data.sets.ihdp import get_ihdp_covariates
 
     >>> covariates = get_ihdp_covariates()
     >>> covariates.shape
