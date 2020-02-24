@@ -62,6 +62,14 @@ def test_generator():
     assert len(df) == len(ihdp_cov)
     assert len(set(df.columns).intersection(set(cov_names))) == 25
 
+    # Works with DataFrame and np.array when n_samples is given
+    gen = generate_data(
+        covariates=ihdp_cov, treatment=treatment, outcomes=outcomes, n_samples=500,
+    )
+    df = list(gen)[0]
+    assert len(df) == 500
+    assert len(set(df.columns).intersection({f"x_{i}" for i in range(25)})) == 25
+
 
 def test_ihdp_generator():
     gen = multi_expo_on_ihdp(setting="multi-modal", n_replications=10)

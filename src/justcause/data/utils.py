@@ -161,7 +161,10 @@ def generate_data(
         ), "Covariate function should return a dataframe with `n_samples` rows"
     else:
         indices = random_state.choice(covariates.shape[0], n_samples, replace=False)
-        covariates = covariates[indices, :]
+        if isinstance(covariates, pd.DataFrame):
+            covariates = covariates.iloc[indices, :]  # ensure proper access
+        else:
+            covariates = covariates[indices, :]
 
     if covariate_names is None:
         if isinstance(covariates, pd.DataFrame):
