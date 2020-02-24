@@ -89,6 +89,7 @@ As a JustCause maintainer following steps are needed to release a new version:
    the correct version (no ``.dirty`` or Git hash) according to the Git tag.
    Also sizes of the distributions should be less than 500KB (for bdist), otherwise unwanted
    clutter may have been included.
+#. Make sure you uploaded the new tag to Github, run ``git push origin --tags``.
 #. Run ``twine upload dist/*`` and check that everything was uploaded to `PyPI`_ correctly.
 
 
