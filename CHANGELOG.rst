@@ -2,6 +2,12 @@
 Changelog
 =========
 
+Version 0.3.2
+=============
+- some fixes in usage documentation
+- fixed persistent "future annotation"-bug that prevent importing justcause on Python 3.6
+- ``generate_data`` handles now CausaFrames as covariates correctly
+
 Version 0.3.1
 =============
 - bugfixes in data generator based on IHDP (wrong covariate was used)
