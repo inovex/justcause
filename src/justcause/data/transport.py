@@ -5,7 +5,8 @@ to a specified dataset. The transport module hides the fact, that the dataset mi
 have to be downloaded first.
 
 """
-from __future__ import annotations
+# Uncomment only when we require Python >= 3.7
+# from __future__ import annotations
 
 import logging
 from os import PathLike
