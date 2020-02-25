@@ -449,7 +449,7 @@ To implement that as a DGP in JustCause we define the outcome function as follow
         tau = random_state.normal((3 * prob) + 1 * (1 - prob), 0.1)
 
         y_0 = random_state.normal(0, 0.2, size=len(covariates))
-        y_1 = y_0 + _multi_modal_effect(covariates, random_state)
+        y_1 = y_0 + tau
         mu_0, mu_1 = y_0, y_1  # no noise for this example
         return mu_0, mu_1, y_0, y_1
 
