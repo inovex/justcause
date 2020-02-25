@@ -438,7 +438,9 @@ where
 To implement that as a DGP in JustCause we define the outcome function as follows::
 
     from sklearn.utils import check_random_state  # ensures usable random state
-
+    from justcause.data.utils import generate_data
+    from scipy.special import expit
+    
     def outcome(covariates, *, random_state: RandomState, **kwargs):
         random_state = check_random_state(random_state)
 
