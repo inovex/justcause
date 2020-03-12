@@ -4,8 +4,6 @@ Generalised DataFrame which differentiates between covariates and other column n
 # Uncomment only when we require Python >= 3.7
 # from __future__ import annotations
 
-from abc import ABC
-from functools import partial
 from typing import List, Type
 
 import numpy as np
@@ -38,7 +36,7 @@ class Col:
 DATA_COLS = [Col.t, Col.y, Col.y_cf, Col.y_0, Col.y_1, Col.mu_0, Col.mu_1, Col.ite]
 
 
-class CausalFrame(pd.DataFrame, ABC):
+class CausalFrame(pd.DataFrame):
     """Special DataFrame for causal data
 
     The CausalFrame ensures consistent naming of the columns in a DataFrame used
@@ -50,9 +48,7 @@ class CausalFrame(pd.DataFrame, ABC):
 
     def __init__(self, data, *args, **kwargs):
         covariates = kwargs.pop("covariates", None)
-        internal_op = kwargs.pop("_internal_operation", False) or isinstance(
-            data, BlockManager
-        )
+        internal_op = hasattr(self, "_names") or isinstance(data, BlockManager)
 
         super().__init__(data, *args, **kwargs)
 
@@ -70,11 +66,8 @@ class CausalFrame(pd.DataFrame, ABC):
         self._names = dict(covariates=covariates)
 
     @property
-    def _constructor(self) -> "CausalFrame":
-        # This is called during operations with CausalFrames
-        # We pass a marker to differentiate between explicit and implicit invocation
-        kwargs = {"_internal_operation": True, **self._names}
-        return partial(CausalFrame, **kwargs)
+    def _constructor(self) -> Type["CausalFrame"]:
+        return CausalFrame
 
     @property
     def _constructor_sliced(self) -> Type[pd.Series]:
