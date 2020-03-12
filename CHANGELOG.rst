@@ -4,6 +4,11 @@ Changelog
 
 Version 0.3.2
 =============
+
+- added missing ``requests`` library in dependencies
+
+Version 0.3.2
+=============
 - some fixes in usage documentation
 - fixed persistent "future annotation"-bug that prevent importing justcause on Python 3.6
 - ``generate_data`` handles now CausaFrames as covariates correctly
