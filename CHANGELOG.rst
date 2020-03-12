@@ -2,9 +2,12 @@
 Changelog
 =========
 
-Version 0.3.2
-=============
+Version 0.4
+===========
 
+- removed dependency to ``causalml`` thus x- and t- learner were removed
+- removed dependency to ``rpy`` thus CausalForest method was removed
+- removed dependency to ``tensorflow`` thus ganite and dragonnet were removed
 - added missing ``requests`` library in dependencies
 
 Version 0.3.2

@@ -13,15 +13,11 @@ import pytest
 
 import numpy as np
 import pandas as pd
-import rpy2.robjects.packages as rpackages
-from rpy2 import robjects
-from rpy2.robjects import StrVector
 
 from justcause.data.frames import CausalFrame
 from justcause.data.sets.ibm import load_ibm
 from justcause.data.sets.ihdp import load_ihdp
 from justcause.data.sets.twins import load_twins
-from justcause.learners.utils import install_r_packages
 
 RUNS_ON_CIRRUS = bool(strtobool(os.environ.get("CIRRUS_CI", "false")))
 
@@ -98,28 +94,3 @@ def dummy_covariates_and_treatment():
     T_1 = np.full(80, 0)
     t = np.append(T_0, T_1)
     return X, t
-
-
-@pytest.fixture
-def uninstall_grf():
-    """ Ensures the grf packages is not installed before the test runs"""
-    if rpackages.isinstalled("grf"):
-        robjects.r.options(download_file_method="curl")
-        utils = rpackages.importr("utils")
-        utils.chooseCRANmirror(ind=0)
-
-        utils.remove_packages(StrVector(["grf"]))
-
-
-@pytest.fixture
-def grf():
-    """ Ensures grf is installed before running tests with it
-
-    This is required as usually the user is requested to install the package manually
-
-    """
-    if not rpackages.isinstalled("grf"):
-        install_r_packages(["grf"])
-        return 0
-
-    return 1

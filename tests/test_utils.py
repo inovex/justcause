@@ -1,11 +1,10 @@
 import pytest
 
 import numpy as np
-import rpy2.robjects.packages as rpackages
 from numpy.random import RandomState
 
 from justcause.data.utils import to_rep_iter, to_rep_list
-from justcause.learners.utils import install_r_packages, replace_factual_outcomes
+from justcause.learners.utils import replace_factual_outcomes
 from justcause.utils import int_from_random_state
 
 
@@ -34,12 +33,6 @@ def test_replace_factuals():
     assert y_1[5] == y[5]
     assert y_1[0] != y[0]
     assert y_0[0] == y[0]
-
-
-def test_install_r_packages(uninstall_grf):
-    package_names = ["grf"]
-    install_r_packages(package_names, verbose=True)
-    assert rpackages.isinstalled(package_names[0])
 
 
 def test_int_from_random_state():
