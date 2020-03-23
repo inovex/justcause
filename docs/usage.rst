@@ -19,8 +19,6 @@ To get a quick overview of what JustCause has to offer, let's take a look at the
     ├── learners
     │   ├── ate        <- average treatment effect estimators
     │   ├── meta       <- meta learners working with the help of classical estimators
-    │   ├── nn         <- neural network-based learners
-    │   ├── tree       <- tree-based learners
     │   ├── propensity <- functionality estimate propensity scores
     │   └── utils      <- generic helper functions for learners
     ├── evaluation     <- helper functions for evaluation
@@ -28,9 +26,12 @@ To get a quick overview of what JustCause has to offer, let's take a look at the
     └── utils          <- most generic helper functions not related to data and learners
 
 Most commonly you will deal with :mod:`.data.generators` and :mod:`.data.sets` to generate or fetch a
-data set and apply some learners within :mod:`.learners`. To evaluate your results you can use
+data set and apply some basic learners within :mod:`.learners`. To evaluate your results you can use
 :mod:`.metrics` and :mod:`.evaluation`. All methods within :mod:`.contrib` are not meant to be accessed directly and
 are wrapped within :mod:`.learners`.
+
+.. note:: 
+    Since version 0.4 the :mod:`.learners` is greatly reduced to focus the attention and efforts of JustCause on evaluation. See section `Implement 
 
 
 The Reason for DGPs
@@ -177,7 +178,7 @@ Quickstart
 ----------
 The simplest and fastest evaluation is using standard datasets and the methods provided by JustCause::
 
-    from justcause.learners import SLearner, TLearner, XLearner, RLearner
+    from justcause.learners import SLearner, TLearner
     from justcause.metrics import pehe_score, mean_absolute
     from justcause.data.sets import load_ihdp
 
@@ -188,7 +189,7 @@ The simplest and fastest evaluation is using standard datasets and the methods p
     methods = [basic_slearner, weighted_slearner]
 
     # All in standard configuration
-    methods = [SLearner(), weighted_slearner, TLearner(), XLearner(), RLearner()]
+    methods = [SLearner(), TLearner()]
     result = evaluate_ite(replications,
                           methods,
                           metrics,
@@ -196,8 +197,11 @@ The simplest and fastest evaluation is using standard datasets and the methods p
                           random_state=random_state)
 
 
+Here, we use two methods ``basic_slearner`` and ``weighted_slearner`` that haven't been defined yet. To better understand what's happening inside 
+and how to customize, let us take a look at an evaluation loop in more detail.
 
-To better understand what's happening inside and how to customize, let us take a look at an evaluation loop in more detail.
+
+.. _`Evaluating Learners`:
 
 Evaluating Learners
 -------------------
@@ -248,7 +252,8 @@ We define a callable, which takes train and test data, fits a weighted model and
 
 .. note::
     Another way to add new learners is to implement them as a class similiar to the implementations in :mod:`~justcause.learners`
-    (for example :class:`~justcause.learners.meta.slearner.SLearner`) providing at least the methods ``fit(x, t, y)`` and ``predict_ite(x, t, y)``
+    (for example :class:`~justcause.learners.meta.slearner.SLearner`) providing at least the methods ``fit(x, t, y)`` and ``predict_ite(x, t, y)``. 
+    See the section `Implementing New Learners`_ for more.
 
 Custom Evaluation Loop
 ----------------------
@@ -361,13 +366,10 @@ Using the standard evaluation looks like this::
 
 And, we can also get rid of ``basic_slearner`` since that is the default usage of a learner:
 fit on train, predict on train and test without special settings or parameters. Instead, we simply
-pass the instantiation of the ``SLearner`` along to the methods parameter. Similarly, we can add all other
-methods provided by JustCause::
-
-    from justcause.learners import TLearner, XLearner, RLearner
+pass the instantiation of the ``SLearner`` along to the methods parameter. 
 
     # All in standard configuration
-    methods = [SLearner(), weighted_slearner, TLearner(), XLearner(), RLearner()]
+    methods = [SLearner(), weighted_slearner]
     result = evaluate_ite(replications,
                           methods,
                           metrics,
@@ -375,7 +377,7 @@ methods provided by JustCause::
                           random_state=random_state)
 
 
-.. note:: Note that all Meta Learners use a default setting to determine which regression to use when none is provided.
+.. note:: Note that the Meta Learners use a default setting to determine which regression to use when none is provided.
 
 Implementing New Data
 =====================
@@ -388,7 +390,7 @@ In the `JustCause Data Repository`_ we provide datasets in the ``.parquet`` form
 In order to avoid duplicate data we store covariates and outcomes in separate files and only join them upon loading.
 This is to say that usually we have a fixed set of covariates for a number of instances.
 In the outcomes file we define factual outcomes and counterfactual for these instances for one or multiple replications.
-
+ext:rst
 
 .. note::
     If you have a new reference dataset or a useful set of covariates and want to allow others to use it,
@@ -517,6 +519,124 @@ We encourage users of JustCause to start their considerations with the terminolo
 
 
 
+.. _`Implementing New Learners`: 
+
+Implementing New Learners
+=====================
+
+As of JustCause 0.4 only very basic learners - namely the S- and T-Learner are provided in :mod:`.learners`. Here, we clarify how to implement and use more learners with JustCause.
+The consideration behind removing all the learners was, that all the different packages out there (e.g. `causalML`_) sport different APIs for there learners and are changing quickly.
+Instead of exerting efforts on trying to unify these APIs with the one proposed in JustCause, 
+we provide two ways of adapting whatever methods you have at hand to work with Justcause. 
+
+1. Implementation as a method (See `Evaluating Learners`_) 
+2. Implementation as a class
+
+For recurring use of a learner within the JustCause package it might be favorable to wrap a learner in a class. 
+For example, the RLearner from `causalML`_ can be wrapped in the way it was done it JustCause 0.3.2 :: 
+
+    """Wrapper of the python RLearner implemented in the ``causalml`` package"""
+    from typing import Optional, Union
+
+    import numpy as np
+    from numpy.random import RandomState
+    from sklearn.linear_model import LinearRegression
+    from sklearn.utils import check_random_state
+
+    from ..propensity import estimate_propensities
+
+    StateType = Optional[Union[int, RandomState]]
+
+
+    class RLearner:
+        """A wrapper of the BaseRRegressor from ``causalml``
+        Defaults to LassoLars regression as a base learner if not specified otherwise.
+        Allows to either specify one learner for both tasks or two distinct learners
+        for the task outcome and effect learning.
+
+        """
+
+        def __init__(
+            self,
+            learner=None,
+            outcome_learner=None,
+            effect_learner=None,
+            random_state: StateType = None,
+        ):
+            """Setup an RLearner with defaults
+            Args:
+                learner: default learner for both outcome and effect
+                outcome_learner: specific learner for outcome
+                effect_learner: specific learner for effect
+                random_state: RandomState or int to be used for K-fold splitting. NOT used
+                    in the learners, this has to be done by the user.
+            """
+            from causalml.inference.meta import BaseRRegressor
+
+            if learner is None and (outcome_learner is None and effect_learner is None):
+                learner = LinearRegression()
+
+            self.random_state = check_random_state(random_state)
+            self.model = BaseRRegressor(
+                learner, outcome_learner, effect_learner, random_state=random_state
+            )
+
+        def fit(self, x: np.array, t: np.array, y: np.array, p: np.array = None) -> None:
+            """Fits the RLearner on given samples.
+            Defaults to `justcause.learners.propensities.estimate_propensities`
+            for ``p`` if not given explicitly, in order to allow a generic call
+            to the fit() method
+            Args:
+                x: covariate matrix of shape (num_instances, num_features)
+                t: treatment indicator vector, shape (num_instances)
+                y: factual outcomes, (num_instances)
+                p: propensities, shape (num_instances)
+            """
+            if p is None:
+                # Propensity is needed by CausalML, so we estimate it,
+                # if it was not provided
+                p = estimate_propensities(x, t)
+
+            self.model.fit(x, p, t, y)
+
+        def predict_ite(self, x: np.array, *args) -> np.array:
+            """Predicts ITE for given samples; ignores the factual outcome and treatment
+            Args:
+                x: covariates used for precition
+                *args: NOT USED but kept to work with the standard ``fit(x, t, y)`` call
+            """
+
+            # assert t is None and y is None, "The R-Learner does not use factual outcomes"
+            return self.model.predict(x).flatten()
+
+        def estimate_ate(
+            self, x: np.array, t: np.array, y: np.array, p: Optional[np.array] = None
+        ) -> float:
+            """Estimate the average treatment effect (ATE) by fit and predict on given data
+            Estimates the ATE as the mean of ITE predictions on the given data.
+            Args:
+                x: covariates of shape (num_samples, num_covariates)
+                t: treatment indicator vector, shape (num_instances)
+                y: factual outcomes, (num_instances)
+                p: propensities, shape (num_instances)
+            Returns:
+                the average treatment effect estimate
+            """
+            self.fit(x, t, y, p)
+            ite = self.predict_ite(x, t, y)
+            return float(np.mean(ite))
+
+In the code above, we've used the internal functionality of the causalml class ``BaseRRegressor`` and have wrapped in our API definition that works directly within the JustCause evaluation. 
+Having implemented that once, we can used it in the prototypical evalaution just like the :class:`~justcause.learners.meta.slearner.SLearner` :: 
+
+    >>> methods = [SLearner(), RLearner()]
+    >>> result = evaluate_ite(replications,
+                      methods,
+                      metrics,
+                      train_size=train_size,
+                      random_state=random_state)
+
+Similarly, we could wrap the RLearner in a function, like it was done in `Evaluating Learners`_ for the SLearner. 
 
 
 .. _Numpy: https://numpy.org/
@@ -524,3 +644,5 @@ We encourage users of JustCause to start their considerations with the terminolo
 .. _[1]: https://arxiv.org/pdf/1810.13237.pdf
 .. _JustCause Data Repository: https://github.com/inovex/justcause-data/
 .. _RLearner Paper: https://arxiv.org/abs/1712.04912
+.. _causalML: https://github.com/uber/causalml
+
